@@ -1,0 +1,21 @@
+{
+  "name": "Feynman Challenge",
+  "short_name": "Feynman",
+  "description": "Kuasai materi apapun lewat tantangan menjelaskan ulang — AI mengevaluasi penjelasanmu.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101218",
+  "theme_color": "#101218",
+  "lang": "id",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

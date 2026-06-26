@@ -3,6 +3,9 @@
 // Mirrors the database schema in supabase/migrations/001_initial_schema.sql (§7).
 // `Database` is shaped for the supabase-js generic:
 //   createClient<Database>(...)
+// Each table includes `Relationships` and the schema includes `CompositeTypes`
+// so the type satisfies postgrest-js's GenericSchema/GenericTable constraints
+// (otherwise queries resolve to `never`).
 // ============================================================================
 
 // --- JSON helper (for jsonb columns) ---
@@ -43,7 +46,7 @@ export interface Coverage {
 // ----------------------------------------------------------------------------
 // Database — consumed by the Supabase client generic
 // ----------------------------------------------------------------------------
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       profiles: {
@@ -71,6 +74,7 @@ export interface Database {
           last_active_date?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       challenges: {
         Row: {
@@ -118,6 +122,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       challenge_outlines: {
         Row: {
@@ -147,6 +152,7 @@ export interface Database {
           is_user_added?: boolean;
           created_at?: string;
         };
+        Relationships: [];
       };
       challenge_sources: {
         Row: {
@@ -176,6 +182,7 @@ export interface Database {
           is_ai_suggested?: boolean;
           created_at?: string;
         };
+        Relationships: [];
       };
       challenge_notes: {
         Row: {
@@ -196,6 +203,7 @@ export interface Database {
           content?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       attempts: {
         Row: {
@@ -258,13 +266,15 @@ export interface Database {
           evaluation_status?: EvaluationStatus;
           created_at?: string;
         };
+        Relationships: [];
       };
     };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
-    Enums: Record<string, never>;
+    Views: { [_ in never]: never };
+    Functions: { [_ in never]: never };
+    Enums: { [_ in never]: never };
+    CompositeTypes: { [_ in never]: never };
   };
-}
+};
 
 // ----------------------------------------------------------------------------
 // Convenience row aliases

@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧠 Feynman Challenge
 
-## Getting Started
+> _"Kalau kamu nggak bisa menjelaskannya, kamu belum paham."_
+> A PWA that helps self-learners master any topic with the **Feynman Technique**: explain it out loud, and let AI evaluate how well you understood it.
 
-First, run the development server:
+<!-- Replace with a real screenshot / demo GIF -->
+![Demo placeholder](docs/demo-placeholder.png)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## ✨ What it does
+
+You pick a topic. AI drafts a learning outline + sources. You study, then **record yourself explaining it**. The recording goes straight to Gemini (multimodal audio), which transcribes it and scores your explanation against the outline — comprehensiveness, accuracy, and clarity — with actionable feedback. Repeat to climb the mastery ladder.
+
+### Features
+
+- **AI learning plans** — generate an outline, suggested sources, and an adaptive recording duration from any topic.
+- **Notebook** — editable outline (add / edit / reorder via drag or arrows), sources, and markdown notes with autosave.
+- **Immersive recording** — circular countdown, real-time waveform (Web Audio), and **tiered hints** that cap your max score (none = 10 → keywords 9 → questions 8 → full outline 7).
+- **Single-call AI evaluation** — audio → transcript + scores + per-topic coverage + feedback, in one Gemini request.
+- **Mastery system** — `not_started → attempted → developing → proficient → mastered → solidified`, with 30-day decay.
+- **Gentle accountability** — supportive deadline nudges and automatic +2-day extensions instead of punishment.
+- **Dashboard** — streaks, "Due Soon", "Needs Review" (decay), and a grid of all challenges.
+- **PWA** — installable, offline-capable, dark-mode-first.
+
+---
+
+## 🧱 Tech stack
+
+| Layer | Tech |
+|---|---|
+| Framework | Next.js 15 (App Router, React Server Components) |
+| Language | TypeScript (strict, zero `any`) |
+| Database / Auth / Storage | Supabase (PostgreSQL + RLS, Auth, Storage) |
+| AI | Google Gemini 2.5 Flash (`@google/genai`, multimodal audio) |
+| Audio | MediaRecorder + Web Audio API → WebM/Opus (MP4 on Safari) |
+| Validation | Zod (all API & AI I/O) |
+| Styling | Vanilla CSS custom properties — no Tailwind, no CSS-in-JS |
+| Hosting | Vercel |
+
+---
+
+## 🏗️ Architecture
+
+- **Route groups** — `(auth)` for the centered login/signup flow, `(app)` for the authenticated shell (header + responsive nav). The recording screen lives outside both for a full-screen, immersive experience.
+- **Server-first** — pages are RSC that read data via a per-request Supabase server client; interactivity is isolated to small `"use client"` islands.
+- **Security** — `GEMINI_API_KEY` and the service-role key are server-only. Every table is protected by **Row Level Security**, so users can only ever touch their own data; the Gemini client is `import "server-only"`.
+- **One AI call per evaluation** — the audio is sent directly to Gemini with the outline as ground truth; structured JSON out, Zod-validated, then persisted and used to advance the mastery state machine.
+- **Middleware** — refreshes the Supabase session and guards every non-public route.
+
+```
+src/
+├── app/
+│   ├── (auth)/                 # login, signup
+│   ├── (app)/                  # dashboard + challenge notebook + results (shell)
+│   ├── challenge/[id]/record/  # full-screen recorder
+│   └── api/                    # challenge CRUD, generate, evaluate, attempt
+├── components/                 # ui, layout, challenge, recording, evaluation, dashboard
+├── lib/                        # supabase/, gemini/, audio/, auth/, utils/
+└── types/                      # Database type + shared domain types
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Prerequisites
+- Node.js 20+
+- A [Supabase](https://supabase.com) project (free tier)
+- A [Gemini API key](https://aistudio.google.com/app/apikey)
 
-## Learn More
+### 2. Install
+```bash
+npm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Environment
+Copy `.env.local.example` to `.env.local` and fill in:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...      # server-only
+GEMINI_API_KEY=...                 # server-only
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Database
+In the Supabase SQL Editor, run the migrations in order:
+1. `supabase/migrations/001_initial_schema.sql` — 6 tables, RLS policies, profile + updated_at triggers.
+2. `supabase/migrations/002_storage.sql` — private `recordings` bucket + storage policies.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 5. Run
+```bash
+npm run dev      # http://localhost:3000
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## ✅ Verification
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx tsc --noEmit     # type check (strict)
+npx next lint        # lint
+npm run build        # production build
+```
+
+---
+
+## 📄 License
+
+MIT — built as a portfolio project.
