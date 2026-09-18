@@ -1,18 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  applyMasteryDecay,
+  SOLIDIFIED_BOX,
   computeMasteryAfterAttempt,
   effectiveMasteryState,
   type MasteryInput,
 } from "./mastery";
-
-const NOW = new Date("2026-09-18T12:00:00Z");
-const DAY_MS = 86_400_000;
-
-function daysAgo(days: number): string {
-  return new Date(NOW.getTime() - days * DAY_MS).toISOString();
-}
 
 function run(
   overrides: Partial<MasteryInput>,
@@ -21,8 +14,7 @@ function run(
     current: "not_started",
     score: 0,
     previousScore: null,
-    masteryUpdatedAt: daysAgo(0),
-    now: NOW,
+    reviewBox: 0,
     ...overrides,
   });
 }
@@ -51,26 +43,13 @@ describe("computeMasteryAfterAttempt — spec §6.6 transitions", () => {
     );
   });
 
-  it("mastered + score >= 8 after two weeks reaches solidified", () => {
-    expect(
-      run({
-        current: "mastered",
-        score: 8,
-        previousScore: 8,
-        masteryUpdatedAt: daysAgo(14),
-      }),
-    ).toBe("solidified");
-  });
-
-  it("mastered + score >= 8 before two weeks stays mastered", () => {
-    expect(
-      run({
-        current: "mastered",
-        score: 9,
-        previousScore: 9,
-        masteryUpdatedAt: daysAgo(13),
-      }),
-    ).toBe("mastered");
+  it("mastered + score >= 8 reaches solidified once the review box is high enough", () => {
+    expect(run({ current: "mastered", score: 8, reviewBox: SOLIDIFIED_BOX })).toBe(
+      "solidified",
+    );
+    expect(run({ current: "mastered", score: 9, reviewBox: SOLIDIFIED_BOX - 1 })).toBe(
+      "mastered",
+    );
   });
 });
 
@@ -84,14 +63,9 @@ describe("computeMasteryAfterAttempt — jumping and guarding", () => {
   });
 
   it("cannot go from proficient to solidified in the same attempt", () => {
-    expect(
-      run({
-        current: "proficient",
-        score: 9,
-        previousScore: 9,
-        masteryUpdatedAt: daysAgo(30),
-      }),
-    ).toBe("mastered");
+    expect(run({ current: "proficient", score: 9, previousScore: 9, reviewBox: 5 })).toBe(
+      "mastered",
+    );
   });
 
   it("never demotes on a low score", () => {
@@ -101,37 +75,42 @@ describe("computeMasteryAfterAttempt — jumping and guarding", () => {
   });
 });
 
-describe("applyMasteryDecay", () => {
-  it("mastered decays to developing after 30 days without review", () => {
-    expect(applyMasteryDecay("mastered", daysAgo(30), NOW)).toBe("developing");
-  });
+describe("effectiveMasteryState — slipping when reviews lapse", () => {
+  const TODAY = "2026-09-19";
 
-  it("mastered does not decay before 30 days", () => {
-    expect(applyMasteryDecay("mastered", daysAgo(29), NOW)).toBe("mastered");
-  });
-
-  it("only mastered decays; other states are untouched", () => {
-    expect(applyMasteryDecay("proficient", daysAgo(90), NOW)).toBe("proficient");
-    expect(applyMasteryDecay("solidified", daysAgo(90), NOW)).toBe("solidified");
-    expect(applyMasteryDecay("developing", daysAgo(90), NOW)).toBe("developing");
-  });
-});
-
-describe("effectiveMasteryState", () => {
-  it("returns the stored state when there was never an attempt", () => {
-    expect(effectiveMasteryState("mastered", null, NOW)).toBe("mastered");
-  });
-
-  it("applies decay from last_attempt_at", () => {
-    expect(effectiveMasteryState("mastered", daysAgo(31), NOW)).toBe("developing");
-    expect(effectiveMasteryState("mastered", daysAgo(10), NOW)).toBe("mastered");
-  });
-
-  it("a decayed challenge cannot jump to solidified on the next attempt", () => {
-    const current = effectiveMasteryState("mastered", daysAgo(40), NOW);
-    expect(current).toBe("developing");
+  it("keeps the stored state while reviews are on time", () => {
     expect(
-      run({ current, score: 9, previousScore: 9, masteryUpdatedAt: daysAgo(40) }),
+      effectiveMasteryState("mastered", { box: 2, nextReviewAt: "2026-09-25" }, TODAY),
     ).toBe("mastered");
+    // Overdue, but not by more than one interval (box 2 = 7 days).
+    expect(
+      effectiveMasteryState("mastered", { box: 2, nextReviewAt: "2026-09-12" }, TODAY),
+    ).toBe("mastered");
+  });
+
+  it("drops exactly one level once more than one interval overdue", () => {
+    const lapsed = { box: 2, nextReviewAt: "2026-09-10" };
+    expect(effectiveMasteryState("solidified", lapsed, TODAY)).toBe("mastered");
+    expect(effectiveMasteryState("mastered", lapsed, TODAY)).toBe("proficient");
+    expect(effectiveMasteryState("proficient", lapsed, TODAY)).toBe("developing");
+  });
+
+  it("early levels never slip, and nothing slips without a schedule", () => {
+    const lapsed = { box: 0, nextReviewAt: "2026-01-01" };
+    expect(effectiveMasteryState("developing", lapsed, TODAY)).toBe("developing");
+    expect(effectiveMasteryState("attempted", lapsed, TODAY)).toBe("attempted");
+    expect(effectiveMasteryState("mastered", { box: 0, nextReviewAt: null }, TODAY)).toBe(
+      "mastered",
+    );
+  });
+
+  it("a lapsed mastered challenge must re-earn mastery on the next attempt", () => {
+    const current = effectiveMasteryState(
+      "mastered",
+      { box: 3, nextReviewAt: "2026-08-01" },
+      TODAY,
+    );
+    expect(current).toBe("proficient");
+    expect(run({ current, score: 9, previousScore: 5, reviewBox: 4 })).toBe("proficient");
   });
 });

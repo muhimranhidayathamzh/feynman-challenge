@@ -669,11 +669,22 @@ Headroom: 136x lipat ✅
 🟨 Proficient
     ↓  (skor ≥ 8, 2x berturut)
 🟩 Mastered
-    ↓  (skor ≥ 8 setelah 2+ minggu)
+    ↓  (skor ≥ 8 dan review box ≥ 4)
 🟦 Solidified
-
-⚠️ Decay: Mastered → Developing setelah 30 hari tanpa review
 ```
+
+**Spaced repetition (menggantikan decay 30 hari).** Setiap tantangan punya *review box* 0–5 (sistem Leitner, `src/lib/utils/review.ts`) dengan interval 1, 3, 7, 14, 30, 60 hari.
+
+| Skor percobaan | Efek pada box | Review berikutnya |
+|---|---|---|
+| ≥ 8, dilakukan pada/after hari review | naik 1 box (maks 5) | hari ini + interval box baru |
+| ≥ 8, dilakukan **sebelum** hari review | tetap (tidak bisa "ngebut") | jadwal lama dipertahankan |
+| 5–7 | tetap | hari ini + interval box |
+| < 5 | kembali ke box 0 | besok |
+
+- **Solidified** butuh box ≥ 4, artinya empat review kuat yang tepat waktu dan tersebar dalam hitungan minggu.
+- **Menurun**: bila review terlambat lebih dari satu interval penuh, *tampilan* mastery turun satu level (Solidified → Mastered → Proficient → Developing). Database menyimpan level yang pernah dicapai; penurunan dihitung saat dibaca, dan percobaan berikutnya berangkat dari level yang sudah turun.
+- Dashboard menampilkan **Review Hari Ini** untuk tantangan aktif maupun selesai yang jadwalnya sudah tiba.
 
 ---
 

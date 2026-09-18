@@ -11,6 +11,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { getDeadlineInfo } from "@/lib/utils/deadline";
 import { effectiveMasteryState } from "@/lib/utils/mastery";
+import { nextReviewLabel } from "@/lib/utils/review";
 import { getUserClock } from "@/lib/utils/user-day";
 
 type PageProps = { params: Promise<{ id: string }> };
@@ -41,6 +42,7 @@ export default async function ChallengePage({ params }: PageProps) {
   }
 
   const clock = await getUserClock(supabase, challenge.user_id);
+  const review = { box: challenge.review_box, nextReviewAt: challenge.next_review_at };
 
   const [{ data: outline }, { data: sources }, { data: note }] = await Promise.all([
     supabase
@@ -61,14 +63,11 @@ export default async function ChallengePage({ params }: PageProps) {
       <NotebookHeader
         id={challenge.id}
         initialTitle={challenge.title}
-        masteryState={effectiveMasteryState(
-          challenge.mastery_state,
-          challenge.last_attempt_at,
-          clock.now,
-        )}
+        masteryState={effectiveMasteryState(challenge.mastery_state, review, clock.today)}
         status={challenge.status}
         deadline={challenge.deadline}
         deadlineInfo={getDeadlineInfo(challenge.deadline, clock.today)}
+        nextReview={nextReviewLabel(review.nextReviewAt, clock.today)}
       />
 
       <Card className="stack gap-4">

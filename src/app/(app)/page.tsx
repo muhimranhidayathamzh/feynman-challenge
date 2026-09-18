@@ -4,19 +4,22 @@ import { Brain, ChartColumn, Plus } from "lucide-react";
 
 import { ChallengeList } from "@/components/dashboard/challenge-list";
 import type { ChallengeCardData } from "@/components/dashboard/challenge-card";
-import { DecayAlert, type DecayItem } from "@/components/dashboard/decay-alert";
 import {
   DueSoonSection,
   type DueSoonItem,
 } from "@/components/dashboard/due-soon-section";
+import {
+  ReviewTodaySection,
+  type ReviewItem,
+} from "@/components/dashboard/review-today-section";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { DASHBOARD_TABS, countByStatus, tabFromSlug } from "@/lib/utils/challenge-status";
-import { calendarDay, dayDiff } from "@/lib/utils/date";
 import { getDeadlineInfo } from "@/lib/utils/deadline";
 import { effectiveMasteryState } from "@/lib/utils/mastery";
+import { daysOverdue, isLapsed } from "@/lib/utils/review";
 import { displayStreak } from "@/lib/utils/streak";
 import { getUserClock } from "@/lib/utils/user-day";
 import { createClient } from "@/lib/supabase/server";
@@ -33,8 +36,9 @@ type PageProps = {
 };
 
 /**
- * Read-only: every derived value (auto-extended deadlines, mastery decay,
- * live streak) is computed here from stored data + the user's current day.
+ * Read-only: every derived value (auto-extended deadlines, due reviews,
+ * slipped mastery, live streak) is computed here from stored data + the
+ * user's current day.
  * Nothing is written during render. Tabs are plain links (?tab=), so the
  * filter works without client JavaScript and survives a refresh.
  */
@@ -55,14 +59,20 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       .maybeSingle(),
     supabase
       .from("challenges")
-      .select("id, title, deadline, mastery_state, latest_score, status, last_attempt_at")
+      .select(
+        "id, title, deadline, mastery_state, latest_score, status, review_box, next_review_at",
+      )
       .order("updated_at", { ascending: false }),
     getUserClock(supabase, user.id),
     searchParams,
   ]);
 
   const rows = challenges ?? [];
-  const { now, today, timeZone } = clock;
+  const { today } = clock;
+  const reviewOf = (c: { review_box: number; next_review_at: string | null }) => ({
+    box: c.review_box,
+    nextReviewAt: c.next_review_at,
+  });
   const activeTab = tabFromSlug(params.tab);
   const counts = countByStatus(rows);
   const activeRows = rows.filter((c) => c.status === "active");
@@ -72,7 +82,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     .map((c) => ({
       id: c.id,
       title: c.title,
-      masteryState: effectiveMasteryState(c.mastery_state, c.last_attempt_at, now),
+      masteryState: effectiveMasteryState(c.mastery_state, reviewOf(c), today),
       latestScore: c.latest_score,
       deadline: getDeadlineInfo(c.deadline, today),
     }));
@@ -92,14 +102,23 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       deadline: c.deadline,
     }));
 
-  const decay: DecayItem[] = activeRows.flatMap<DecayItem>((c) => {
-    if (c.mastery_state !== "mastered" || !c.last_attempt_at) return [];
-    if (effectiveMasteryState("mastered", c.last_attempt_at, now) === "mastered") {
-      return [];
-    }
-    const lastDay = calendarDay(new Date(c.last_attempt_at), timeZone);
-    return [{ id: c.id, title: c.title, daysSinceReview: dayDiff(lastDay, today) }];
-  });
+  // Spaced reviews that are due, most overdue first. Completed challenges are
+  // included on purpose: finishing a topic is exactly when retention matters.
+  const reviews: ReviewItem[] = rows
+    .filter((c) => c.status !== "parked")
+    .flatMap<ReviewItem>((c) => {
+      const overdue = daysOverdue(c.next_review_at, today);
+      if (overdue === null || overdue < 0) return [];
+      return [
+        {
+          id: c.id,
+          title: c.title,
+          daysOverdue: overdue,
+          lapsed: isLapsed(reviewOf(c), today),
+        },
+      ];
+    })
+    .sort((a, b) => b.daysOverdue - a.daysOverdue);
 
   const displayName =
     profile?.display_name?.trim() || user.email?.split("@")[0] || "Kamu";
@@ -139,7 +158,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       ) : (
         <>
           <DueSoonSection items={dueSoon} />
-          <DecayAlert items={decay} />
+          <ReviewTodaySection items={reviews} />
 
           <section className="stack gap-3" aria-labelledby="all-challenges-title">
             <div className="row-between flex-wrap gap-3">

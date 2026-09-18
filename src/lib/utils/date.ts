@@ -55,6 +55,17 @@ export function dayDiff(fromDay: CalendarDay, toDay: CalendarDay): number {
   return dayNumber(toDay) - dayNumber(fromDay);
 }
 
+/** Short Indonesian date for a calendar day, e.g. "22 Sep 2026" (year optional). */
+export function formatDay(day: CalendarDay, withYear = false): string {
+  const [y, m, d] = day.split("-").map(Number) as [number, number, number];
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "short",
+    ...(withYear ? { year: "numeric" } : {}),
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(y, m - 1, d)));
+}
+
 /** `day` shifted by `days` (may be negative). */
 export function addDays(day: CalendarDay, days: number): CalendarDay {
   const [y, m, d] = day.split("-").map(Number) as [number, number, number];

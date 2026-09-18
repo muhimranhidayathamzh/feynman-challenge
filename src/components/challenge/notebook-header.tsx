@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Pencil, Trash2 } from "lucide-react";
+import { Check, Pencil, Repeat, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button, IconButton } from "@/components/ui/button";
@@ -28,6 +28,8 @@ interface Props {
   deadline: string | null;
   /** Computed on the server in the user's timezone. */
   deadlineInfo: DeadlineInfo;
+  /** e.g. "Review berikutnya: 22 Sep" (spaced repetition), or null. */
+  nextReview: string | null;
 }
 
 export function NotebookHeader({
@@ -37,6 +39,7 @@ export function NotebookHeader({
   status,
   deadline,
   deadlineInfo,
+  nextReview,
 }: Props) {
   const router = useRouter();
   const toast = useToast();
@@ -161,6 +164,15 @@ export function NotebookHeader({
           </Badge>
         ) : (
           <DeadlineBadge info={deadlineInfo} />
+        )}
+        {nextReview && (
+          <Badge
+            icon={Repeat}
+            tone={nextReview.startsWith("Review terlambat") ? "warning" : "accent"}
+            title="Jadwal spaced repetition"
+          >
+            {nextReview}
+          </Badge>
         )}
       </div>
 

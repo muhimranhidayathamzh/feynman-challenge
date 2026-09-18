@@ -19,6 +19,7 @@ import { RECORDINGS_BUCKET, contentTypeForPath } from "@/lib/storage/recording-p
 import { createClient } from "@/lib/supabase/server";
 import { normalizeCoverage, normalizeJargon } from "@/lib/utils/coverage";
 import { computeMasteryAfterAttempt, effectiveMasteryState } from "@/lib/utils/mastery";
+import { computeReviewAfterAttempt } from "@/lib/utils/review";
 import { computeOverallScore, normalizeSubScores } from "@/lib/utils/scoring";
 import { computeStreakOnActivity } from "@/lib/utils/streak";
 import { getUserClock } from "@/lib/utils/user-day";
@@ -235,17 +236,31 @@ export async function POST(request: Request) {
       .limit(1);
     const previousScore = prevAttempts?.[0]?.overall_score ?? null;
 
-    // Start from the decay-applied state so a lapsed "mastered" challenge
-    // has to earn its way back instead of jumping to "solidified".
+    const { today } = await getUserClock(supabase, user.id);
+
+    // --- Spaced repetition: next box + review day ---
+    const reviewBefore = {
+      box: challenge.review_box,
+      nextReviewAt: challenge.next_review_at,
+    };
+    const review = computeReviewAfterAttempt({
+      state: reviewBefore,
+      score: overall,
+      today,
+    });
+
+    // Start from the effective (possibly slipped) state so a lapsed challenge
+    // has to earn its way back instead of jumping ahead.
     const currentState = effectiveMasteryState(
       challenge.mastery_state,
-      challenge.last_attempt_at,
+      reviewBefore,
+      today,
     );
     const newState = computeMasteryAfterAttempt({
       current: currentState,
       score: overall,
       previousScore,
-      masteryUpdatedAt: challenge.mastery_updated_at,
+      reviewBox: review.box,
     });
 
     // --- Streak ---
@@ -254,7 +269,6 @@ export async function POST(request: Request) {
       .select("streak_count, best_streak, last_active_date")
       .eq("id", user.id)
       .maybeSingle();
-    const { today } = await getUserClock(supabase, user.id);
     const streak = computeStreakOnActivity({
       lastActiveDate: profile?.last_active_date ?? null,
       currentStreak: profile?.streak_count ?? 0,
@@ -275,8 +289,11 @@ export async function POST(request: Request) {
       p_improvements: result.improvements as Json,
       p_coverage: coverage as Json,
       p_unexplained_jargon: jargon,
+      p_follow_up_questions: [],
       p_mastery_state: newState,
       p_mastery_changed: newState !== challenge.mastery_state,
+      p_review_box: review.box,
+      p_next_review_at: review.nextReviewAt ?? today,
       p_streak_count: streak.streakCount,
       p_best_streak: streak.bestStreak,
       p_last_active_date: streak.changed ? streak.lastActiveDate : null,

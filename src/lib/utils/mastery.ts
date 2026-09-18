@@ -1,17 +1,24 @@
 import type { MasteryState } from "@/types";
 
+import type { CalendarDay } from "./date";
+import { isLapsed, type ReviewState } from "./review";
+
 // ============================================================================
-// Mastery state machine — pure functions. Logic per master spec §6.6:
+// Mastery state machine — pure functions. Master spec §6.6, with spaced
+// repetition (src/lib/utils/review.ts) replacing the old fixed timers:
 //
-//   not_started --(first submit)--------------------> attempted
-//   attempted   --(score >= 5)----------------------> developing
-//   developing  --(score >= 7)----------------------> proficient
-//   proficient  --(score >= 8, 2x consecutive)------> mastered
-//   mastered    --(score >= 8, >= 2 weeks later)----> solidified
-//   decay: mastered --(30 days w/o review)----------> developing
+//   not_started --(first submit)------------------------> attempted
+//   attempted   --(score >= 5)--------------------------> developing
+//   developing  --(score >= 7)--------------------------> proficient
+//   proficient  --(score >= 8, 2x consecutive)----------> mastered
+//   mastered    --(score >= 8 and review box >= 4)------> solidified
 //
-// Progression never moves *down* on a low score (only the time-based decay
-// does, handled separately by applyMasteryDecay).
+// A box >= 4 means four strong, ON-TIME reviews spread over weeks, so
+// "solidified" really is long-term retention, not one good evening.
+//
+// Progression never moves down on a low score. Slipping is derived at read
+// time: a review more than one full interval overdue drops the displayed
+// state by one level (effectiveMasteryState).
 // ============================================================================
 
 const ORDER: MasteryState[] = [
@@ -23,24 +30,22 @@ const ORDER: MasteryState[] = [
   "solidified",
 ];
 
+/** Review box needed for "solidified". */
+export const SOLIDIFIED_BOX = 4;
+
 function rank(state: MasteryState): number {
   return ORDER.indexOf(state);
 }
 
-const TWO_WEEKS_MS = 14 * 86_400_000;
-const THIRTY_DAYS_MS = 30 * 86_400_000;
-
 export interface MasteryInput {
-  /** Current mastery state of the challenge. */
+  /** Current (effective) mastery state of the challenge. */
   current: MasteryState;
   /** Capped overall score of the new attempt (0–10). */
   score: number;
   /** Overall score of the immediately previous completed attempt, if any. */
   previousScore: number | null;
-  /** ISO timestamp of when the current mastery state was set. */
-  masteryUpdatedAt: string;
-  /** Override "now" (for testing). */
-  now?: Date;
+  /** Review box AFTER this attempt (see computeReviewAfterAttempt). */
+  reviewBox: number;
 }
 
 /**
@@ -48,8 +53,7 @@ export interface MasteryInput {
  * as far as the new score + history allow; never demotes.
  */
 export function computeMasteryAfterAttempt(input: MasteryInput): MasteryState {
-  const { current, score, previousScore, masteryUpdatedAt } = input;
-  const now = input.now ?? new Date();
+  const { current, score, previousScore, reviewBox } = input;
 
   // Any submitted attempt moves a fresh challenge to "attempted".
   let state: MasteryState = current === "not_started" ? "attempted" : current;
@@ -68,50 +72,34 @@ export function computeMasteryAfterAttempt(input: MasteryInput): MasteryState {
     state = "mastered";
   }
 
-  // mastered -> solidified: score >= 8 at least two weeks after *being* mastered.
-  // Gated on `current === "mastered"` so a same-attempt promotion to mastered
-  // can't immediately jump to solidified (masteryUpdatedAt would be stale).
-  if (
-    current === "mastered" &&
-    score >= 8 &&
-    now.getTime() - new Date(masteryUpdatedAt).getTime() >= TWO_WEEKS_MS
-  ) {
+  // mastered -> solidified: only from an already-mastered challenge, and only
+  // once spaced reviews have climbed to box 4.
+  if (current === "mastered" && score >= 8 && reviewBox >= SOLIDIFIED_BOX) {
     state = "solidified";
   }
 
   return state;
 }
 
-/**
- * Time-based decay: a "mastered" challenge slips to "developing" after 30 days
- * without a review. Used by the dashboard (Phase 5); harmless elsewhere.
- */
-export function applyMasteryDecay(
-  state: MasteryState,
-  lastReviewedAt: string,
-  now: Date = new Date(),
-): MasteryState {
-  if (
-    state === "mastered" &&
-    now.getTime() - new Date(lastReviewedAt).getTime() >= THIRTY_DAYS_MS
-  ) {
-    return "developing";
-  }
-  return state;
-}
+/** Levels that can visibly slip when reviews lapse. */
+const CAN_SLIP: ReadonlySet<MasteryState> = new Set([
+  "proficient",
+  "mastered",
+  "solidified",
+]);
 
 /**
- * The state to reason and display with: the stored state after time-based
- * decay. The database keeps the last *earned* state; decay is derived from
- * `last_attempt_at` on every read so nothing has to run on a schedule.
- * Also used as the starting point when a new attempt is evaluated, so a
- * challenge that decayed cannot jump straight from "mastered" to "solidified".
+ * The state to reason and display with. The database keeps the last EARNED
+ * state; when the review is more than one full interval overdue, the shown
+ * state drops one level (solidified -> mastered -> proficient -> developing).
+ * Used as the starting point for the next evaluation too, so a lapsed
+ * challenge has to earn its way back.
  */
 export function effectiveMasteryState(
   stored: MasteryState,
-  lastAttemptAt: string | null,
-  now: Date = new Date(),
+  review: ReviewState,
+  today: CalendarDay,
 ): MasteryState {
-  if (!lastAttemptAt) return stored;
-  return applyMasteryDecay(stored, lastAttemptAt, now);
+  if (!CAN_SLIP.has(stored) || !isLapsed(review, today)) return stored;
+  return ORDER[rank(stored) - 1] ?? stored;
 }

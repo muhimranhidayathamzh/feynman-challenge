@@ -86,6 +86,10 @@ export type Database = {
           /** Calendar day "YYYY-MM-DD" in the user's timezone. */
           deadline: string | null;
           last_attempt_at: string | null;
+          /** Leitner box 0..5 (src/lib/utils/review.ts). */
+          review_box: number;
+          /** Calendar day of the next spaced review, or null. */
+          next_review_at: string | null;
           mastery_state: MasteryState;
           mastery_updated_at: string;
           latest_score: number | null;
@@ -101,6 +105,8 @@ export type Database = {
           title: string;
           deadline?: string | null;
           last_attempt_at?: string | null;
+          review_box?: number;
+          next_review_at?: string | null;
           mastery_state?: MasteryState;
           mastery_updated_at?: string;
           latest_score?: number | null;
@@ -116,6 +122,8 @@ export type Database = {
           title?: string;
           deadline?: string | null;
           last_attempt_at?: string | null;
+          review_box?: number;
+          next_review_at?: string | null;
           mastery_state?: MasteryState;
           mastery_updated_at?: string;
           latest_score?: number | null;
@@ -233,6 +241,7 @@ export type Database = {
           improvements: Json | null;
           coverage: Json | null;
           unexplained_jargon: Json | null;
+          follow_up_questions: Json | null;
           audio_issue: AudioIssue | null;
           evaluation_status: EvaluationStatus;
           evaluation_started_at: string | null;
@@ -257,6 +266,7 @@ export type Database = {
           improvements?: Json | null;
           coverage?: Json | null;
           unexplained_jargon?: Json | null;
+          follow_up_questions?: Json | null;
           audio_issue?: AudioIssue | null;
           evaluation_status?: EvaluationStatus;
           evaluation_started_at?: string | null;
@@ -281,6 +291,7 @@ export type Database = {
           improvements?: Json | null;
           coverage?: Json | null;
           unexplained_jargon?: Json | null;
+          follow_up_questions?: Json | null;
           audio_issue?: AudioIssue | null;
           evaluation_status?: EvaluationStatus;
           evaluation_started_at?: string | null;
@@ -332,8 +343,11 @@ export type Database = {
           p_improvements: Json;
           p_coverage: Json;
           p_unexplained_jargon: Json;
+          p_follow_up_questions: Json;
           p_mastery_state: MasteryState;
           p_mastery_changed: boolean;
+          p_review_box: number;
+          p_next_review_at: string;
           p_streak_count: number;
           p_best_streak: number;
           p_last_active_date: string | null;

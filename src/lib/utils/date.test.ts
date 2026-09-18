@@ -5,6 +5,7 @@ import {
   addDays,
   calendarDay,
   dayDiff,
+  formatDay,
   isCalendarDay,
   isValidTimeZone,
 } from "./date";
@@ -40,6 +41,13 @@ describe("dayDiff / addDays", () => {
     expect(addDays("2026-09-30", 2)).toBe("2026-10-02");
     expect(addDays("2026-01-01", -1)).toBe("2025-12-31");
     expect(addDays("2026-09-18", 0)).toBe("2026-09-18");
+  });
+});
+
+describe("formatDay", () => {
+  it("formats a calendar day in Indonesian without timezone drift", () => {
+    expect(formatDay("2026-09-22")).toMatch(/^22 Sep/);
+    expect(formatDay("2026-01-01", true)).toMatch(/1 Jan 2026/);
   });
 });
 
