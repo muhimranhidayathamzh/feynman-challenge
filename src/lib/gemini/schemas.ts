@@ -7,6 +7,22 @@ export const MAX_DURATION_SEC = 600;
 
 const SOURCE_TYPES = ["video", "article", "book", "paper", "other"] as const;
 
+/**
+ * Returns the trimmed URL when it is a valid http(s) URL, otherwise null.
+ * Used for both AI-suggested and user-added sources so we never store
+ * javascript:, data:, or free-text "URLs".
+ */
+export function normalizeHttpUrl(value: string | null | undefined): string | null {
+  const trimmed = value?.trim() ?? "";
+  if (trimmed.length === 0) return null;
+  try {
+    const url = new URL(trimmed);
+    return url.protocol === "http:" || url.protocol === "https:" ? trimmed : null;
+  } catch {
+    return null;
+  }
+}
+
 // ----------------------------------------------------------------------------
 // Zod schemas — validate the parsed JSON returned by Gemini.
 // ----------------------------------------------------------------------------
@@ -17,13 +33,9 @@ export const OutlineItemSchema = z.object({
 
 export const GeneratedSourceSchema = z.object({
   title: z.string().trim().min(1),
-  // AI-suggested URLs can be missing or approximate — keep permissive, normalise
-  // empty strings to null, and never reject the whole response over a bad URL.
-  url: z
-    .string()
-    .trim()
-    .nullish()
-    .transform((value) => (value && value.length > 0 ? value : null)),
+  // AI-suggested URLs can be missing or approximate. Never reject the whole
+  // response over a bad URL: keep it only if it is a real http(s) link.
+  url: z.string().nullish().transform(normalizeHttpUrl),
   // Fall back to "other" rather than failing if the model returns an unknown type.
   type: z.enum(SOURCE_TYPES).catch("other"),
 });

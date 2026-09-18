@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+import { publicEnv } from "@/lib/env.public";
 import type { Database } from "@/types";
 
 /** Paths that an unauthenticated visitor is allowed to reach. */
@@ -23,10 +24,11 @@ export async function updateSession(
   request: NextRequest,
 ): Promise<NextResponse> {
   let supabaseResponse = NextResponse.next({ request });
+  const env = publicEnv();
 
   const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {

@@ -19,7 +19,7 @@ import type { Json } from "@/types";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const RequestSchema = z.object({ attemptId: z.string().uuid() });
+const RequestSchema = z.object({ attemptId: z.uuid() });
 
 function clampScore(value: number, max: number): number {
   return Math.max(0, Math.min(max, Math.round(value)));

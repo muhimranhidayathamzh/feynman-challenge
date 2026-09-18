@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { normalizeHttpUrl } from "@/lib/gemini/schemas";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -9,13 +10,8 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 const AddSchema = z.object({
   title: z.string().trim().min(1).max(300),
-  url: z
-    .string()
-    .trim()
-    .url()
-    .nullish()
-    .or(z.literal(""))
-    .transform((value) => (value && value.length > 0 ? value : null)),
+  // Only http(s) links are stored; anything else (including "") becomes null.
+  url: z.string().nullish().transform(normalizeHttpUrl),
   type: z.enum(["video", "article", "book", "paper", "other"]).default("other"),
 });
 
@@ -82,7 +78,7 @@ export async function DELETE(request: Request, context: RouteContext) {
     }
 
     const body: unknown = await request.json().catch(() => null);
-    const parsed = z.object({ id: z.string().uuid() }).safeParse(body);
+    const parsed = z.object({ id: z.uuid() }).safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: "ID tidak valid." }, { status: 400 });
     }

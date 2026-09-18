@@ -7,6 +7,7 @@
 **Feynman Challenge** — PWA yang membantu self-learner menguasai materi apapun lewat Feynman Technique: jelaskan ulang via audio → AI evaluasi.
 
 Master spec: `docs/feynman_challenge_master.md`
+Rencana perbaikan aktif: `prompts/improvement-plan.md` (3 fase, 16 prompt). Kerjakan berurutan; cek tabel Status di bagian bawah file itu.
 
 ## Tech Stack
 
@@ -15,10 +16,10 @@ Master spec: `docs/feynman_challenge_master.md`
 | Framework | Next.js 15 (App Router, RSC) |
 | Language | TypeScript strict — **zero `any`** |
 | Database | Supabase (PostgreSQL + Auth + Storage) |
-| AI | Gemini 2.0 Flash (multimodal audio) |
+| AI | Gemini 2.5 Flash via `@google/genai` (multimodal audio) |
 | Audio | MediaRecorder API → WebM (Opus) |
 | Styling | Vanilla CSS custom properties — **NO Tailwind, NO CSS-in-JS** |
-| Validation | Zod for all API I/O |
+| Validation | Zod 4 for all API I/O (`z.uuid()`, `z.iso.datetime()`, `z.url()`) |
 | Font | Inter (Google Fonts) |
 | Hosting | Vercel |
 
@@ -29,10 +30,12 @@ Master spec: `docs/feynman_challenge_master.md`
 - All API responses validated with Zod schemas.
 - Server Components by default. `'use client'` only when needed (interactivity, hooks, browser APIs).
 - Feature-based file structure (lihat master spec section 8).
-- Conventional commits: `feat:`, `fix:`, `refactor:`, `style:`, `docs:`.
+- Conventional commits: `feat:`, `fix:`, `refactor:`, `style:`, `docs:`, `test:`, `chore:`.
+- Unit test (Vitest) wajib untuk setiap logika murni di `src/lib/utils/`. File test di samping sumber: `*.test.ts`.
+- Env dibaca lewat `src/lib/env.ts` (server) dan `src/lib/env.public.ts` (public), bukan `process.env.X!`.
 
 ### API Keys & Security
-- `GEMINI_API_KEY` dan `SUPABASE_SERVICE_ROLE_KEY` = **server-side only** (Next.js API Routes).
+- `GEMINI_API_KEY` dan `SUPABASE_SERVICE_ROLE_KEY` = **server-side only** (Next.js API Routes). Akses lewat `serverEnv()` dari `src/lib/env.ts`.
 - Client hanya pakai `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 - Semua database access via Supabase RLS — user hanya bisa akses data sendiri.
 
@@ -81,11 +84,13 @@ Eksekusi berurutan. Jangan loncat phase.
 
 ## Verification
 
-Setiap phase selesai, jalankan:
+Setiap prompt selesai, jalankan:
 ```bash
-npx tsc --noEmit    # Type check
-npx next lint        # Lint
-npm run build        # Build check
+npx tsc --noEmit        # Type check
+npm run lint            # ESLint CLI (next lint sudah deprecated)
+npm run format:check    # Prettier
+npm test                # Vitest unit tests
+npm run build           # Build check
 ```
 
 ## Environment Variables

@@ -3,8 +3,7 @@
 > _"Kalau kamu nggak bisa menjelaskannya, kamu belum paham."_
 > A PWA that helps self-learners master any topic with the **Feynman Technique**: explain it out loud, and let AI evaluate how well you understood it.
 
-<!-- Replace with a real screenshot / demo GIF -->
-![Demo placeholder](docs/demo-placeholder.png)
+> Screenshots coming with the portfolio pass (see `prompts/improvement-plan.md`, Prompt 3.5).
 
 ---
 
@@ -34,7 +33,8 @@ You pick a topic. AI drafts a learning outline + sources. You study, then **reco
 | Database / Auth / Storage | Supabase (PostgreSQL + RLS, Auth, Storage) |
 | AI | Google Gemini 2.5 Flash (`@google/genai`, multimodal audio) |
 | Audio | MediaRecorder + Web Audio API → WebM/Opus (MP4 on Safari) |
-| Validation | Zod (all API & AI I/O) |
+| Validation | Zod 4 (all API & AI I/O) |
+| Testing | Vitest (unit tests for all pure logic), GitHub Actions CI |
 | Styling | Vanilla CSS custom properties — no Tailwind, no CSS-in-JS |
 | Hosting | Vercel |
 
@@ -98,10 +98,20 @@ npm run dev      # http://localhost:3000
 ## ✅ Verification
 
 ```bash
-npx tsc --noEmit     # type check (strict)
-npx next lint        # lint
-npm run build        # production build
+npx tsc --noEmit        # type check (strict)
+npm run lint            # ESLint
+npm run format:check    # Prettier
+npm test                # Vitest unit tests
+npm run build           # production build
 ```
+
+The same checks run in CI on every push (`.github/workflows/ci.yml`).
+
+---
+
+## 🗺️ Roadmap
+
+Ongoing improvements are tracked in [`prompts/improvement-plan.md`](prompts/improvement-plan.md): three phases (stabilise, complete, differentiate) with a status table at the bottom.
 
 ---
 

@@ -1,15 +1,24 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { GeneratedSourceSchema, OutlineItemSchema } from "@/lib/gemini/schemas";
+import {
+  GeneratedSourceSchema,
+  MAX_DURATION_SEC,
+  MIN_DURATION_SEC,
+  OutlineItemSchema,
+} from "@/lib/gemini/schemas";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
 const CreateChallengeSchema = z.object({
   topic: z.string().trim().min(3).max(200),
-  deadline: z.string().datetime({ offset: true }).nullable().optional(),
-  estimated_duration_sec: z.number().int().positive(),
+  deadline: z.iso.datetime({ offset: true }).nullable().optional(),
+  estimated_duration_sec: z
+    .number()
+    .int()
+    .positive()
+    .transform((value) => Math.min(MAX_DURATION_SEC, Math.max(MIN_DURATION_SEC, value))),
   outline: z.array(OutlineItemSchema).min(1),
   sources: z.array(GeneratedSourceSchema).default([]),
 });

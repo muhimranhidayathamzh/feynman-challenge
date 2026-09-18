@@ -2,6 +2,8 @@ import "server-only";
 
 import { GoogleGenAI } from "@google/genai";
 
+import { serverEnv } from "@/lib/env";
+
 /**
  * Gemini 2.5 Flash — multimodal model used for both outline generation and
  * (Phase 4) audio evaluation.
@@ -18,11 +20,6 @@ let client: GoogleGenAI | null = null;
 export function getGeminiClient(): GoogleGenAI {
   if (client) return client;
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not set");
-  }
-
-  client = new GoogleGenAI({ apiKey });
+  client = new GoogleGenAI({ apiKey: serverEnv().GEMINI_API_KEY });
   return client;
 }

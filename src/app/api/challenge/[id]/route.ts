@@ -10,7 +10,7 @@ type RouteContext = { params: Promise<{ id: string }> };
 const PatchSchema = z
   .object({
     title: z.string().trim().min(3).max(200).optional(),
-    deadline: z.string().datetime({ offset: true }).nullable().optional(),
+    deadline: z.iso.datetime({ offset: true }).nullable().optional(),
     status: z.enum(["active", "parked", "completed"]).optional(),
   })
   .refine((value) => Object.keys(value).length > 0, {

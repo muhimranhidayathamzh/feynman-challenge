@@ -16,13 +16,13 @@ const AddSchema = z.object({
 });
 
 const UpdateSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   title: z.string().trim().min(1).max(200).optional(),
   description: z.string().trim().max(1000).nullable().optional(),
 });
 
 const ReorderSchema = z.object({
-  reorder: z.array(z.string().uuid()).min(1),
+  reorder: z.array(z.uuid()).min(1),
 });
 
 /** Returns true when the signed-in user owns the challenge (RLS-scoped). */
@@ -167,7 +167,7 @@ export async function DELETE(request: Request, context: RouteContext) {
     }
 
     const body: unknown = await request.json().catch(() => null);
-    const parsed = z.object({ id: z.string().uuid() }).safeParse(body);
+    const parsed = z.object({ id: z.uuid() }).safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: "ID tidak valid." }, { status: 400 });
     }
