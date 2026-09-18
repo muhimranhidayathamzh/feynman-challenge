@@ -7,10 +7,7 @@ import {
   buildEvaluationPrompt,
   EVALUATION_SYSTEM_INSTRUCTION,
 } from "@/lib/gemini/prompts";
-import {
-  EVALUATION_RESPONSE_SCHEMA,
-  EvaluationResultSchema,
-} from "@/lib/gemini/schemas";
+import { EVALUATION_RESPONSE_SCHEMA, EvaluationResultSchema } from "@/lib/gemini/schemas";
 import { computeMasteryAfterAttempt } from "@/lib/utils/mastery";
 import { computeStreakOnActivity } from "@/lib/utils/streak";
 import { createClient } from "@/lib/supabase/server";

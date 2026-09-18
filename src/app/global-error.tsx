@@ -26,8 +26,7 @@ export default function GlobalError({
           justifyContent: "center",
           background: "#101218",
           color: "#eef0f5",
-          fontFamily:
-            "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+          fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
           padding: "1rem",
         }}
       >
@@ -48,8 +47,7 @@ export default function GlobalError({
               cursor: "pointer",
               color: "#fff",
               fontWeight: 600,
-              background:
-                "linear-gradient(135deg, hsl(250,85%,65%), hsl(210,75%,55%))",
+              background: "linear-gradient(135deg, hsl(250,85%,65%), hsl(210,75%,55%))",
             }}
           >
             Muat ulang

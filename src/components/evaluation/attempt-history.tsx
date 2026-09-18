@@ -23,13 +23,8 @@ export function AttemptHistory({ history, currentAttemptNumber }: Props) {
           const isCurrent = entry.attemptNumber === currentAttemptNumber;
           return (
             <div key={entry.attemptNumber} className="hist-col">
-              <span className="text-sm font-semibold">
-                {entry.score ?? "—"}
-              </span>
-              <div
-                className="hist-bar"
-                style={{ opacity: isCurrent ? 1 : 0.55 }}
-              >
+              <span className="text-sm font-semibold">{entry.score ?? "—"}</span>
+              <div className="hist-bar" style={{ opacity: isCurrent ? 1 : 0.55 }}>
                 <div
                   className="hist-bar-fill"
                   style={{

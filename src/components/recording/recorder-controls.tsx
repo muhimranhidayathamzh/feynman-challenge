@@ -35,11 +35,7 @@ export function RecorderControls({
   if (status === "idle" || status === "stopped") {
     return (
       <div className="record-controls">
-        <button
-          type="button"
-          className="btn btn-primary btn-lg"
-          onClick={onStart}
-        >
+        <button type="button" className="btn btn-primary btn-lg" onClick={onStart}>
           🎙️ Mulai Rekam
         </button>
       </div>
@@ -49,27 +45,15 @@ export function RecorderControls({
   return (
     <div className="record-controls">
       {status === "recording" ? (
-        <button
-          type="button"
-          className="btn btn-secondary btn-lg"
-          onClick={onPause}
-        >
+        <button type="button" className="btn btn-secondary btn-lg" onClick={onPause}>
           ⏸️ Jeda
         </button>
       ) : (
-        <button
-          type="button"
-          className="btn btn-secondary btn-lg"
-          onClick={onResume}
-        >
+        <button type="button" className="btn btn-secondary btn-lg" onClick={onResume}>
           ▶️ Lanjut
         </button>
       )}
-      <button
-        type="button"
-        className="btn btn-primary btn-lg"
-        onClick={onStopAndSubmit}
-      >
+      <button type="button" className="btn btn-primary btn-lg" onClick={onStopAndSubmit}>
         ⏹️ Stop &amp; Submit
       </button>
     </div>

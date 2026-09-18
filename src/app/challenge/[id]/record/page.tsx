@@ -8,9 +8,7 @@ type PageProps = { params: Promise<{ id: string }> };
 
 const DEFAULT_DURATION_SEC = 180;
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const supabase = await createClient();
   const { data } = await supabase

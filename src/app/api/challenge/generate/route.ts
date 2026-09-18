@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { GEMINI_MODEL, getGeminiClient } from "@/lib/gemini/client";
-import {
-  buildOutlinePrompt,
-  OUTLINE_SYSTEM_INSTRUCTION,
-} from "@/lib/gemini/prompts";
+import { buildOutlinePrompt, OUTLINE_SYSTEM_INSTRUCTION } from "@/lib/gemini/prompts";
 import {
   MAX_DURATION_SEC,
   MIN_DURATION_SEC,

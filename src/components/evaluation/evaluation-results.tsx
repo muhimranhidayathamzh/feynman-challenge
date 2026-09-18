@@ -83,14 +83,14 @@ export function EvaluationResults(props: Props) {
           >
             <h2>😕 Evaluasi gagal</h2>
             <p className="text-secondary">{error}</p>
-            <div className="row" style={{ justifyContent: "center", gap: "var(--space-3)" }}>
+            <div
+              className="row"
+              style={{ justifyContent: "center", gap: "var(--space-3)" }}
+            >
               <button type="button" className="btn btn-primary" onClick={retry}>
                 Coba lagi
               </button>
-              <Link
-                href={`/challenge/${props.challengeId}`}
-                className="btn btn-ghost"
-              >
+              <Link href={`/challenge/${props.challengeId}`} className="btn btn-ghost">
                 Kembali
               </Link>
             </div>
@@ -98,15 +98,23 @@ export function EvaluationResults(props: Props) {
         ) : (
           <div
             className="glass stack center text-center animate-fade-in"
-            style={{ gap: "var(--space-4)", maxWidth: "28rem", padding: "var(--space-8)" }}
+            style={{
+              gap: "var(--space-4)",
+              maxWidth: "28rem",
+              padding: "var(--space-8)",
+            }}
           >
-            <span className="animate-spin" style={{ fontSize: "2rem" }} aria-hidden="true">
+            <span
+              className="animate-spin"
+              style={{ fontSize: "2rem" }}
+              aria-hidden="true"
+            >
               ◌
             </span>
             <h2>Menganalisis penjelasanmu…</h2>
             <p className="text-secondary">
-              AI sedang mendengarkan rekaman dan menilainya berdasarkan outline.
-              Biasanya butuh 10–30 detik.
+              AI sedang mendengarkan rekaman dan menilainya berdasarkan outline. Biasanya
+              butuh 10–30 detik.
             </p>
           </div>
         )}
@@ -121,10 +129,7 @@ export function EvaluationResults(props: Props) {
       style={{ gap: "var(--space-6)", maxWidth: "44rem", marginInline: "auto" }}
     >
       <div className="stack" style={{ gap: "var(--space-1)" }}>
-        <Link
-          href={`/challenge/${props.challengeId}`}
-          className="text-secondary text-sm"
-        >
+        <Link href={`/challenge/${props.challengeId}`} className="text-secondary text-sm">
           ← {props.challengeTitle}
         </Link>
         <h1>

@@ -2,10 +2,7 @@ import type { ReactNode } from "react";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <main
-      className="center"
-      style={{ minHeight: "100dvh", padding: "var(--space-4)" }}
-    >
+    <main className="center" style={{ minHeight: "100dvh", padding: "var(--space-4)" }}>
       <div
         className="stack animate-fade-in-up"
         style={{ width: "100%", maxWidth: "26rem", gap: "var(--space-6)" }}

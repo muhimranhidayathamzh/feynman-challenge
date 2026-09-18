@@ -5,12 +5,7 @@
 export const AUTO_EXTEND_DAYS = 2;
 
 export type DeadlineStatus =
-  | "none"
-  | "upcoming"
-  | "due_soon"
-  | "due_today"
-  | "overdue"
-  | "extended_overdue";
+  "none" | "upcoming" | "due_soon" | "due_today" | "overdue" | "extended_overdue";
 
 export interface DeadlineInfo {
   status: DeadlineStatus;

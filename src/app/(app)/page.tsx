@@ -38,8 +38,8 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [{ data: profile }, { data: challenges }, { data: attempts }] =
-    await Promise.all([
+  const [{ data: profile }, { data: challenges }, { data: attempts }] = await Promise.all(
+    [
       supabase
         .from("profiles")
         .select("display_name, streak_count, best_streak")
@@ -55,7 +55,8 @@ export default async function DashboardPage() {
         .from("attempts")
         .select("challenge_id, created_at")
         .order("created_at", { ascending: false }),
-    ]);
+    ],
+  );
 
   const rows = challenges ?? [];
   const now = new Date();
@@ -142,15 +143,20 @@ export default async function DashboardPage() {
       {rows.length === 0 ? (
         <div
           className="glass stack text-center animate-fade-in-up"
-          style={{ gap: "var(--space-4)", maxWidth: "32rem", marginInline: "auto", alignItems: "center" }}
+          style={{
+            gap: "var(--space-4)",
+            maxWidth: "32rem",
+            marginInline: "auto",
+            alignItems: "center",
+          }}
         >
           <span style={{ fontSize: "3rem" }} aria-hidden="true">
             🧠
           </span>
           <h2>Belum ada tantangan</h2>
           <p className="text-secondary">
-            Buat tantangan pertamamu — pilih topik, biarkan AI menyusun outline,
-            lalu jelaskan ulang lewat audio.
+            Buat tantangan pertamamu — pilih topik, biarkan AI menyusun outline, lalu
+            jelaskan ulang lewat audio.
           </p>
           <Link href="/challenge/new" className="btn btn-primary btn-lg">
             ➕ Buat Tantangan Pertama

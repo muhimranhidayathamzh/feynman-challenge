@@ -13,9 +13,7 @@ export function Header() {
 
   const metadata = user?.user_metadata as { display_name?: string } | undefined;
   const displayName =
-    metadata?.display_name?.trim() ||
-    user?.email?.split("@")[0] ||
-    "Kamu";
+    metadata?.display_name?.trim() || user?.email?.split("@")[0] || "Kamu";
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -36,9 +34,7 @@ export function Header() {
           🔥 0
         </span>
 
-        <span className="text-secondary text-sm show-from-sm">
-          {displayName}
-        </span>
+        <span className="text-secondary text-sm show-from-sm">{displayName}</span>
 
         <button
           type="button"

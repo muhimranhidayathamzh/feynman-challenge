@@ -78,11 +78,7 @@ export function HintPanel({
       {HINT_TIERS.map((tier) => {
         const isRevealed = revealed.has(tier.level);
         return (
-          <div
-            key={tier.level}
-            className="hint-tier"
-            data-revealed={isRevealed}
-          >
+          <div key={tier.level} className="hint-tier" data-revealed={isRevealed}>
             <div className="row-between">
               <span className="font-semibold">{tier.label}</span>
               {!isRevealed && <span className="badge">maks {tier.cap}</span>}

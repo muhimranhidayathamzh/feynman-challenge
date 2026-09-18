@@ -1,10 +1,7 @@
 import type { HintLevel, MasteryState, SourceType } from "@/types";
 
 /** Display metadata for each learning-source type. */
-export const SOURCE_TYPE_META: Record<
-  SourceType,
-  { icon: string; label: string }
-> = {
+export const SOURCE_TYPE_META: Record<SourceType, { icon: string; label: string }> = {
   video: { icon: "🎥", label: "Video" },
   article: { icon: "📄", label: "Artikel" },
   book: { icon: "📖", label: "Buku" },
@@ -13,10 +10,7 @@ export const SOURCE_TYPE_META: Record<
 };
 
 /** Display metadata for each mastery state (label + CSS color variable). */
-export const MASTERY_META: Record<
-  MasteryState,
-  { label: string; color: string }
-> = {
+export const MASTERY_META: Record<MasteryState, { label: string; color: string }> = {
   not_started: { label: "Belum Mulai", color: "var(--mastery-not-started)" },
   attempted: { label: "Dicoba", color: "var(--mastery-attempted)" },
   developing: { label: "Berkembang", color: "var(--mastery-developing)" },

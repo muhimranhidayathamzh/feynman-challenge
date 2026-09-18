@@ -70,9 +70,7 @@ export async function POST(request: Request, context: RouteContext) {
         challenge_id: id,
         order_index: nextIndex,
         title: parsed.data.title,
-        description: parsed.data.description?.length
-          ? parsed.data.description
-          : null,
+        description: parsed.data.description?.length ? parsed.data.description : null,
         is_user_added: true,
       })
       .select("*")

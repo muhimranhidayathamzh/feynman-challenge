@@ -2,11 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  AudioRecorder,
-  isRecorderError,
-  type RecorderError,
-} from "@/lib/audio/recorder";
+import { AudioRecorder, isRecorderError, type RecorderError } from "@/lib/audio/recorder";
 
 export type RecorderStatus = "idle" | "recording" | "paused" | "stopped";
 
@@ -48,8 +44,7 @@ export function useAudioRecorder(): UseAudioRecorder {
     clearTimer();
     startedAtRef.current = Date.now();
     intervalRef.current = setInterval(() => {
-      const elapsed =
-        accumulatedRef.current + (Date.now() - startedAtRef.current) / 1000;
+      const elapsed = accumulatedRef.current + (Date.now() - startedAtRef.current) / 1000;
       setDuration(elapsed);
     }, TICK_MS);
   }, [clearTimer]);

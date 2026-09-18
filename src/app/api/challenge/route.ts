@@ -36,14 +36,10 @@ export async function POST(request: Request) {
     const body: unknown = await request.json().catch(() => null);
     const parsed = CreateChallengeSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Data challenge tidak valid." },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Data challenge tidak valid." }, { status: 400 });
     }
 
-    const { topic, deadline, estimated_duration_sec, outline, sources } =
-      parsed.data;
+    const { topic, deadline, estimated_duration_sec, outline, sources } = parsed.data;
 
     // 1. Create the challenge (RLS enforces user_id = auth.uid()).
     const { data: challenge, error: challengeError } = await supabase
@@ -59,10 +55,7 @@ export async function POST(request: Request) {
 
     if (challengeError || !challenge) {
       console.error("[challenge] create failed:", challengeError);
-      return NextResponse.json(
-        { error: "Gagal menyimpan challenge." },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "Gagal menyimpan challenge." }, { status: 500 });
     }
 
     // 2. Outline items — order preserved, all AI-generated.
@@ -83,10 +76,7 @@ export async function POST(request: Request) {
       // leave an orphan (cascade removes any partial children).
       await supabase.from("challenges").delete().eq("id", challenge.id);
       console.error("[challenge] outline insert failed:", outlineError);
-      return NextResponse.json(
-        { error: "Gagal menyimpan outline." },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "Gagal menyimpan outline." }, { status: 500 });
     }
 
     // 3. Sources (optional) — all AI-suggested.

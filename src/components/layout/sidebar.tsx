@@ -21,9 +21,7 @@ export function Sidebar() {
     <nav className="app-nav" aria-label="Navigasi utama">
       {NAV_ITEMS.map((item) => {
         const active =
-          item.href === "/"
-            ? pathname === "/"
-            : pathname.startsWith(item.href);
+          item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
 
         return (
           <Link

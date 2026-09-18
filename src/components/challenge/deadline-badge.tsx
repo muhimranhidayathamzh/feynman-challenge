@@ -22,9 +22,7 @@ export function DeadlineBadge({
   return (
     <span className="badge" style={{ color }} title="Deadline">
       📅 {text}
-      {extendedDeadline ? (
-        <span className="text-muted"> · diperpanjang</span>
-      ) : null}
+      {extendedDeadline ? <span className="text-muted"> · diperpanjang</span> : null}
     </span>
   );
 }

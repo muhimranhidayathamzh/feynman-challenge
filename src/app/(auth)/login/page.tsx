@@ -38,9 +38,7 @@ export default function LoginPage() {
     <section className="glass stack" style={{ gap: "var(--space-5)" }}>
       <div className="stack" style={{ gap: "var(--space-1)" }}>
         <h2 style={{ fontSize: "var(--text-xl)" }}>Masuk</h2>
-        <p className="text-secondary text-sm">
-          Lanjutkan tantangan belajarmu.
-        </p>
+        <p className="text-secondary text-sm">Lanjutkan tantangan belajarmu.</p>
       </div>
 
       {error && (

@@ -30,9 +30,7 @@ function toCoverage(value: Json | null): Coverage[] {
   return out;
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const supabase = await createClient();
   const { data } = await supabase
@@ -78,8 +76,7 @@ export default async function ResultPage({ params }: PageProps) {
 
   const priorScores = history
     .filter(
-      (entry) =>
-        entry.attemptNumber < attempt.attempt_number && entry.score !== null,
+      (entry) => entry.attemptNumber < attempt.attempt_number && entry.score !== null,
     )
     .map((entry) => entry.score)
     .filter((score): score is number => score !== null);

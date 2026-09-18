@@ -7,9 +7,7 @@ interface Props {
 export function FeedbackCard({ feedback, strengths, improvements }: Props) {
   return (
     <div className="stack" style={{ gap: "var(--space-4)" }}>
-      {feedback && (
-        <p style={{ lineHeight: "var(--leading-normal)" }}>{feedback}</p>
-      )}
+      {feedback && <p style={{ lineHeight: "var(--leading-normal)" }}>{feedback}</p>}
 
       {strengths.length > 0 && (
         <div className="stack" style={{ gap: "var(--space-2)" }}>

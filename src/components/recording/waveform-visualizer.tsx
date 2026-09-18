@@ -34,8 +34,7 @@ export function WaveformVisualizer({ stream, active }: Props) {
     const styles = getComputedStyle(canvas);
     const accent =
       styles.getPropertyValue("--accent-primary").trim() || "hsl(250,85%,65%)";
-    const muted =
-      styles.getPropertyValue("--text-muted").trim() || "hsl(220,10%,45%)";
+    const muted = styles.getPropertyValue("--text-muted").trim() || "hsl(220,10%,45%)";
 
     let raf = 0;
 

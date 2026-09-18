@@ -5,10 +5,7 @@
 // ============================================================================
 
 export type RecorderErrorCode =
-  | "permission-denied"
-  | "no-microphone"
-  | "unsupported"
-  | "unknown";
+  "permission-denied" | "no-microphone" | "unsupported" | "unknown";
 
 export interface RecorderError {
   code: RecorderErrorCode;
@@ -18,10 +15,7 @@ export interface RecorderError {
 /** Type guard + factory for our structured recorder errors. */
 export function isRecorderError(value: unknown): value is RecorderError {
   return (
-    typeof value === "object" &&
-    value !== null &&
-    "code" in value &&
-    "message" in value
+    typeof value === "object" && value !== null && "code" in value && "message" in value
   );
 }
 
@@ -29,11 +23,7 @@ function recorderError(code: RecorderErrorCode, message: string): RecorderError 
   return { code, message };
 }
 
-const MIME_CANDIDATES = [
-  "audio/webm;codecs=opus",
-  "audio/webm",
-  "audio/mp4",
-] as const;
+const MIME_CANDIDATES = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"] as const;
 
 export class AudioRecorder {
   private stream: MediaStream | null = null;
@@ -44,10 +34,7 @@ export class AudioRecorder {
   /** First MediaRecorder-supported mime type, or "" to let the browser decide. */
   static getSupportedMimeType(): string {
     if (typeof MediaRecorder === "undefined") {
-      throw recorderError(
-        "unsupported",
-        "Browser ini tidak mendukung perekaman audio.",
-      );
+      throw recorderError("unsupported", "Browser ini tidak mendukung perekaman audio.");
     }
     for (const candidate of MIME_CANDIDATES) {
       if (MediaRecorder.isTypeSupported(candidate)) {
@@ -70,10 +57,7 @@ export class AudioRecorder {
   /** Requests microphone access and begins recording. */
   async start(): Promise<void> {
     if (typeof navigator === "undefined" || !navigator.mediaDevices) {
-      throw recorderError(
-        "unsupported",
-        "Browser ini tidak mendukung perekaman audio.",
-      );
+      throw recorderError("unsupported", "Browser ini tidak mendukung perekaman audio.");
     }
 
     this.selectedMimeType = AudioRecorder.getSupportedMimeType();
@@ -117,9 +101,7 @@ export class AudioRecorder {
     return new Promise<Blob>((resolve, reject) => {
       const recorder = this.recorder;
       if (!recorder || recorder.state === "inactive") {
-        reject(
-          recorderError("unknown", "Tidak ada rekaman yang sedang berjalan."),
-        );
+        reject(recorderError("unknown", "Tidak ada rekaman yang sedang berjalan."));
         return;
       }
 
@@ -186,10 +168,7 @@ export class AudioRecorder {
           "Mikrofon tidak ditemukan. Sambungkan mikrofon lalu coba lagi.",
         );
       default:
-        return recorderError(
-          "unknown",
-          "Gagal mengakses mikrofon. Coba lagi.",
-        );
+        return recorderError("unknown", "Gagal mengakses mikrofon. Coba lagi.");
     }
   }
 }

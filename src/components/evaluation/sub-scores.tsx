@@ -32,8 +32,7 @@ export function SubScores(props: Props) {
           <div key={row.key} className="stack" style={{ gap: "var(--space-2)" }}>
             <div className="row-between">
               <span className="text-sm">
-                {row.label}{" "}
-                <span className="text-muted">({row.weight})</span>
+                {row.label} <span className="text-muted">({row.weight})</span>
               </span>
               <span className="text-sm font-semibold">{value}/10</span>
             </div>

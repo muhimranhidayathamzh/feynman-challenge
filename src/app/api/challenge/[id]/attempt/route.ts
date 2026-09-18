@@ -52,7 +52,10 @@ export async function POST(request: Request, context: RouteContext) {
       duration_seconds: form.get("duration_seconds"),
     });
     if (!meta.success) {
-      return NextResponse.json({ error: "Metadata rekaman tidak valid." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Metadata rekaman tidak valid." },
+        { status: 400 },
+      );
     }
 
     // attempt_number = existing count + 1
@@ -98,6 +101,9 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ attemptId: attempt.id }, { status: 201 });
   } catch (error) {
     console.error("[attempt POST] failed:", error);
-    return NextResponse.json({ error: "Gagal mengirim rekaman. Coba lagi." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Gagal mengirim rekaman. Coba lagi." },
+      { status: 500 },
+    );
   }
 }

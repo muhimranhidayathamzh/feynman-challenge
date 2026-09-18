@@ -17,12 +17,18 @@ describe("hint tiers", () => {
   });
 
   it("each single tier applies its own cap", () => {
-    expect(effectiveHint(new Set<HintLevel>(["keywords"]))).toEqual({ level: "keywords", cap: 9 });
+    expect(effectiveHint(new Set<HintLevel>(["keywords"]))).toEqual({
+      level: "keywords",
+      cap: 9,
+    });
     expect(effectiveHint(new Set<HintLevel>(["guiding_questions"]))).toEqual({
       level: "guiding_questions",
       cap: 8,
     });
-    expect(effectiveHint(new Set<HintLevel>(["outline"]))).toEqual({ level: "outline", cap: 7 });
+    expect(effectiveHint(new Set<HintLevel>(["outline"]))).toEqual({
+      level: "outline",
+      cap: 7,
+    });
   });
 
   it("the most helpful revealed tier wins, regardless of reveal order", () => {

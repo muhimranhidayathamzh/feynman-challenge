@@ -35,7 +35,9 @@ export function publicEnv(): PublicEnv {
   if (!isHttpUrl(url)) problems.push("NEXT_PUBLIC_SUPABASE_URL (must be an http(s) URL)");
   if (anonKey.trim().length === 0) problems.push("NEXT_PUBLIC_SUPABASE_ANON_KEY");
   if (problems.length > 0) {
-    throw new Error(`Invalid public environment: ${problems.join(", ")}. Check .env.local.`);
+    throw new Error(
+      `Invalid public environment: ${problems.join(", ")}. Check .env.local.`,
+    );
   }
 
   cached = { NEXT_PUBLIC_SUPABASE_URL: url, NEXT_PUBLIC_SUPABASE_ANON_KEY: anonKey };

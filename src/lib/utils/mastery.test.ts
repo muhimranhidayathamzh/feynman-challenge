@@ -13,7 +13,9 @@ function daysAgo(days: number): string {
   return new Date(NOW.getTime() - days * DAY_MS).toISOString();
 }
 
-function run(overrides: Partial<MasteryInput>): ReturnType<typeof computeMasteryAfterAttempt> {
+function run(
+  overrides: Partial<MasteryInput>,
+): ReturnType<typeof computeMasteryAfterAttempt> {
   return computeMasteryAfterAttempt({
     current: "not_started",
     score: 0,
@@ -43,18 +45,30 @@ describe("computeMasteryAfterAttempt — spec §6.6 transitions", () => {
 
   it("score >= 8 only once stays proficient", () => {
     expect(run({ current: "proficient", score: 8, previousScore: 7 })).toBe("proficient");
-    expect(run({ current: "proficient", score: 8, previousScore: null })).toBe("proficient");
+    expect(run({ current: "proficient", score: 8, previousScore: null })).toBe(
+      "proficient",
+    );
   });
 
   it("mastered + score >= 8 after two weeks reaches solidified", () => {
     expect(
-      run({ current: "mastered", score: 8, previousScore: 8, masteryUpdatedAt: daysAgo(14) }),
+      run({
+        current: "mastered",
+        score: 8,
+        previousScore: 8,
+        masteryUpdatedAt: daysAgo(14),
+      }),
     ).toBe("solidified");
   });
 
   it("mastered + score >= 8 before two weeks stays mastered", () => {
     expect(
-      run({ current: "mastered", score: 9, previousScore: 9, masteryUpdatedAt: daysAgo(13) }),
+      run({
+        current: "mastered",
+        score: 9,
+        previousScore: 9,
+        masteryUpdatedAt: daysAgo(13),
+      }),
     ).toBe("mastered");
   });
 });
@@ -70,7 +84,12 @@ describe("computeMasteryAfterAttempt — jumping and guarding", () => {
 
   it("cannot go from proficient to solidified in the same attempt", () => {
     expect(
-      run({ current: "proficient", score: 9, previousScore: 9, masteryUpdatedAt: daysAgo(30) }),
+      run({
+        current: "proficient",
+        score: 9,
+        previousScore: 9,
+        masteryUpdatedAt: daysAgo(30),
+      }),
     ).toBe("mastered");
   });
 

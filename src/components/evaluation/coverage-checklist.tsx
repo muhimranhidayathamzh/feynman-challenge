@@ -20,9 +20,7 @@ export function CoverageChecklist({ items }: { items: Coverage[] }) {
               <span className="font-medium" style={{ color: meta.color }}>
                 {item.topic}
               </span>
-              {item.note && (
-                <span className="text-secondary text-sm">{item.note}</span>
-              )}
+              {item.note && <span className="text-secondary text-sm">{item.note}</span>}
             </div>
           </li>
         );

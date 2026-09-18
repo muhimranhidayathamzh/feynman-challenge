@@ -43,7 +43,10 @@ export function ChallengeCard({ challenge }: { challenge: ChallengeCardData }) {
           }}
         >
           {challenge.latestScore}
-          <span className="text-muted font-medium" style={{ fontSize: "var(--text-base)" }}>
+          <span
+            className="text-muted font-medium"
+            style={{ fontSize: "var(--text-base)" }}
+          >
             {" "}
             / 10
           </span>

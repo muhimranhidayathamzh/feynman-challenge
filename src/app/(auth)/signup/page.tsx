@@ -73,8 +73,8 @@ export default function SignupPage() {
       <section className="glass stack text-center" style={{ gap: "var(--space-4)" }}>
         <h2 style={{ fontSize: "var(--text-xl)" }}>Cek email kamu 📬</h2>
         <p className="text-secondary text-sm">
-          Kami mengirim tautan konfirmasi ke <strong>{email}</strong>. Klik
-          tautan itu untuk mengaktifkan akunmu.
+          Kami mengirim tautan konfirmasi ke <strong>{email}</strong>. Klik tautan itu
+          untuk mengaktifkan akunmu.
         </p>
         <Link href="/login" className="btn btn-secondary btn-block">
           Kembali ke halaman masuk
@@ -101,8 +101,7 @@ export default function SignupPage() {
       <form className="stack" onSubmit={handleSubmit}>
         <div className="field">
           <label className="label" htmlFor="displayName">
-            Nama tampilan{" "}
-            <span className="text-muted">(opsional)</span>
+            Nama tampilan <span className="text-muted">(opsional)</span>
           </label>
           <input
             id="displayName"

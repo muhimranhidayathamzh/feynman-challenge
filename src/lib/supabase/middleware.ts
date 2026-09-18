@@ -20,9 +20,7 @@ function isPublicPath(pathname: string): boolean {
  * - Unauthenticated user on a protected route -> redirect to /login.
  * - Authenticated user on /login or /signup    -> redirect to / (dashboard).
  */
-export async function updateSession(
-  request: NextRequest,
-): Promise<NextResponse> {
+export async function updateSession(request: NextRequest): Promise<NextResponse> {
   let supabaseResponse = NextResponse.next({ request });
   const env = publicEnv();
 
@@ -35,9 +33,7 @@ export async function updateSession(
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),

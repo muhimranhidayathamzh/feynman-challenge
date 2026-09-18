@@ -10,9 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 
 type PageProps = { params: Promise<{ id: string }> };
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const supabase = await createClient();
   const { data } = await supabase
@@ -37,24 +35,19 @@ export default async function ChallengePage({ params }: PageProps) {
     notFound();
   }
 
-  const [{ data: outline }, { data: sources }, { data: note }] =
-    await Promise.all([
-      supabase
-        .from("challenge_outlines")
-        .select("*")
-        .eq("challenge_id", id)
-        .order("order_index"),
-      supabase
-        .from("challenge_sources")
-        .select("*")
-        .eq("challenge_id", id)
-        .order("created_at"),
-      supabase
-        .from("challenge_notes")
-        .select("*")
-        .eq("challenge_id", id)
-        .maybeSingle(),
-    ]);
+  const [{ data: outline }, { data: sources }, { data: note }] = await Promise.all([
+    supabase
+      .from("challenge_outlines")
+      .select("*")
+      .eq("challenge_id", id)
+      .order("order_index"),
+    supabase
+      .from("challenge_sources")
+      .select("*")
+      .eq("challenge_id", id)
+      .order("created_at"),
+    supabase.from("challenge_notes").select("*").eq("challenge_id", id).maybeSingle(),
+  ]);
 
   return (
     <section
@@ -96,10 +89,7 @@ export default async function ChallengePage({ params }: PageProps) {
 
       <div className="card stack" style={{ gap: "var(--space-4)" }}>
         <h3>✏️ Catatan</h3>
-        <NotesEditor
-          challengeId={challenge.id}
-          initialContent={note?.content ?? ""}
-        />
+        <NotesEditor challengeId={challenge.id} initialContent={note?.content ?? ""} />
       </div>
 
       <Link

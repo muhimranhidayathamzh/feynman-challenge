@@ -4,7 +4,9 @@ import { GeneratedSourceSchema, normalizeHttpUrl } from "./schemas";
 
 describe("normalizeHttpUrl", () => {
   it("keeps http and https URLs, trimmed", () => {
-    expect(normalizeHttpUrl("  https://example.com/a?b=1 ")).toBe("https://example.com/a?b=1");
+    expect(normalizeHttpUrl("  https://example.com/a?b=1 ")).toBe(
+      "https://example.com/a?b=1",
+    );
     expect(normalizeHttpUrl("http://example.com")).toBe("http://example.com");
   });
 

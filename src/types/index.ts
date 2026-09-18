@@ -10,21 +10,11 @@
 
 // --- JSON helper (for jsonb columns) ---
 export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+  string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 // --- Enum-like string unions (match CHECK constraints) ---
 export type MasteryState =
-  | "not_started"
-  | "attempted"
-  | "developing"
-  | "proficient"
-  | "mastered"
-  | "solidified";
+  "not_started" | "attempted" | "developing" | "proficient" | "mastered" | "solidified";
 
 export type ChallengeStatus = "active" | "parked" | "completed";
 
@@ -281,10 +271,7 @@ export type Database = {
 // ----------------------------------------------------------------------------
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Challenge = Database["public"]["Tables"]["challenges"]["Row"];
-export type ChallengeOutline =
-  Database["public"]["Tables"]["challenge_outlines"]["Row"];
-export type ChallengeSource =
-  Database["public"]["Tables"]["challenge_sources"]["Row"];
-export type ChallengeNote =
-  Database["public"]["Tables"]["challenge_notes"]["Row"];
+export type ChallengeOutline = Database["public"]["Tables"]["challenge_outlines"]["Row"];
+export type ChallengeSource = Database["public"]["Tables"]["challenge_sources"]["Row"];
+export type ChallengeNote = Database["public"]["Tables"]["challenge_notes"]["Row"];
 export type Attempt = Database["public"]["Tables"]["attempts"]["Row"];

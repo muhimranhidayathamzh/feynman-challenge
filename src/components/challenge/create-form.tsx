@@ -91,9 +91,7 @@ export function CreateForm() {
     setError(null);
     setStatus("creating");
 
-    const deadlineIso = deadline
-      ? new Date(`${deadline}T23:59:59`).toISOString()
-      : null;
+    const deadlineIso = deadline ? new Date(`${deadline}T23:59:59`).toISOString() : null;
 
     try {
       const res = await fetch("/api/challenge", {
@@ -198,10 +196,7 @@ export function CreateForm() {
       {status === "generating" && <PreviewSkeleton />}
 
       {(status === "preview" || status === "creating") && plan && (
-        <div
-          className="card stack animate-fade-in-up"
-          style={{ gap: "var(--space-5)" }}
-        >
+        <div className="card stack animate-fade-in-up" style={{ gap: "var(--space-5)" }}>
           <div className="row-between">
             <h3>Rencana Belajar</h3>
             <span className="badge" title="Estimasi durasi rekaman">
@@ -224,9 +219,7 @@ export function CreateForm() {
                   <div className="stack" style={{ gap: "var(--space-1)" }}>
                     <span className="font-semibold">{item.title}</span>
                     {item.description && (
-                      <span className="text-secondary text-sm">
-                        {item.description}
-                      </span>
+                      <span className="text-secondary text-sm">{item.description}</span>
                     )}
                   </div>
                 </li>
@@ -244,9 +237,7 @@ export function CreateForm() {
                     className="row"
                     style={{ gap: "var(--space-2)" }}
                   >
-                    <span aria-hidden="true">
-                      {SOURCE_TYPE_META[source.type].icon}
-                    </span>
+                    <span aria-hidden="true">{SOURCE_TYPE_META[source.type].icon}</span>
                     {source.url ? (
                       <a
                         href={source.url}
