@@ -22,7 +22,7 @@ export function DeadlineBadge({ info }: { info: DeadlineInfo }) {
   if (!described) return null;
 
   return (
-    <Badge tone={described.tone} icon={CalendarClock} title="Deadline">
+    <Badge tone={described.tone} icon={CalendarClock} title="Tenggat">
       {described.text}
       {info.isExtended ? <span className="text-muted"> · diperpanjang</span> : null}
     </Badge>

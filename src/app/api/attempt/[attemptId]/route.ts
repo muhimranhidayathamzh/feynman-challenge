@@ -13,7 +13,7 @@ export async function GET(_request: Request, context: RouteContext) {
   try {
     const { attemptId } = await context.params;
     if (!z.uuid().safeParse(attemptId).success) {
-      return NextResponse.json({ error: "attemptId tidak valid." }, { status: 400 });
+      return NextResponse.json({ error: "ID percobaan tidak valid." }, { status: 400 });
     }
 
     const supabase = await createClient();
@@ -30,7 +30,7 @@ export async function GET(_request: Request, context: RouteContext) {
       .eq("id", attemptId)
       .maybeSingle();
     if (!attempt) {
-      return NextResponse.json({ error: "Attempt tidak ditemukan." }, { status: 404 });
+      return NextResponse.json({ error: "Percobaan tidak ditemukan." }, { status: 404 });
     }
 
     const payload: AttemptStatusResponse = {

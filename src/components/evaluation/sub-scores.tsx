@@ -11,9 +11,9 @@ interface Props {
 }
 
 const ROWS: { key: keyof Props; label: string; weight: string }[] = [
-  { key: "comprehensiveness", label: "Comprehensiveness", weight: "40%" },
-  { key: "accuracy", label: "Accuracy", weight: "35%" },
-  { key: "clarity", label: "Clarity", weight: "25%" },
+  { key: "comprehensiveness", label: "Kelengkapan", weight: "40%" },
+  { key: "accuracy", label: "Ketepatan", weight: "35%" },
+  { key: "clarity", label: "Kejelasan", weight: "25%" },
 ];
 
 export function SubScores(props: Props) {

@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .select("title")
     .eq("id", id)
     .maybeSingle();
-  return { title: data?.title ?? "Challenge" };
+  return { title: data?.title ?? "Tantangan" };
 }
 
 export default async function ChallengePage({ params }: PageProps) {
@@ -70,7 +70,7 @@ export default async function ChallengePage({ params }: PageProps) {
       />
 
       <Card className="stack gap-4">
-        <CardTitle icon={ClipboardList}>Learning Outline</CardTitle>
+        <CardTitle icon={ClipboardList}>Outline Materi</CardTitle>
         <OutlineEditor
           challengeId={challenge.id}
           initialItems={(outline ?? []).map((item) => ({
@@ -100,7 +100,7 @@ export default async function ChallengePage({ params }: PageProps) {
       </Card>
 
       <ButtonLink href={`/challenge/${challenge.id}/record`} size="lg" block icon={Mic}>
-        Start Recording
+        Mulai Rekam
       </ButtonLink>
     </section>
   );

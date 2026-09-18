@@ -20,7 +20,7 @@ export function AttemptHistory({ history, currentAttemptNumber }: Props) {
 
   return (
     <Card className="stack gap-4">
-      <CardTitle icon={TrendingUp}>Progress</CardTitle>
+      <CardTitle icon={TrendingUp}>Perkembangan</CardTitle>
       <div className="hist-bars">
         {history.map((entry) => {
           const score = entry.score ?? 0;

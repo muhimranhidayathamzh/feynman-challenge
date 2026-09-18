@@ -57,7 +57,7 @@ export async function POST(request: Request) {
   const body: unknown = await request.json().catch(() => null);
   const parsed = RequestSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "attemptId tidak valid." }, { status: 400 });
+    return NextResponse.json({ error: "ID percobaan tidak valid." }, { status: 400 });
   }
   const { attemptId } = parsed.data;
 
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     .eq("id", attemptId)
     .maybeSingle();
   if (!existing) {
-    return NextResponse.json({ error: "Attempt tidak ditemukan." }, { status: 404 });
+    return NextResponse.json({ error: "Percobaan tidak ditemukan." }, { status: 404 });
   }
   if (existing.evaluation_status === "completed") {
     return NextResponse.json({
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     });
   }
   if (!existing.audio_storage_path) {
-    return NextResponse.json({ error: "Audio attempt tidak ada." }, { status: 400 });
+    return NextResponse.json({ error: "Audio percobaan tidak ada." }, { status: 400 });
   }
 
   // --- Claim: exactly one worker may evaluate this attempt ---
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
       .maybeSingle();
     if (!challenge) {
       await markError("unknown");
-      return NextResponse.json({ error: "Challenge tidak ditemukan." }, { status: 404 });
+      return NextResponse.json({ error: "Tantangan tidak ditemukan." }, { status: 404 });
     }
 
     const [{ data: outline }, { data: note }] = await Promise.all([

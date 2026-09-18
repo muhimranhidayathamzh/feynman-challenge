@@ -16,14 +16,14 @@ export function DecayAlert({ items }: { items: DecayItem[] }) {
     <section className="stack gap-3" aria-labelledby="decay-title">
       <h2 id="decay-title" className="section-title">
         <Icon icon={Leaf} size={20} />
-        Perlu Review
+        Perlu Diulang
       </h2>
       <div className="stack gap-2">
         {items.map((item) => (
           <Link key={item.id} href={`/challenge/${item.id}`} className="alert-row">
             <span className="font-medium">{item.title}</span>
             <span className="text-sm nowrap text-warning">
-              {item.daysSinceReview} hari sejak review
+              {item.daysSinceReview} hari sejak latihan terakhir
             </span>
           </Link>
         ))}

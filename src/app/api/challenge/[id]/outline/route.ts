@@ -65,7 +65,7 @@ export async function POST(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
     }
     if (!(await ownsChallenge(supabase, id))) {
-      return NextResponse.json({ error: "Challenge tidak ditemukan." }, { status: 404 });
+      return NextResponse.json({ error: "Tantangan tidak ditemukan." }, { status: 404 });
     }
 
     const body: unknown = await request.json().catch(() => null);
@@ -120,7 +120,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
     }
     if (!(await ownsChallenge(supabase, id))) {
-      return NextResponse.json({ error: "Challenge tidak ditemukan." }, { status: 404 });
+      return NextResponse.json({ error: "Tantangan tidak ditemukan." }, { status: 404 });
     }
 
     const body: unknown = await request.json().catch(() => null);

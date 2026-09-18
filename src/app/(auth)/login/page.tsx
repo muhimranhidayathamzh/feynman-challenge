@@ -3,11 +3,12 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogIn } from "lucide-react";
+import { LogIn, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/field";
+import { authErrorCode, authErrorMessage } from "@/lib/auth/errors";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -15,11 +16,14 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setNeedsConfirmation(false);
     setLoading(true);
 
     const supabase = createClient();
@@ -29,13 +33,30 @@ export default function LoginPage() {
     });
 
     if (signInError) {
-      setError("Email atau password salah. Coba lagi.");
+      setError(authErrorMessage(signInError));
+      setNeedsConfirmation(authErrorCode(signInError) === "email_not_confirmed");
       setLoading(false);
       return;
     }
 
     router.push("/");
     router.refresh();
+  }
+
+  async function handleResendConfirmation() {
+    setResendState("sending");
+    const supabase = createClient();
+    const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/api/auth/callback` },
+    });
+    if (resendError) {
+      setError(authErrorMessage(resendError));
+      setResendState("idle");
+      return;
+    }
+    setResendState("sent");
   }
 
   return (
@@ -46,8 +67,26 @@ export default function LoginPage() {
       </div>
 
       {error && (
-        <div className="alert alert-error" role="alert">
-          {error}
+        <div className="alert alert-error stack gap-2" role="alert">
+          <span>{error}</span>
+          {needsConfirmation && resendState !== "sent" && (
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={Mail}
+              className="self-start"
+              loading={resendState === "sending"}
+              onClick={() => void handleResendConfirmation()}
+            >
+              Kirim ulang email konfirmasi
+            </Button>
+          )}
+        </div>
+      )}
+      {resendState === "sent" && (
+        <div className="alert alert-success" role="status">
+          Email konfirmasi dikirim ulang ke <strong>{email}</strong>. Cek kotak masuk dan
+          folder spam.
         </div>
       )}
 
@@ -64,7 +103,7 @@ export default function LoginPage() {
           />
         </Field>
 
-        <Field id="password" label="Password">
+        <Field id="password" label="Kata sandi">
           <Input
             type="password"
             autoComplete="current-password"

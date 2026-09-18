@@ -79,6 +79,22 @@ export function EvaluationResults(props: Props) {
   const started = useRef(false);
   const pollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pollStartedAt = useRef(0);
+  const headingRef = useRef<HTMLHeadingElement | null>(null);
+
+  const isScored =
+    props.status === "completed" &&
+    props.overallScore !== null &&
+    props.subScores !== null;
+  const isRejected =
+    props.status === "completed" &&
+    props.audioIssue !== null &&
+    props.audioIssue !== "none";
+
+  // When a result (or a "could not judge" verdict) appears, move focus to its
+  // heading so keyboard and screen-reader users land on the outcome.
+  useEffect(() => {
+    if (isScored || isRejected) headingRef.current?.focus();
+  }, [isScored, isRejected]);
 
   const stopPolling = useCallback(() => {
     if (pollTimer.current) clearTimeout(pollTimer.current);
@@ -153,11 +169,13 @@ export function EvaluationResults(props: Props) {
       <section className="state-screen">
         <Card className="state-card">
           <Icon icon={Headphones} size={40} className="state-icon" />
-          <h2>Rekaman belum bisa dinilai</h2>
+          <h2 ref={headingRef} tabIndex={-1} className="focus-target">
+            Rekaman belum bisa dinilai
+          </h2>
           <p className="text-secondary">{AUDIO_ISSUE_MESSAGES[props.audioIssue]}</p>
           {props.feedback && <p className="text-secondary text-sm">{props.feedback}</p>}
           <p className="text-muted text-sm">
-            Percobaan ini tidak memengaruhi skor, mastery, maupun streak-mu.
+            Percobaan ini tidak memengaruhi skor, tingkat penguasaan, maupun streak-mu.
           </p>
           <div className="state-actions">
             <ButtonLink href={recordHref} icon={Mic}>
@@ -180,7 +198,9 @@ export function EvaluationResults(props: Props) {
           <Card className="state-card">
             <Icon icon={CircleAlert} size={40} className="state-icon" />
             <h2>Evaluasi gagal</h2>
-            <p className="text-secondary">{error}</p>
+            <p className="text-secondary" role="alert">
+              {error}
+            </p>
             <div className="state-actions">
               <Button icon={RotateCcw} onClick={() => void runEvaluation()}>
                 Coba lagi
@@ -234,9 +254,9 @@ export function EvaluationResults(props: Props) {
           <Icon icon={ArrowLeft} size={14} />
           {props.challengeTitle}
         </Link>
-        <h1>
+        <h1 ref={headingRef} tabIndex={-1} className="focus-target">
           Hasil Evaluasi{" "}
-          <span className="text-secondary">· Attempt #{props.attemptNumber}</span>
+          <span className="text-secondary">· Percobaan #{props.attemptNumber}</span>
         </h1>
       </div>
 
@@ -255,13 +275,13 @@ export function EvaluationResults(props: Props) {
 
       {props.coverage.length > 0 && (
         <Card className="stack gap-3">
-          <CardTitle icon={ListChecks}>Coverage Analysis</CardTitle>
+          <CardTitle icon={ListChecks}>Cakupan Materi</CardTitle>
           <CoverageChecklist items={props.coverage} />
         </Card>
       )}
 
       <Card className="stack gap-3">
-        <CardTitle icon={MessageSquareText}>Feedback AI</CardTitle>
+        <CardTitle icon={MessageSquareText}>Umpan Balik AI</CardTitle>
         <FeedbackCard
           feedback={props.feedback ?? ""}
           strengths={props.strengths}
@@ -298,7 +318,7 @@ export function EvaluationResults(props: Props) {
           Coba Lagi
         </ButtonLink>
         <ButtonLink href={notebookHref} variant="secondary" size="lg" icon={BookOpen}>
-          Kembali ke Notebook
+          Kembali ke Catatan Belajar
         </ButtonLink>
       </div>
     </section>

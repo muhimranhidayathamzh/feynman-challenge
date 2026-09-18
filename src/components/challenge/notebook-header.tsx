@@ -73,7 +73,7 @@ export function NotebookHeader({ id, initialTitle, masteryState, deadlineInfo }:
       toast.show({ message: result.error, tone: "error" });
       return;
     }
-    toast.show({ message: "Challenge dihapus.", tone: "success" });
+    toast.show({ message: "Tantangan dihapus.", tone: "success" });
     router.push("/");
     router.refresh();
   }
@@ -93,7 +93,7 @@ export function NotebookHeader({ id, initialTitle, masteryState, deadlineInfo }:
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               maxLength={200}
-              aria-label="Judul challenge"
+              aria-label="Judul tantangan"
               autoFocus
             />
             <div className="row gap-2">
@@ -132,7 +132,7 @@ export function NotebookHeader({ id, initialTitle, masteryState, deadlineInfo }:
           )}
           <IconButton
             icon={Trash2}
-            label="Hapus challenge"
+            label="Hapus tantangan"
             danger
             onClick={() => setConfirmingDelete(true)}
             disabled={busy}
@@ -147,7 +147,7 @@ export function NotebookHeader({ id, initialTitle, masteryState, deadlineInfo }:
 
       <ConfirmDialog
         open={confirmingDelete}
-        title="Hapus challenge ini?"
+        title="Hapus tantangan ini?"
         message="Outline, sumber, catatan, semua percobaan, dan rekamannya akan dihapus permanen."
         confirmLabel="Hapus"
         tone="danger"

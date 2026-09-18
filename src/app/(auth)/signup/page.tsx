@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, UserPlus } from "lucide-react";
 
-import { ButtonLink, Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
+import { authErrorMessage } from "@/lib/auth/errors";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
@@ -23,10 +24,10 @@ export default function SignupPage() {
 
   function validate(): string | null {
     if (password.length < 6) {
-      return "Password minimal 6 karakter.";
+      return "Kata sandi minimal 6 karakter.";
     }
     if (password !== confirm) {
-      return "Konfirmasi password tidak cocok.";
+      return "Konfirmasi kata sandi tidak cocok.";
     }
     return null;
   }
@@ -59,7 +60,7 @@ export default function SignupPage() {
     });
 
     if (signUpError) {
-      setError(signUpError.message);
+      setError(authErrorMessage(signUpError));
       setLoading(false);
       return;
     }
@@ -131,7 +132,7 @@ export default function SignupPage() {
           />
         </Field>
 
-        <Field id="password" label="Password">
+        <Field id="password" label="Kata sandi">
           <Input
             type="password"
             autoComplete="new-password"
@@ -144,12 +145,12 @@ export default function SignupPage() {
           />
         </Field>
 
-        <Field id="confirm" label="Konfirmasi password">
+        <Field id="confirm" label="Konfirmasi kata sandi">
           <Input
             type="password"
             autoComplete="new-password"
             required
-            placeholder="Ulangi password"
+            placeholder="Ulangi kata sandi"
             value={confirm}
             onChange={(event) => setConfirm(event.target.value)}
             disabled={loading}

@@ -110,7 +110,7 @@ export function CreateForm() {
               />
             </Field>
 
-            <Field id="deadline" label="Deadline" optional>
+            <Field id="deadline" label="Tenggat" optional>
               <Input
                 type="date"
                 value={deadline}
@@ -128,7 +128,7 @@ export function CreateForm() {
               loading={status === "generating"}
               disabled={busy || topic.trim().length < 3}
             >
-              {status === "generating" ? "AI sedang menyusun…" : "Generate Learning Plan"}
+              {status === "generating" ? "AI sedang menyusun…" : "Susun Rencana Belajar"}
             </Button>
           </form>
         </Card>
@@ -146,7 +146,7 @@ export function CreateForm() {
           </div>
 
           <div className="stack gap-3">
-            <h4 className="text-secondary text-sm">Learning Outline</h4>
+            <h4 className="text-secondary text-sm">Outline Materi</h4>
             <ol className="stack gap-3">
               {plan.outline.map((item, index) => (
                 <li key={`${index}-${item.title}`} className="row items-start gap-3">
@@ -202,7 +202,7 @@ export function CreateForm() {
               onClick={handleCreate}
               loading={status === "creating"}
             >
-              Buat Challenge
+              Buat Tantangan
             </Button>
             <Button
               variant="ghost"

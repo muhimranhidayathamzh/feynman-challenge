@@ -97,7 +97,7 @@ export function HintPanel({
                 <span className="text-secondary text-sm">{tier.description}</span>
                 <span className="hint-warning">
                   <Icon icon={TriangleAlert} size={14} />
-                  Membuka hint ini akan membatasi skor maks ke {tier.cap}.
+                  Membuka petunjuk ini membatasi skor maks ke {tier.cap}.
                 </span>
                 <Button
                   variant="secondary"
@@ -107,7 +107,7 @@ export function HintPanel({
                   onClick={() => onReveal(tier.level)}
                   disabled={disabled}
                 >
-                  Buka hint
+                  Buka petunjuk
                 </Button>
               </div>
             )}

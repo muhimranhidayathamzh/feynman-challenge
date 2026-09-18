@@ -11,7 +11,7 @@ interface Props {
   /** Blocks starting (e.g. while hints are being prepared). */
   startDisabled?: boolean;
   startLabel?: string;
-  /** Blocks "Stop & Submit" (e.g. below the minimum duration). */
+  /** Blocks "Selesai & Kirim" (e.g. below the minimum duration). */
   submitDisabled?: boolean;
   onStart: () => void;
   onPause: () => void;
@@ -68,7 +68,7 @@ export function RecorderControls({
         </Button>
       )}
       <Button size="lg" icon={Square} onClick={onStopAndSubmit} disabled={submitDisabled}>
-        Stop &amp; Submit
+        Selesai &amp; Kirim
       </Button>
     </div>
   );

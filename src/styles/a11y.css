@@ -1,6 +1,44 @@
 /* ---------------------------------------------------------------------------
-   11. Accessibility — reduced motion
+   11. Accessibility
    ------------------------------------------------------------------------- */
+
+/* Skip link: invisible until focused with the keyboard. */
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: var(--z-toast);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+  transform: translateY(-200%);
+  transition: transform var(--transition-fast);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Headings that receive focus programmatically (tabIndex=-1) should not show
+   a focus ring for mouse users, but must for keyboard users. */
+.focus-target:focus {
+  outline: none;
+}
+
+.focus-target:focus-visible,
+main:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+main:focus {
+  outline: none;
+}
+
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

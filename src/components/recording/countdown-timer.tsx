@@ -1,9 +1,4 @@
-function formatClock(totalSeconds: number): string {
-  const safe = Math.max(0, Math.floor(totalSeconds));
-  const minutes = Math.floor(safe / 60);
-  const seconds = safe % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
+import { formatClock, timerAnnouncement } from "@/lib/utils/timer";
 
 interface Props {
   totalSeconds: number;
@@ -22,45 +17,52 @@ export function CountdownTimer({ totalSeconds, elapsedSeconds }: Props) {
   const almostDone = remaining <= 15 && remaining > 0;
 
   return (
-    <div
-      className="ring countdown"
-      data-almost-done={almostDone}
-      role="timer"
-      aria-label={`${formatClock(remaining)} tersisa`}
-      style={{ width: SIZE, height: SIZE }}
-    >
-      <svg
-        width={SIZE}
-        height={SIZE}
-        viewBox={`0 0 ${SIZE} ${SIZE}`}
-        aria-hidden="true"
-        focusable="false"
+    <>
+      {/* role="timer" is not live: screen readers read the current value when
+          the user navigates to it, but it never interrupts every second. */}
+      <div
+        className="ring countdown"
+        data-almost-done={almostDone}
+        role="timer"
+        style={{ width: SIZE, height: SIZE }}
       >
-        <circle
-          cx={SIZE / 2}
-          cy={SIZE / 2}
-          r={RADIUS}
-          fill="none"
-          stroke="var(--bg-tertiary)"
-          strokeWidth={STROKE}
-        />
-        <circle
-          className="countdown-progress"
-          cx={SIZE / 2}
-          cy={SIZE / 2}
-          r={RADIUS}
-          fill="none"
-          strokeWidth={STROKE}
-          strokeLinecap="round"
-          strokeDasharray={CIRCUMFERENCE}
-          strokeDashoffset={CIRCUMFERENCE - offset}
-          transform={`rotate(-90 ${SIZE / 2} ${SIZE / 2})`}
-        />
-      </svg>
-      <div className="ring-center gap-1" aria-hidden="true">
-        <span className="countdown-value">{formatClock(remaining)}</span>
-        <span className="text-muted text-sm">tersisa</span>
+        <svg
+          width={SIZE}
+          height={SIZE}
+          viewBox={`0 0 ${SIZE} ${SIZE}`}
+          aria-hidden="true"
+          focusable="false"
+        >
+          <circle
+            cx={SIZE / 2}
+            cy={SIZE / 2}
+            r={RADIUS}
+            fill="none"
+            stroke="var(--bg-tertiary)"
+            strokeWidth={STROKE}
+          />
+          <circle
+            className="countdown-progress"
+            cx={SIZE / 2}
+            cy={SIZE / 2}
+            r={RADIUS}
+            fill="none"
+            strokeWidth={STROKE}
+            strokeLinecap="round"
+            strokeDasharray={CIRCUMFERENCE}
+            strokeDashoffset={CIRCUMFERENCE - offset}
+            transform={`rotate(-90 ${SIZE / 2} ${SIZE / 2})`}
+          />
+        </svg>
+        <div className="ring-center gap-1">
+          <span className="countdown-value">{formatClock(remaining)}</span>
+          <span className="text-muted text-sm">tersisa</span>
+        </div>
       </div>
-    </div>
+      {/* Announced only when the milestone text changes (1 min, 15 s left). */}
+      <span className="visually-hidden" aria-live="polite">
+        {timerAnnouncement(remaining, totalSeconds)}
+      </span>
+    </>
   );
 }

@@ -66,7 +66,7 @@ export async function GET(_request: Request, context: RouteContext) {
       .eq("id", id)
       .maybeSingle();
     if (!challenge) {
-      return NextResponse.json({ error: "Challenge tidak ditemukan." }, { status: 404 });
+      return NextResponse.json({ error: "Tantangan tidak ditemukan." }, { status: 404 });
     }
 
     const [{ data: outline }, { data: sources }, { data: note }] = await Promise.all([
@@ -91,7 +91,7 @@ export async function GET(_request: Request, context: RouteContext) {
     });
   } catch (error) {
     console.error("[challenge/:id GET] failed:", error);
-    return NextResponse.json({ error: "Gagal memuat challenge." }, { status: 500 });
+    return NextResponse.json({ error: "Gagal memuat tantangan." }, { status: 500 });
   }
 }
 
@@ -124,7 +124,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Gagal menyimpan perubahan." }, { status: 500 });
     }
     if (!updated) {
-      return NextResponse.json({ error: "Challenge tidak ditemukan." }, { status: 404 });
+      return NextResponse.json({ error: "Tantangan tidak ditemukan." }, { status: 404 });
     }
 
     return NextResponse.json({ challenge: updated });
@@ -149,7 +149,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
     const { error } = await supabase.from("challenges").delete().eq("id", id);
     if (error) {
       console.error("[challenge/:id DELETE] failed:", error);
-      return NextResponse.json({ error: "Gagal menghapus challenge." }, { status: 500 });
+      return NextResponse.json({ error: "Gagal menghapus tantangan." }, { status: 500 });
     }
 
     // Then the recordings, best-effort: a leftover file must never block the
@@ -159,6 +159,6 @@ export async function DELETE(_request: Request, context: RouteContext) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[challenge/:id DELETE] failed:", error);
-    return NextResponse.json({ error: "Gagal menghapus challenge." }, { status: 500 });
+    return NextResponse.json({ error: "Gagal menghapus tantangan." }, { status: 500 });
   }
 }

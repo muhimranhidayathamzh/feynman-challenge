@@ -24,14 +24,14 @@ export default function Error({
         <Icon icon={TriangleAlert} size={40} className="state-icon" />
         <h2>Ada yang tidak beres</h2>
         <p className="text-secondary">
-          Terjadi kesalahan tak terduga. Coba lagi atau kembali ke dashboard.
+          Terjadi kesalahan tak terduga. Coba lagi atau kembali ke beranda.
         </p>
         <div className="state-actions">
           <Button icon={RotateCcw} onClick={reset}>
             Coba lagi
           </Button>
           <ButtonLink href="/" variant="ghost" icon={House}>
-            Ke Dashboard
+            Ke Beranda
           </ButtonLink>
         </div>
       </Card>

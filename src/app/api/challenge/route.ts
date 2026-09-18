@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     const body: unknown = await request.json().catch(() => null);
     const parsed = CreateChallengeSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Data challenge tidak valid." }, { status: 400 });
+      return NextResponse.json({ error: "Data tantangan tidak valid." }, { status: 400 });
     }
 
     const { topic, deadline, estimated_duration_sec, outline, sources } = parsed.data;
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
     if (challengeError || !challenge) {
       console.error("[challenge] create failed:", challengeError);
-      return NextResponse.json({ error: "Gagal menyimpan challenge." }, { status: 500 });
+      return NextResponse.json({ error: "Gagal menyimpan tantangan." }, { status: 500 });
     }
 
     // 2. Outline items — order preserved, all AI-generated.
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[challenge] POST failed:", error);
     return NextResponse.json(
-      { error: "Gagal membuat challenge. Coba lagi." },
+      { error: "Gagal membuat tantangan. Coba lagi." },
       { status: 500 },
     );
   }

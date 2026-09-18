@@ -138,7 +138,7 @@ export default async function DashboardPage() {
             <div className="row-between">
               <h2 id="all-challenges-title" className="section-title">
                 <Icon icon={ChartColumn} size={20} />
-                Semua Challenge
+                Semua Tantangan
               </h2>
               <ButtonLink href="/challenge/new" variant="secondary" size="sm" icon={Plus}>
                 Baru

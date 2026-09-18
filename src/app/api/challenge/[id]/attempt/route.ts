@@ -64,7 +64,7 @@ export async function POST(request: Request, context: RouteContext) {
       .eq("id", id)
       .maybeSingle();
     if (!challenge) {
-      return NextResponse.json({ error: "Challenge tidak ditemukan." }, { status: 404 });
+      return NextResponse.json({ error: "Tantangan tidak ditemukan." }, { status: 404 });
     }
 
     // The object must really exist (RLS lets the user list only their own folder).
@@ -119,7 +119,7 @@ export async function POST(request: Request, context: RouteContext) {
       // Don't orphan the upload.
       await storage.remove([path]);
       console.error("[attempt POST] insert failed:", lastError);
-      return NextResponse.json({ error: "Gagal menyimpan attempt." }, { status: 500 });
+      return NextResponse.json({ error: "Gagal menyimpan percobaan." }, { status: 500 });
     }
 
     const payload: AttemptCreateResponse = { attemptId };

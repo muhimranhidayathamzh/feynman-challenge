@@ -42,7 +42,7 @@ export async function POST(_request: Request, context: RouteContext) {
       }
       case "not-found":
         return NextResponse.json(
-          { error: "Challenge tidak ditemukan." },
+          { error: "Tantangan tidak ditemukan." },
           { status: 404 },
         );
       case "quota":

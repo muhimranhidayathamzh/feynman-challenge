@@ -284,7 +284,7 @@ export function RecordingExperience({
             status={status}
             submitting={submitting}
             startDisabled={preparingHints}
-            startLabel={preparingHints ? "Menyiapkan hint…" : undefined}
+            startLabel={preparingHints ? "Menyiapkan petunjuk…" : undefined}
             submitDisabled={tooShort}
             onStart={() => void recorder.start()}
             onPause={recorder.pause}

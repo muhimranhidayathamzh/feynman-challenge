@@ -27,7 +27,7 @@ export function DueSoonSection({ items }: { items: DueSoonItem[] }) {
     <section className="stack gap-3" aria-labelledby="due-soon-title">
       <h2 id="due-soon-title" className="section-title">
         <Icon icon={Zap} size={20} />
-        Due Soon
+        Segera Jatuh Tempo
       </h2>
       <div className="stack gap-2">
         {items.map((item) => (

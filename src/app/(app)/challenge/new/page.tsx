@@ -14,7 +14,7 @@ export default function NewChallengePage() {
           Tantangan <span className="gradient-text">Baru</span>
         </h1>
         <p className="text-secondary">
-          Pilih topik apapun — AI akan menyusun learning outline, sumber belajar, dan
+          Pilih topik apapun — AI akan menyusun outline materi, sumber belajar, dan
           estimasi durasi rekaman.
         </p>
       </div>

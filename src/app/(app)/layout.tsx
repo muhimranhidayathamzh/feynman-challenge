@@ -35,10 +35,15 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="app-shell">
+      <a href="#main-content" className="skip-link">
+        Lewati ke konten utama
+      </a>
       <Header displayName={displayName} streakCount={streakCount} />
       <div className="app-body">
         <Sidebar />
-        <main className="app-main">{children}</main>
+        <main id="main-content" className="app-main" tabIndex={-1}>
+          {children}
+        </main>
       </div>
     </div>
   );

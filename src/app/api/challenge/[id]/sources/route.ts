@@ -33,7 +33,7 @@ export async function POST(request: Request, context: RouteContext) {
       .eq("id", id)
       .maybeSingle();
     if (!challenge) {
-      return NextResponse.json({ error: "Challenge tidak ditemukan." }, { status: 404 });
+      return NextResponse.json({ error: "Tantangan tidak ditemukan." }, { status: 404 });
     }
 
     const body: unknown = await request.json().catch(() => null);

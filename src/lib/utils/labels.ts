@@ -7,7 +7,7 @@ export const SOURCE_TYPE_META: Record<SourceType, { icon: LucideIcon; label: str
   video: { icon: Video, label: "Video" },
   article: { icon: FileText, label: "Artikel" },
   book: { icon: Book, label: "Buku" },
-  paper: { icon: ScrollText, label: "Paper" },
+  paper: { icon: ScrollText, label: "Makalah" },
   other: { icon: Link, label: "Lainnya" },
 };
 

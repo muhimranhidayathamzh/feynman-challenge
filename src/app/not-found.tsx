@@ -10,10 +10,10 @@ export default function NotFound() {
         <span className="gradient-text not-found-code">404</span>
         <h2>Halaman tidak ditemukan</h2>
         <p className="text-secondary">
-          Tautan mungkin salah, atau challenge-nya sudah dihapus.
+          Tautan mungkin salah, atau tantangannya sudah dihapus.
         </p>
         <ButtonLink href="/" icon={House}>
-          Ke Dashboard
+          Ke Beranda
         </ButtonLink>
       </Card>
     </main>
