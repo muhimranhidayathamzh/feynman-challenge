@@ -6,7 +6,15 @@ import { publicEnv } from "@/lib/env.public";
 import type { Database } from "@/types";
 
 /** Paths that an unauthenticated visitor is allowed to reach. */
-const PUBLIC_PATHS = ["/login", "/signup", "/lupa-password", "/api/auth/callback"];
+// /offline is precached by the service worker without cookies: it must be
+// reachable signed out, or the login page would be cached in its place.
+const PUBLIC_PATHS = [
+  "/login",
+  "/signup",
+  "/lupa-password",
+  "/offline",
+  "/api/auth/callback",
+];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some(

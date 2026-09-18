@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 
+import { clearAppCaches } from "@/lib/pwa/client";
 import { createClient } from "@/lib/supabase/client";
 
 interface AuthContextValue {
@@ -29,9 +30,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
+      // Covers the logout button, other tabs, and expired sessions alike.
+      if (event === "SIGNED_OUT") void clearAppCaches();
     });
 
     return () => {

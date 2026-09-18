@@ -38,8 +38,11 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: { url: "/icons/apple-touch-icon.png", sizes: "180x180" },
   },
 };
 
@@ -59,9 +62,11 @@ export default function RootLayout({
     <html lang="id" className={inter.variable}>
       <body>
         <AuthProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            {children}
+            <PwaRegister />
+          </ToastProvider>
         </AuthProvider>
-        <PwaRegister />
       </body>
     </html>
   );

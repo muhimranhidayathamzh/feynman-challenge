@@ -1,21 +1,72 @@
 {
+  "id": "/",
   "name": "Feynman Challenge",
   "short_name": "Feynman",
-  "description": "Kuasai materi apapun lewat tantangan menjelaskan ulang — AI mengevaluasi penjelasanmu.",
+  "description": "Kuasai materi apa pun dengan menjelaskannya ulang. AI mengevaluasi penjelasanmu.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#101218",
   "theme_color": "#101218",
   "lang": "id",
+  "dir": "ltr",
   "categories": ["education", "productivity"],
   "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
     {
       "src": "/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tantangan Baru",
+      "short_name": "Baru",
+      "description": "Buat tantangan belajar baru",
+      "url": "/challenge/new",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/login-narrow.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Halaman masuk Feynman Challenge di ponsel"
+    },
+    {
+      "src": "/screenshots/login-wide.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Halaman masuk Feynman Challenge di desktop"
     }
   ]
 }
