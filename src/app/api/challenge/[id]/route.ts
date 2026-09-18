@@ -1,11 +1,43 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { RECORDINGS_BUCKET } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
 type RouteContext = { params: Promise<{ id: string }> };
+
+const STORAGE_PAGE = 100;
+
+/**
+ * Removes every object directly under `folder` in the recordings bucket, in
+ * pages of 100. Errors are logged, never thrown.
+ */
+async function removeRecordingsFolder(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  folder: string,
+): Promise<void> {
+  const storage = supabase.storage.from(RECORDINGS_BUCKET);
+  try {
+    for (;;) {
+      // Always page from offset 0: each removed batch shifts the rest forward.
+      const { data: objects, error } = await storage.list(folder, {
+        limit: STORAGE_PAGE,
+      });
+      if (error) throw error;
+      const paths = (objects ?? [])
+        .filter((object) => object.id !== null) // folders have no id
+        .map((object) => `${folder}/${object.name}`);
+      if (paths.length === 0) return;
+      const { error: removeError } = await storage.remove(paths);
+      if (removeError) throw removeError;
+      if (paths.length < STORAGE_PAGE) return;
+    }
+  } catch (error) {
+    console.error(`[challenge DELETE] storage cleanup failed for ${folder}:`, error);
+  }
+}
 
 const PatchSchema = z
   .object({
@@ -113,11 +145,16 @@ export async function DELETE(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
     }
 
+    // Database first: it is the source of truth and cascades to attempts.
     const { error } = await supabase.from("challenges").delete().eq("id", id);
     if (error) {
       console.error("[challenge/:id DELETE] failed:", error);
       return NextResponse.json({ error: "Gagal menghapus challenge." }, { status: 500 });
     }
+
+    // Then the recordings, best-effort: a leftover file must never block the
+    // delete, it only costs storage quota.
+    await removeRecordingsFolder(supabase, `${user.id}/${id}`);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

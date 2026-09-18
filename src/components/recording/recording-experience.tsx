@@ -5,6 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
+import { UploadError, uploadRecording } from "@/lib/audio/upload";
+import {
+  buildRecordingPath,
+  extensionForMime,
+  storageContentType,
+} from "@/lib/storage/recording-path";
 import { effectiveHint } from "@/lib/utils/labels";
 import type { HintLevel } from "@/types";
 
@@ -15,6 +21,7 @@ import { WaveformVisualizer } from "./waveform-visualizer";
 
 interface Props {
   challengeId: string;
+  userId: string;
   title: string;
   durationSec: number;
   keywords: string[];
@@ -22,8 +29,11 @@ interface Props {
   outline: OutlinePoint[];
 }
 
+type SubmitPhase = "idle" | "uploading" | "registering";
+
 export function RecordingExperience({
   challengeId,
+  userId,
   title,
   durationSec,
   keywords,
@@ -33,12 +43,14 @@ export function RecordingExperience({
   const router = useRouter();
   const recorder = useAudioRecorder();
   const [revealed, setRevealed] = useState<ReadonlySet<HintLevel>>(new Set());
-  const [submitting, setSubmitting] = useState(false);
+  const [phase, setPhase] = useState<SubmitPhase>("idle");
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const submitGuard = useRef(false);
 
   const { status, duration, stop, mimeType } = recorder;
   const hint = effectiveHint(revealed);
+  const submitting = phase !== "idle";
 
   function handleReveal(level: HintLevel) {
     setRevealed((prev) => {
@@ -51,42 +63,62 @@ export function RecordingExperience({
   const handleSubmit = useCallback(async () => {
     if (submitGuard.current) return;
     submitGuard.current = true;
-    setSubmitting(true);
     setSubmitError(null);
+    setUploadProgress(0);
+    setPhase("uploading");
+
+    const fail = (message: string) => {
+      submitGuard.current = false;
+      setPhase("idle");
+      setSubmitError(message);
+    };
 
     const blob = await stop();
     if (!blob) {
-      submitGuard.current = false;
-      setSubmitting(false);
-      setSubmitError("Tidak ada audio untuk dikirim. Coba rekam lagi.");
+      fail("Tidak ada audio untuk dikirim. Coba rekam lagi.");
       return;
     }
 
-    const ext = mimeType.includes("mp4") ? "mp4" : "webm";
-    const form = new FormData();
-    form.append("audio", blob, `recording.${ext}`);
-    form.append("hint_level_used", hint.level);
-    form.append("duration_seconds", String(Math.round(duration)));
+    // 1. Browser -> Storage directly (RLS scopes the user to their own folder).
+    const path = buildRecordingPath(userId, challengeId, extensionForMime(mimeType));
+    try {
+      await uploadRecording({
+        blob,
+        path,
+        contentType: storageContentType(mimeType),
+        onProgress: setUploadProgress,
+      });
+    } catch (error) {
+      fail(
+        error instanceof UploadError
+          ? error.message
+          : "Gagal mengunggah rekaman. Coba lagi.",
+      );
+      return;
+    }
 
+    // 2. Register the attempt (server verifies the object exists).
+    setPhase("registering");
     try {
       const res = await fetch(`/api/challenge/${challengeId}/attempt`, {
         method: "POST",
-        body: form,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          storage_path: path,
+          hint_level_used: hint.level,
+          duration_seconds: Math.round(duration),
+        }),
       });
       const data: { attemptId?: string; error?: string } = await res.json();
       if (!res.ok || !data.attemptId) {
-        submitGuard.current = false;
-        setSubmitting(false);
-        setSubmitError(data.error ?? "Gagal mengirim rekaman. Coba lagi.");
+        fail(data.error ?? "Gagal mengirim rekaman. Coba lagi.");
         return;
       }
       router.replace(`/challenge/${challengeId}/result/${data.attemptId}`);
     } catch {
-      submitGuard.current = false;
-      setSubmitting(false);
-      setSubmitError("Kesalahan jaringan. Coba lagi.");
+      fail("Kesalahan jaringan. Coba lagi.");
     }
-  }, [stop, mimeType, hint.level, duration, challengeId, router]);
+  }, [stop, mimeType, hint.level, duration, challengeId, userId, router]);
 
   // Auto stop & submit when the countdown runs out.
   useEffect(() => {
@@ -137,6 +169,32 @@ export function RecordingExperience({
         onResume={recorder.resume}
         onStopAndSubmit={() => void handleSubmit()}
       />
+
+      {submitting && (
+        <div className="stack" style={{ width: "100%", gap: "var(--space-2)" }}>
+          <div
+            className="bar-track"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(uploadProgress * 100)}
+            aria-label="Progres unggah"
+          >
+            <div
+              className="bar-fill"
+              style={{
+                width: `${Math.round(uploadProgress * 100)}%`,
+                background: "var(--accent-primary)",
+              }}
+            />
+          </div>
+          <span className="text-secondary text-sm" aria-live="polite">
+            {phase === "uploading"
+              ? `Mengunggah rekaman… ${Math.round(uploadProgress * 100)}%`
+              : "Menyiapkan evaluasi…"}
+          </span>
+        </div>
+      )}
 
       {(recording || paused) && (
         <HintPanel

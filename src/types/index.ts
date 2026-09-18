@@ -214,6 +214,8 @@ export type Database = {
           improvements: Json | null;
           coverage: Json | null;
           evaluation_status: EvaluationStatus;
+          evaluation_started_at: string | null;
+          evaluation_error: string | null;
           created_at: string;
         };
         Insert: {
@@ -234,6 +236,8 @@ export type Database = {
           improvements?: Json | null;
           coverage?: Json | null;
           evaluation_status?: EvaluationStatus;
+          evaluation_started_at?: string | null;
+          evaluation_error?: string | null;
           created_at?: string;
         };
         Update: {
@@ -254,6 +258,8 @@ export type Database = {
           improvements?: Json | null;
           coverage?: Json | null;
           evaluation_status?: EvaluationStatus;
+          evaluation_started_at?: string | null;
+          evaluation_error?: string | null;
           created_at?: string;
         };
         Relationships: [];

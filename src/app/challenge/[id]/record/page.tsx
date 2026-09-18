@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { RecordingExperience } from "@/components/recording/recording-experience";
 import { createClient } from "@/lib/supabase/server";
@@ -23,6 +23,13 @@ export default async function RecordPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
   const { data: challenge } = await supabase
     .from("challenges")
     .select("title, recording_duration_sec")
@@ -44,6 +51,7 @@ export default async function RecordPage({ params }: PageProps) {
   return (
     <RecordingExperience
       challengeId={id}
+      userId={user.id}
       title={challenge.title}
       durationSec={challenge.recording_duration_sec ?? DEFAULT_DURATION_SEC}
       keywords={items.map((o) => o.title)}

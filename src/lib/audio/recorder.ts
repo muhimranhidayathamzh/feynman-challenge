@@ -69,9 +69,12 @@ export class AudioRecorder {
     }
 
     this.chunks = [];
-    const options: MediaRecorderOptions = this.selectedMimeType
-      ? { mimeType: this.selectedMimeType }
-      : {};
+    // 32 kbps Opus is plenty for speech and keeps a 10-minute take ~2.5 MB,
+    // well under the bucket's 10 MB limit.
+    const options: MediaRecorderOptions = {
+      audioBitsPerSecond: 32_000,
+      ...(this.selectedMimeType ? { mimeType: this.selectedMimeType } : {}),
+    };
     this.recorder = new MediaRecorder(this.stream, options);
 
     this.recorder.ondataavailable = (event: BlobEvent) => {
