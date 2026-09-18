@@ -4,6 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import {
+  AttemptStatusResponseSchema,
+  EvaluateResponseSchema,
+  describeEvaluationError,
+} from "@/lib/api/contracts";
+import { fetchJson } from "@/lib/api/fetch-json";
 import type { Coverage, EvaluationStatus } from "@/types";
 
 import { AttemptHistory } from "./attempt-history";
@@ -21,6 +27,7 @@ interface Props {
   previousScore: number | null;
   history: { attemptNumber: number; score: number | null }[];
   status: EvaluationStatus;
+  evaluationError: string | null;
   overallScore: number | null;
   subScores: { comprehensiveness: number; accuracy: number; clarity: number } | null;
   coverage: Coverage[];
@@ -30,53 +37,99 @@ interface Props {
   transcript: string | null;
 }
 
+const POLL_INTERVAL_MS = 3000;
+const POLL_MAX_MS = 90_000;
+
+type View = "evaluating" | "polling" | "stale" | "error";
+
 export function EvaluationResults(props: Props) {
   const router = useRouter();
-  const isPending = props.status === "pending" || props.status === "processing";
-  const [error, setError] = useState<string | null>(
-    props.status === "error" ? "Evaluasi sebelumnya gagal." : null,
+  const [view, setView] = useState<View>(() =>
+    props.status === "error"
+      ? "error"
+      : props.status === "processing"
+        ? "polling"
+        : "evaluating",
   );
-  const triggered = useRef(false);
+  const [error, setError] = useState<string | null>(() =>
+    props.status === "error" ? describeEvaluationError(props.evaluationError) : null,
+  );
+  const started = useRef(false);
+  const pollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollStartedAt = useRef(0);
 
-  const runEvaluation = useCallback(async () => {
-    setError(null);
-    try {
-      const res = await fetch("/api/evaluate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ attemptId: props.attemptId }),
-      });
-      const data: { error?: string } = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Evaluasi gagal. Coba lagi.");
+  const stopPolling = useCallback(() => {
+    if (pollTimer.current) clearTimeout(pollTimer.current);
+    pollTimer.current = null;
+  }, []);
+
+  /** Polls GET status until completed/error, or gives up after POLL_MAX_MS. */
+  const startPolling = useCallback(() => {
+    stopPolling();
+    pollStartedAt.current = Date.now();
+    setView("polling");
+
+    const tick = async () => {
+      const result = await fetchJson(
+        `/api/attempt/${props.attemptId}`,
+        AttemptStatusResponseSchema,
+        { cache: "no-store" },
+      );
+      if (result.ok && result.data.evaluation_status === "completed") {
+        router.refresh();
         return;
       }
-      router.refresh();
-    } catch {
-      setError("Kesalahan jaringan. Coba lagi.");
+      if (result.ok && result.data.evaluation_status === "error") {
+        setError(describeEvaluationError(result.data.evaluation_error));
+        setView("error");
+        return;
+      }
+      if (Date.now() - pollStartedAt.current >= POLL_MAX_MS) {
+        setView("stale");
+        return;
+      }
+      pollTimer.current = setTimeout(() => void tick(), POLL_INTERVAL_MS);
+    };
+    pollTimer.current = setTimeout(() => void tick(), POLL_INTERVAL_MS);
+  }, [props.attemptId, router, stopPolling]);
+
+  /** Asks the server to evaluate. Only called for pending/error attempts. */
+  const runEvaluation = useCallback(async () => {
+    setError(null);
+    setView("evaluating");
+    const result = await fetchJson("/api/evaluate", EvaluateResponseSchema, {
+      method: "POST",
+      json: { attemptId: props.attemptId },
+    });
+    if (!result.ok) {
+      setError(result.error);
+      setView("error");
+      return;
     }
-  }, [props.attemptId, router]);
+    if (result.data.evaluation_status === "completed") {
+      router.refresh();
+      return;
+    }
+    // 202: another request holds the claim. Watch it instead of racing it.
+    startPolling();
+  }, [props.attemptId, router, startPolling]);
 
   useEffect(() => {
-    if (isPending && !triggered.current) {
-      triggered.current = true;
-      void runEvaluation();
-    }
-  }, [isPending, runEvaluation]);
+    if (started.current) return;
+    started.current = true;
+    if (props.status === "pending") void runEvaluation();
+    else if (props.status === "processing") startPolling();
+    return stopPolling;
+  }, [props.status, runEvaluation, startPolling, stopPolling]);
 
-  function retry() {
-    triggered.current = true;
-    void runEvaluation();
-  }
-
-  // ---- Not yet completed: evaluating spinner or error ----
+  // ---- Not yet completed: evaluating / polling / stale / error ----
   if (props.status !== "completed" || props.overallScore === null || !props.subScores) {
     return (
       <section
         className="center"
         style={{ minHeight: "60vh", padding: "var(--space-4)" }}
       >
-        {error ? (
+        {view === "error" ? (
           <div
             className="card stack text-center"
             style={{ gap: "var(--space-4)", maxWidth: "28rem" }}
@@ -87,8 +140,34 @@ export function EvaluationResults(props: Props) {
               className="row"
               style={{ justifyContent: "center", gap: "var(--space-3)" }}
             >
-              <button type="button" className="btn btn-primary" onClick={retry}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => void runEvaluation()}
+              >
                 Coba lagi
+              </button>
+              <Link href={`/challenge/${props.challengeId}`} className="btn btn-ghost">
+                Kembali
+              </Link>
+            </div>
+          </div>
+        ) : view === "stale" ? (
+          <div
+            className="card stack text-center"
+            style={{ gap: "var(--space-4)", maxWidth: "28rem" }}
+          >
+            <h2>⏳ Masih diproses</h2>
+            <p className="text-secondary">
+              Evaluasi memakan waktu lebih lama dari biasanya. Muat ulang untuk melihat
+              status terbaru.
+            </p>
+            <div
+              className="row"
+              style={{ justifyContent: "center", gap: "var(--space-3)" }}
+            >
+              <button type="button" className="btn btn-primary" onClick={startPolling}>
+                Muat ulang
               </button>
               <Link href={`/challenge/${props.challengeId}`} className="btn btn-ghost">
                 Kembali
@@ -103,6 +182,8 @@ export function EvaluationResults(props: Props) {
               maxWidth: "28rem",
               padding: "var(--space-8)",
             }}
+            aria-live="polite"
+            aria-busy="true"
           >
             <span
               className="animate-spin"

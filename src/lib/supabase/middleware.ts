@@ -52,6 +52,10 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   const onPublicPath = isPublicPath(pathname);
 
   if (!user && !onPublicPath) {
+    // API callers get a JSON 401, never an HTML redirect they cannot parse.
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+    }
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.search = "";

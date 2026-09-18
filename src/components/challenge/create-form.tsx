@@ -3,34 +3,13 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
+import {
+  CreateChallengeResponseSchema,
+  GenerateResponseSchema,
+  type GenerateResponse as GeneratedPlan,
+} from "@/lib/api/contracts";
+import { fetchJson } from "@/lib/api/fetch-json";
 import { SOURCE_TYPE_META, formatDuration } from "@/lib/utils/labels";
-import type { SourceType } from "@/types";
-
-interface OutlineItem {
-  title: string;
-  description: string;
-}
-
-interface PlanSource {
-  title: string;
-  url: string | null;
-  type: SourceType;
-}
-
-interface GeneratedPlan {
-  outline: OutlineItem[];
-  sources: PlanSource[];
-  estimated_duration_sec: number;
-}
-
-interface GenerateResponse extends Partial<GeneratedPlan> {
-  error?: string;
-}
-
-interface CreateResponse {
-  id?: string;
-  error?: string;
-}
 
 type Status = "idle" | "generating" | "preview" | "creating";
 
@@ -55,35 +34,17 @@ export function CreateForm() {
     setError(null);
     setStatus("generating");
 
-    try {
-      const res = await fetch("/api/challenge/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: topic.trim() }),
-      });
-      const data: GenerateResponse = await res.json();
-
-      if (
-        !res.ok ||
-        !data.outline ||
-        !data.sources ||
-        typeof data.estimated_duration_sec !== "number"
-      ) {
-        setError(data.error ?? "Gagal membuat rencana belajar. Coba lagi.");
-        setStatus("idle");
-        return;
-      }
-
-      setPlan({
-        outline: data.outline,
-        sources: data.sources,
-        estimated_duration_sec: data.estimated_duration_sec,
-      });
-      setStatus("preview");
-    } catch {
-      setError("Terjadi kesalahan jaringan. Coba lagi.");
+    const result = await fetchJson("/api/challenge/generate", GenerateResponseSchema, {
+      method: "POST",
+      json: { topic: topic.trim() },
+    });
+    if (!result.ok) {
+      setError(result.error);
       setStatus("idle");
+      return;
     }
+    setPlan(result.data);
+    setStatus("preview");
   }
 
   async function handleCreate() {
@@ -93,31 +54,22 @@ export function CreateForm() {
 
     const deadlineIso = deadline ? new Date(`${deadline}T23:59:59`).toISOString() : null;
 
-    try {
-      const res = await fetch("/api/challenge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          topic: topic.trim(),
-          deadline: deadlineIso,
-          estimated_duration_sec: plan.estimated_duration_sec,
-          outline: plan.outline,
-          sources: plan.sources,
-        }),
-      });
-      const data: CreateResponse = await res.json();
-
-      if (!res.ok || !data.id) {
-        setError(data.error ?? "Gagal membuat challenge. Coba lagi.");
-        setStatus("preview");
-        return;
-      }
-
-      router.push(`/challenge/${data.id}`);
-    } catch {
-      setError("Terjadi kesalahan jaringan. Coba lagi.");
+    const result = await fetchJson("/api/challenge", CreateChallengeResponseSchema, {
+      method: "POST",
+      json: {
+        topic: topic.trim(),
+        deadline: deadlineIso,
+        estimated_duration_sec: plan.estimated_duration_sec,
+        outline: plan.outline,
+        sources: plan.sources,
+      },
+    });
+    if (!result.ok) {
+      setError(result.error);
       setStatus("preview");
+      return;
     }
+    router.push(`/challenge/${result.data.id}`);
   }
 
   function handleBackToEdit() {

@@ -7,6 +7,7 @@ import {
   MIN_DURATION_SEC,
   OutlineItemSchema,
 } from "@/lib/gemini/schemas";
+import type { CreateChallengeResponse } from "@/lib/api/contracts";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -103,7 +104,8 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ id: challenge.id }, { status: 201 });
+    const payload: CreateChallengeResponse = { id: challenge.id };
+    return NextResponse.json(payload, { status: 201 });
   } catch (error) {
     console.error("[challenge] POST failed:", error);
     return NextResponse.json(

@@ -3,6 +3,7 @@ import { createPartFromBase64 } from "@google/genai";
 import { z } from "zod";
 
 import { consumeAiQuota } from "@/lib/ai/quota";
+import type { EvaluateResponse } from "@/lib/api/contracts";
 import { THINKING_BUDGET, generateJson } from "@/lib/gemini/generate";
 import {
   EVALUATION_SYSTEM_INSTRUCTION,
@@ -102,7 +103,8 @@ export async function POST(request: Request) {
         overall_score: current.overall_score,
       });
     }
-    return NextResponse.json({ evaluation_status: "processing" }, { status: 202 });
+    const processing: EvaluateResponse = { evaluation_status: "processing" };
+    return NextResponse.json(processing, { status: 202 });
   }
 
   const markError = async (code: EvaluationErrorCode) => {
@@ -244,12 +246,12 @@ export async function POST(request: Request) {
       throw new Error("finalize failed");
     }
 
-    return NextResponse.json({
-      ok: true,
+    const done: EvaluateResponse = {
       evaluation_status: "completed",
       overall_score: overall,
       mastery_state: newState,
-    });
+    };
+    return NextResponse.json(done);
   } catch (error) {
     console.error("[evaluate] failed:", error);
 

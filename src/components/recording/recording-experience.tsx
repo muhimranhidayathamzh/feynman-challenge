@@ -5,6 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
+import {
+  AttemptCreateResponseSchema,
+  type AttemptCreateRequest,
+} from "@/lib/api/contracts";
+import { fetchJson } from "@/lib/api/fetch-json";
 import { UploadError, uploadRecording } from "@/lib/audio/upload";
 import {
   buildRecordingPath,
@@ -29,7 +34,20 @@ interface Props {
   outline: OutlinePoint[];
 }
 
-type SubmitPhase = "idle" | "uploading" | "registering";
+type SubmitPhase = "idle" | "uploading" | "registering" | "failed";
+
+/**
+ * A finished recording that has not been accepted by the server yet. Kept in
+ * memory so a failed upload/registration can be retried without re-recording.
+ * `uploadedPath` is set once Storage has the file, so a retry skips the upload.
+ */
+interface PendingRecording {
+  blob: Blob;
+  mimeType: string;
+  durationSeconds: number;
+  hintLevel: HintLevel;
+  uploadedPath: string | null;
+}
 
 export function RecordingExperience({
   challengeId,
@@ -44,13 +62,16 @@ export function RecordingExperience({
   const recorder = useAudioRecorder();
   const [revealed, setRevealed] = useState<ReadonlySet<HintLevel>>(new Set());
   const [phase, setPhase] = useState<SubmitPhase>("idle");
+  const [pending, setPending] = useState<PendingRecording | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const submitGuard = useRef(false);
 
   const { status, duration, stop, mimeType } = recorder;
   const hint = effectiveHint(revealed);
-  const submitting = phase !== "idle";
+  const submitting = phase === "uploading" || phase === "registering";
+  const recording = status === "recording";
+  const paused = status === "paused";
 
   function handleReveal(level: HintLevel) {
     setRevealed((prev) => {
@@ -60,75 +81,120 @@ export function RecordingExperience({
     });
   }
 
-  const handleSubmit = useCallback(async () => {
-    if (submitGuard.current) return;
-    submitGuard.current = true;
-    setSubmitError(null);
-    setUploadProgress(0);
-    setPhase("uploading");
+  /** Upload (if needed) + register. Never throws; leaves `pending` intact on failure. */
+  const submit = useCallback(
+    async (item: PendingRecording) => {
+      if (submitGuard.current) return;
+      submitGuard.current = true;
+      setSubmitError(null);
+      setUploadProgress(item.uploadedPath ? 1 : 0);
 
-    const fail = (message: string) => {
-      submitGuard.current = false;
-      setPhase("idle");
-      setSubmitError(message);
-    };
+      const fail = (message: string) => {
+        submitGuard.current = false;
+        setPhase("failed");
+        setSubmitError(message);
+      };
 
-    const blob = await stop();
-    if (!blob) {
-      fail("Tidak ada audio untuk dikirim. Coba rekam lagi.");
-      return;
-    }
+      // 1. Browser -> Storage directly (skipped when a previous try got this far).
+      let path = item.uploadedPath;
+      if (!path) {
+        setPhase("uploading");
+        const candidate = buildRecordingPath(
+          userId,
+          challengeId,
+          extensionForMime(item.mimeType),
+        );
+        try {
+          await uploadRecording({
+            blob: item.blob,
+            path: candidate,
+            contentType: storageContentType(item.mimeType),
+            onProgress: setUploadProgress,
+          });
+        } catch (error) {
+          fail(
+            error instanceof UploadError
+              ? error.message
+              : "Gagal mengunggah rekaman. Coba lagi.",
+          );
+          return;
+        }
+        path = candidate;
+        setPending({ ...item, uploadedPath: path });
+      }
 
-    // 1. Browser -> Storage directly (RLS scopes the user to their own folder).
-    const path = buildRecordingPath(userId, challengeId, extensionForMime(mimeType));
-    try {
-      await uploadRecording({
-        blob,
-        path,
-        contentType: storageContentType(mimeType),
-        onProgress: setUploadProgress,
-      });
-    } catch (error) {
-      fail(
-        error instanceof UploadError
-          ? error.message
-          : "Gagal mengunggah rekaman. Coba lagi.",
+      // 2. Register the attempt (server verifies the object exists).
+      setPhase("registering");
+      const body: AttemptCreateRequest = {
+        storage_path: path,
+        hint_level_used: item.hintLevel,
+        duration_seconds: item.durationSeconds,
+      };
+      const result = await fetchJson(
+        `/api/challenge/${challengeId}/attempt`,
+        AttemptCreateResponseSchema,
+        { method: "POST", json: body },
       );
-      return;
-    }
-
-    // 2. Register the attempt (server verifies the object exists).
-    setPhase("registering");
-    try {
-      const res = await fetch(`/api/challenge/${challengeId}/attempt`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          storage_path: path,
-          hint_level_used: hint.level,
-          duration_seconds: Math.round(duration),
-        }),
-      });
-      const data: { attemptId?: string; error?: string } = await res.json();
-      if (!res.ok || !data.attemptId) {
-        fail(data.error ?? "Gagal mengirim rekaman. Coba lagi.");
+      if (!result.ok) {
+        fail(result.error);
         return;
       }
-      router.replace(`/challenge/${challengeId}/result/${data.attemptId}`);
-    } catch {
-      fail("Kesalahan jaringan. Coba lagi.");
+      setPending(null);
+      router.replace(`/challenge/${challengeId}/result/${result.data.attemptId}`);
+    },
+    [challengeId, userId, router],
+  );
+
+  const handleStopAndSubmit = useCallback(async () => {
+    if (submitGuard.current || pending) return;
+    const blob = await stop();
+    if (!blob) {
+      setSubmitError("Tidak ada audio untuk dikirim. Coba rekam lagi.");
+      return;
     }
-  }, [stop, mimeType, hint.level, duration, challengeId, userId, router]);
+    const item: PendingRecording = {
+      blob,
+      mimeType,
+      durationSeconds: Math.round(duration),
+      hintLevel: hint.level,
+      uploadedPath: null,
+    };
+    setPending(item);
+    await submit(item);
+  }, [pending, stop, mimeType, duration, hint.level, submit]);
+
+  function handleResend() {
+    if (pending) void submit(pending);
+  }
+
+  function handleRerecord() {
+    recorder.reset();
+    setPending(null);
+    setPhase("idle");
+    setSubmitError(null);
+    setUploadProgress(0);
+  }
 
   // Auto stop & submit when the countdown runs out.
   useEffect(() => {
-    if (status === "recording" && duration >= durationSec && !submitGuard.current) {
-      void handleSubmit();
+    if (recording && duration >= durationSec && !submitGuard.current && !pending) {
+      void handleStopAndSubmit();
     }
-  }, [status, duration, durationSec, handleSubmit]);
+  }, [recording, duration, durationSec, pending, handleStopAndSubmit]);
 
-  const recording = status === "recording";
-  const paused = status === "paused";
+  // Warn before leaving while a recording is in progress or not yet sent.
+  const mustWarn = recording || paused || pending !== null;
+  useEffect(() => {
+    if (!mustWarn) return;
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [mustWarn]);
+
+  const progressPct = Math.round(uploadProgress * 100);
 
   return (
     <main className="record-shell">
@@ -161,14 +227,38 @@ export function RecordingExperience({
         </div>
       )}
 
-      <RecorderControls
-        status={status}
-        submitting={submitting}
-        onStart={() => void recorder.start()}
-        onPause={recorder.pause}
-        onResume={recorder.resume}
-        onStopAndSubmit={() => void handleSubmit()}
-      />
+      {phase === "failed" && pending ? (
+        <div className="stack" style={{ width: "100%", gap: "var(--space-3)" }}>
+          <p className="text-secondary text-sm">
+            Rekamanmu ({pending.durationSeconds} detik) masih tersimpan di perangkat ini.
+          </p>
+          <div className="record-controls">
+            <button
+              type="button"
+              className="btn btn-primary btn-lg"
+              onClick={handleResend}
+            >
+              🔁 Kirim ulang
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary btn-lg"
+              onClick={handleRerecord}
+            >
+              🎙️ Rekam ulang
+            </button>
+          </div>
+        </div>
+      ) : (
+        <RecorderControls
+          status={status}
+          submitting={submitting}
+          onStart={() => void recorder.start()}
+          onPause={recorder.pause}
+          onResume={recorder.resume}
+          onStopAndSubmit={() => void handleStopAndSubmit()}
+        />
+      )}
 
       {submitting && (
         <div className="stack" style={{ width: "100%", gap: "var(--space-2)" }}>
@@ -177,20 +267,17 @@ export function RecordingExperience({
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-valuenow={Math.round(uploadProgress * 100)}
+            aria-valuenow={progressPct}
             aria-label="Progres unggah"
           >
             <div
               className="bar-fill"
-              style={{
-                width: `${Math.round(uploadProgress * 100)}%`,
-                background: "var(--accent-primary)",
-              }}
+              style={{ width: `${progressPct}%`, background: "var(--accent-primary)" }}
             />
           </div>
           <span className="text-secondary text-sm" aria-live="polite">
             {phase === "uploading"
-              ? `Mengunggah rekaman… ${Math.round(uploadProgress * 100)}%`
+              ? `Mengunggah rekaman… ${progressPct}%`
               : "Menyiapkan evaluasi…"}
           </span>
         </div>

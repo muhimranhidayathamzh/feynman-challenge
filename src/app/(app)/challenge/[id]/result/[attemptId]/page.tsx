@@ -103,6 +103,7 @@ export default async function ResultPage({ params }: PageProps) {
       previousScore={previousScore}
       history={history}
       status={attempt.evaluation_status}
+      evaluationError={attempt.evaluation_error}
       overallScore={attempt.overall_score}
       subScores={subScores}
       coverage={toCoverage(attempt.coverage)}

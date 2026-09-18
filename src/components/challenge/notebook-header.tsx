@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { ChallengePatchResponseSchema, OkResponseSchema } from "@/lib/api/contracts";
+import { fetchJson } from "@/lib/api/fetch-json";
 import type { MasteryState } from "@/types";
 
 import { DeadlineBadge } from "./deadline-badge";
 import { MasteryIndicator } from "./mastery-indicator";
-
-const JSON_HEADERS = { "Content-Type": "application/json" };
 
 interface Props {
   id: string;
@@ -44,42 +44,33 @@ export function NotebookHeader({
     }
     setBusy(true);
     setError(null);
-    try {
-      const res = await fetch(`/api/challenge/${id}`, {
-        method: "PATCH",
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ title: trimmed }),
-      });
-      if (!res.ok) {
-        setError("Gagal menyimpan judul.");
-        return;
-      }
-      setTitle(trimmed);
-      setEditing(false);
-    } catch {
-      setError("Kesalahan jaringan. Coba lagi.");
-    } finally {
-      setBusy(false);
+    const result = await fetchJson(`/api/challenge/${id}`, ChallengePatchResponseSchema, {
+      method: "PATCH",
+      json: { title: trimmed },
+    });
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
     }
+    setTitle(result.data.challenge.title);
+    setEditing(false);
   }
 
   async function handleDelete() {
     if (!window.confirm("Hapus challenge ini beserta semua datanya?")) return;
     setBusy(true);
     setError(null);
-    try {
-      const res = await fetch(`/api/challenge/${id}`, { method: "DELETE" });
-      if (!res.ok) {
-        setError("Gagal menghapus challenge.");
-        setBusy(false);
-        return;
-      }
-      router.push("/");
-      router.refresh();
-    } catch {
-      setError("Kesalahan jaringan. Coba lagi.");
+    const result = await fetchJson(`/api/challenge/${id}`, OkResponseSchema, {
+      method: "DELETE",
+    });
+    if (!result.ok) {
+      setError(result.error);
       setBusy(false);
+      return;
     }
+    router.push("/");
+    router.refresh();
   }
 
   return (

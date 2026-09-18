@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
+
+import {
+  AttemptCreateRequestSchema,
+  type AttemptCreateResponse,
+} from "@/lib/api/contracts";
 
 import {
   RECORDINGS_BUCKET,
@@ -17,11 +21,6 @@ type RouteContext = { params: Promise<{ id: string }> };
  * The audio itself is uploaded by the browser straight to Storage
  * (see src/lib/audio/upload.ts). This route only registers the attempt.
  */
-const BodySchema = z.object({
-  storage_path: z.string().min(1).max(200),
-  hint_level_used: z.enum(["none", "keywords", "guiding_questions", "outline"]),
-  duration_seconds: z.number().int().nonnegative().max(36_000),
-});
 
 const UNIQUE_VIOLATION = "23505";
 const MAX_INSERT_RETRIES = 3;
@@ -38,7 +37,7 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   const body: unknown = await request.json().catch(() => null);
-  const parsed = BodySchema.safeParse(body);
+  const parsed = AttemptCreateRequestSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "Metadata rekaman tidak valid." }, { status: 400 });
   }
@@ -118,7 +117,8 @@ export async function POST(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Gagal menyimpan attempt." }, { status: 500 });
     }
 
-    return NextResponse.json({ attemptId }, { status: 201 });
+    const payload: AttemptCreateResponse = { attemptId };
+    return NextResponse.json(payload, { status: 201 });
   } catch (error) {
     console.error("[attempt POST] failed:", error);
     return NextResponse.json(

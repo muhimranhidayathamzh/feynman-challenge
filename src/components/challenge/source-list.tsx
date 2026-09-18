@@ -2,12 +2,13 @@
 
 import { useState, type FormEvent } from "react";
 
+import { OkResponseSchema, SourceEnvelopeSchema } from "@/lib/api/contracts";
+import { fetchJson } from "@/lib/api/fetch-json";
 import { SOURCE_TYPE_META } from "@/lib/utils/labels";
 import type { SourceType } from "@/types";
 
 import { SourceItem, type SourceData } from "./source-item";
 
-const JSON_HEADERS = { "Content-Type": "application/json" };
 const SOURCE_TYPES: SourceType[] = ["video", "article", "book", "paper", "other"];
 
 interface Props {
@@ -31,46 +32,41 @@ export function SourceList({ challengeId, initialSources }: Props) {
     if (!trimmed) return;
     setBusy(true);
     setError(null);
-    try {
-      const res = await fetch(base, {
-        method: "POST",
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ title: trimmed, url: url.trim() || null, type }),
-      });
-      const data: { source?: SourceData; error?: string } = await res.json();
-      if (!res.ok || !data.source) {
-        setError(data.error ?? "Gagal menambah sumber.");
-        return;
-      }
-      const created = data.source;
-      setSources((prev) => [...prev, created]);
-      setTitle("");
-      setUrl("");
-      setType("article");
-    } catch {
-      setError("Kesalahan jaringan. Coba lagi.");
-    } finally {
-      setBusy(false);
+    const result = await fetchJson(base, SourceEnvelopeSchema, {
+      method: "POST",
+      json: { title: trimmed, url: url.trim() || null, type },
+    });
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
     }
+    const created = result.data.source;
+    setSources((prev) => [
+      ...prev,
+      {
+        id: created.id,
+        title: created.title,
+        url: created.url,
+        type: created.source_type,
+      },
+    ]);
+    setTitle("");
+    setUrl("");
+    setType("article");
   }
 
   async function handleRemove(id: string) {
     const rollback = sources;
     setError(null);
     setSources((prev) => prev.filter((s) => s.id !== id));
-    try {
-      const res = await fetch(base, {
-        method: "DELETE",
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ id }),
-      });
-      if (!res.ok) {
-        setSources(rollback);
-        setError("Gagal menghapus sumber.");
-      }
-    } catch {
+    const result = await fetchJson(base, OkResponseSchema, {
+      method: "DELETE",
+      json: { id },
+    });
+    if (!result.ok) {
       setSources(rollback);
-      setError("Kesalahan jaringan. Coba lagi.");
+      setError(result.error);
     }
   }
 

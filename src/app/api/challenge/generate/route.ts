@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { consumeAiQuota } from "@/lib/ai/quota";
+import type { GenerateResponse } from "@/lib/api/contracts";
 import { THINKING_BUDGET, generateJson } from "@/lib/gemini/generate";
 import { OUTLINE_SYSTEM_INSTRUCTION, buildOutlinePrompt } from "@/lib/gemini/prompts";
 import { GEMINI_ERROR_RESPONSE, GeminiError } from "@/lib/gemini/retry";
@@ -75,7 +76,7 @@ export async function POST(request: Request) {
       budgetMs: ROUTE_BUDGET_MS - (Date.now() - started),
     });
 
-    return NextResponse.json({
+    const payload: GenerateResponse = {
       outline: result.outline,
       sources: result.sources,
       estimated_duration_sec: clamp(
@@ -83,7 +84,8 @@ export async function POST(request: Request) {
         MIN_DURATION_SEC,
         MAX_DURATION_SEC,
       ),
-    });
+    };
+    return NextResponse.json(payload);
   } catch (error) {
     console.error("[challenge/generate] failed:", error);
     if (error instanceof GeminiError) {

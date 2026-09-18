@@ -2,9 +2,10 @@
 
 import { useState, type FormEvent } from "react";
 
-import { OutlineItem, type OutlineItemData } from "./outline-item";
+import { OkResponseSchema, OutlineItemEnvelopeSchema } from "@/lib/api/contracts";
+import { fetchJson } from "@/lib/api/fetch-json";
 
-const JSON_HEADERS = { "Content-Type": "application/json" };
+import { OutlineItem, type OutlineItemData } from "./outline-item";
 
 interface Props {
   challengeId: string;
@@ -32,19 +33,13 @@ export function OutlineEditor({ challengeId, initialItems }: Props) {
   }
 
   async function persistOrder(ordered: OutlineItemData[], rollback: OutlineItemData[]) {
-    try {
-      const res = await fetch(base, {
-        method: "PATCH",
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ reorder: ordered.map((it) => it.id) }),
-      });
-      if (!res.ok) {
-        setItems(rollback);
-        setError("Gagal mengurutkan. Coba lagi.");
-      }
-    } catch {
+    const result = await fetchJson(base, OkResponseSchema, {
+      method: "PATCH",
+      json: { reorder: ordered.map((it) => it.id) },
+    });
+    if (!result.ok) {
       setItems(rollback);
-      setError("Kesalahan jaringan saat mengurutkan.");
+      setError(result.error);
     }
   }
 
@@ -54,25 +49,18 @@ export function OutlineEditor({ challengeId, initialItems }: Props) {
     if (!title) return;
     setBusy(true);
     setError(null);
-    try {
-      const res = await fetch(base, {
-        method: "POST",
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ title }),
-      });
-      const data: { item?: OutlineItemData; error?: string } = await res.json();
-      if (!res.ok || !data.item) {
-        setError(data.error ?? "Gagal menambah poin.");
-        return;
-      }
-      const created = data.item;
-      setItems((prev) => [...prev, created]);
-      setNewTitle("");
-    } catch {
-      setError("Kesalahan jaringan. Coba lagi.");
-    } finally {
-      setBusy(false);
+    const result = await fetchJson(base, OutlineItemEnvelopeSchema, {
+      method: "POST",
+      json: { title },
+    });
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
     }
+    const { id, title: createdTitle, description } = result.data.item;
+    setItems((prev) => [...prev, { id, title: createdTitle, description }]);
+    setNewTitle("");
   }
 
   async function handleSave(id: string, title: string, description: string) {
@@ -85,23 +73,13 @@ export function OutlineEditor({ challengeId, initialItems }: Props) {
           : it,
       ),
     );
-    try {
-      const res = await fetch(base, {
-        method: "PATCH",
-        headers: JSON_HEADERS,
-        body: JSON.stringify({
-          id,
-          title,
-          description: description.length ? description : null,
-        }),
-      });
-      if (!res.ok) {
-        setItems(rollback);
-        setError("Gagal menyimpan poin.");
-      }
-    } catch {
+    const result = await fetchJson(base, OutlineItemEnvelopeSchema, {
+      method: "PATCH",
+      json: { id, title, description: description.length ? description : null },
+    });
+    if (!result.ok) {
       setItems(rollback);
-      setError("Kesalahan jaringan. Coba lagi.");
+      setError(result.error);
     }
   }
 
@@ -109,19 +87,13 @@ export function OutlineEditor({ challengeId, initialItems }: Props) {
     const rollback = items;
     setError(null);
     setItems((prev) => prev.filter((it) => it.id !== id));
-    try {
-      const res = await fetch(base, {
-        method: "DELETE",
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ id }),
-      });
-      if (!res.ok) {
-        setItems(rollback);
-        setError("Gagal menghapus poin.");
-      }
-    } catch {
+    const result = await fetchJson(base, OkResponseSchema, {
+      method: "DELETE",
+      json: { id },
+    });
+    if (!result.ok) {
       setItems(rollback);
-      setError("Kesalahan jaringan. Coba lagi.");
+      setError(result.error);
     }
   }
 
