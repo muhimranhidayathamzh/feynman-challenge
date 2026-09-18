@@ -58,3 +58,13 @@
   color: var(--warning);
   flex: 0 0 auto;
 }
+
+/* --- Due-soon rows with actions (Prompt 2.3) --- */
+.alert-row-stacked {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.alert-row-link:hover {
+  color: var(--accent-text);
+}

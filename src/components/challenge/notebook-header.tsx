@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Pencil, Trash2 } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button, IconButton } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/field";
@@ -11,8 +12,10 @@ import { useToast } from "@/components/ui/toast";
 import { ChallengePatchResponseSchema, OkResponseSchema } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
 import type { DeadlineInfo } from "@/lib/utils/deadline";
-import type { MasteryState } from "@/types";
+import { STATUS_LABEL } from "@/lib/utils/challenge-status";
+import type { ChallengeStatus, MasteryState } from "@/types";
 
+import { ChallengeActions } from "./challenge-actions";
 import { DeadlineBadge } from "./deadline-badge";
 import { MasteryIndicator } from "./mastery-indicator";
 
@@ -20,11 +23,21 @@ interface Props {
   id: string;
   initialTitle: string;
   masteryState: MasteryState;
+  status: ChallengeStatus;
+  /** Stored deadline "YYYY-MM-DD" (for the reschedule dialog). */
+  deadline: string | null;
   /** Computed on the server in the user's timezone. */
   deadlineInfo: DeadlineInfo;
 }
 
-export function NotebookHeader({ id, initialTitle, masteryState, deadlineInfo }: Props) {
+export function NotebookHeader({
+  id,
+  initialTitle,
+  masteryState,
+  status,
+  deadline,
+  deadlineInfo,
+}: Props) {
   const router = useRouter();
   const toast = useToast();
   const [title, setTitle] = useState(initialTitle);
@@ -142,8 +155,16 @@ export function NotebookHeader({ id, initialTitle, masteryState, deadlineInfo }:
 
       <div className="row flex-wrap gap-2">
         <MasteryIndicator state={masteryState} />
-        <DeadlineBadge info={deadlineInfo} />
+        {status !== "active" ? (
+          <Badge tone={status === "completed" ? "success" : "neutral"}>
+            {STATUS_LABEL[status]}
+          </Badge>
+        ) : (
+          <DeadlineBadge info={deadlineInfo} />
+        )}
       </div>
+
+      <ChallengeActions challengeId={id} status={status} deadline={deadline} />
 
       <ConfirmDialog
         open={confirmingDelete}

@@ -4,11 +4,15 @@ import { Zap } from "lucide-react";
 import { Icon } from "@/components/ui/icon";
 import type { DeadlineStatus } from "@/lib/utils/deadline";
 
+import { OverdueActions } from "./overdue-actions";
+
 export interface DueSoonItem {
   id: string;
   title: string;
   status: DeadlineStatus;
   nudge: string | null;
+  /** Stored deadline "YYYY-MM-DD" (for the reschedule dialog). */
+  deadline: string | null;
 }
 
 const STATUS_CLASS: Record<DeadlineStatus, string> = {
@@ -29,18 +33,29 @@ export function DueSoonSection({ items }: { items: DueSoonItem[] }) {
         <Icon icon={Zap} size={20} />
         Segera Jatuh Tempo
       </h2>
-      <div className="stack gap-2">
+      <ul className="stack gap-2">
         {items.map((item) => (
-          <Link key={item.id} href={`/challenge/${item.id}`} className="alert-row">
-            <span className="font-medium">{item.title}</span>
-            {item.nudge && (
-              <span className={`text-sm nowrap ${STATUS_CLASS[item.status]}`}>
-                {item.nudge}
-              </span>
+          <li key={item.id} className="alert-row alert-row-stacked">
+            <div className="row-between w-full gap-3">
+              <Link href={`/challenge/${item.id}`} className="font-medium alert-row-link">
+                {item.title}
+              </Link>
+              {item.nudge && (
+                <span className={`text-sm nowrap ${STATUS_CLASS[item.status]}`}>
+                  {item.nudge}
+                </span>
+              )}
+            </div>
+            {item.status === "extended_overdue" && (
+              <OverdueActions
+                challengeId={item.id}
+                title={item.title}
+                deadline={item.deadline}
+              />
             )}
-          </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }

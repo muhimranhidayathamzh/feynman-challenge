@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Brain, ChartColumn, Plus } from "lucide-react";
 
@@ -12,6 +13,7 @@ import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
+import { DASHBOARD_TABS, countByStatus, tabFromSlug } from "@/lib/utils/challenge-status";
 import { calendarDay, dayDiff } from "@/lib/utils/date";
 import { getDeadlineInfo } from "@/lib/utils/deadline";
 import { effectiveMasteryState } from "@/lib/utils/mastery";
@@ -26,16 +28,17 @@ const DUE_SOON_STATUSES = new Set([
   "extended_overdue",
 ]);
 
-interface DueSoonInternal extends DueSoonItem {
-  effectiveDate: string;
-}
+type PageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
 /**
  * Read-only: every derived value (auto-extended deadlines, mastery decay,
  * live streak) is computed here from stored data + the user's current day.
- * Nothing is written during render.
+ * Nothing is written during render. Tabs are plain links (?tab=), so the
+ * filter works without client JavaScript and survives a refresh.
  */
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: PageProps) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -44,7 +47,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [{ data: profile }, { data: challenges }, clock] = await Promise.all([
+  const [{ data: profile }, { data: challenges }, clock, params] = await Promise.all([
     supabase
       .from("profiles")
       .select("display_name, streak_count, best_streak, last_active_date")
@@ -55,41 +58,45 @@ export default async function DashboardPage() {
       .select("id, title, deadline, mastery_state, latest_score, status, last_attempt_at")
       .order("updated_at", { ascending: false }),
     getUserClock(supabase, user.id),
+    searchParams,
   ]);
 
   const rows = challenges ?? [];
   const { now, today, timeZone } = clock;
+  const activeTab = tabFromSlug(params.tab);
+  const counts = countByStatus(rows);
+  const activeRows = rows.filter((c) => c.status === "active");
 
-  const allCards: ChallengeCardData[] = rows.map((c) => ({
-    id: c.id,
-    title: c.title,
-    masteryState: effectiveMasteryState(c.mastery_state, c.last_attempt_at, now),
-    latestScore: c.latest_score,
-    deadline: getDeadlineInfo(c.deadline, today),
-  }));
+  const tabCards: ChallengeCardData[] = rows
+    .filter((c) => c.status === activeTab.status)
+    .map((c) => ({
+      id: c.id,
+      title: c.title,
+      masteryState: effectiveMasteryState(c.mastery_state, c.last_attempt_at, now),
+      latestScore: c.latest_score,
+      deadline: getDeadlineInfo(c.deadline, today),
+    }));
 
-  const dueSoon: DueSoonItem[] = rows
-    .flatMap<DueSoonInternal>((c) => {
-      if (c.status !== "active") return [];
-      const info = getDeadlineInfo(c.deadline, today);
-      if (!DUE_SOON_STATUSES.has(info.status)) return [];
-      return [
-        {
-          id: c.id,
-          title: c.title,
-          status: info.status,
-          nudge: info.nudge,
-          effectiveDate: info.effectiveDate ?? "",
-        },
-      ];
-    })
-    .sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate))
-    .map(({ id, title, status, nudge }) => ({ id, title, status, nudge }));
+  // Deadlines and reviews only nag about ACTIVE challenges (spec §6.5).
+  const dueSoon: DueSoonItem[] = activeRows
+    .map((c) => ({ c, info: getDeadlineInfo(c.deadline, today) }))
+    .filter(({ info }) => DUE_SOON_STATUSES.has(info.status))
+    .sort((a, b) =>
+      (a.info.effectiveDate ?? "").localeCompare(b.info.effectiveDate ?? ""),
+    )
+    .map(({ c, info }) => ({
+      id: c.id,
+      title: c.title,
+      status: info.status,
+      nudge: info.nudge,
+      deadline: c.deadline,
+    }));
 
-  const decay: DecayItem[] = rows.flatMap<DecayItem>((c) => {
+  const decay: DecayItem[] = activeRows.flatMap<DecayItem>((c) => {
     if (c.mastery_state !== "mastered" || !c.last_attempt_at) return [];
-    if (effectiveMasteryState("mastered", c.last_attempt_at, now) === "mastered")
+    if (effectiveMasteryState("mastered", c.last_attempt_at, now) === "mastered") {
       return [];
+    }
     const lastDay = calendarDay(new Date(c.last_attempt_at), timeZone);
     return [{ id: c.id, title: c.title, daysSinceReview: dayDiff(lastDay, today) }];
   });
@@ -135,16 +142,41 @@ export default async function DashboardPage() {
           <DecayAlert items={decay} />
 
           <section className="stack gap-3" aria-labelledby="all-challenges-title">
-            <div className="row-between">
+            <div className="row-between flex-wrap gap-3">
               <h2 id="all-challenges-title" className="section-title">
                 <Icon icon={ChartColumn} size={20} />
-                Semua Tantangan
+                Tantangan
               </h2>
               <ButtonLink href="/challenge/new" variant="secondary" size="sm" icon={Plus}>
                 Baru
               </ButtonLink>
             </div>
-            <ChallengeList challenges={allCards} />
+
+            <nav className="tabs" aria-label="Filter tantangan">
+              {DASHBOARD_TABS.map((tab) => {
+                const current = tab.status === activeTab.status;
+                return (
+                  <Link
+                    key={tab.slug}
+                    href={tab.slug === "aktif" ? "/" : `/?tab=${tab.slug}`}
+                    className="tab"
+                    aria-current={current ? "page" : undefined}
+                    scroll={false}
+                  >
+                    {tab.label}
+                    <span className="tab-count">{counts[tab.status]}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {tabCards.length > 0 ? (
+              <ChallengeList challenges={tabCards} />
+            ) : (
+              <p className="text-muted text-sm">
+                Belum ada tantangan berstatus {activeTab.label.toLowerCase()}.
+              </p>
+            )}
           </section>
         </>
       )}

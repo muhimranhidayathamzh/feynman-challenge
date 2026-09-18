@@ -1,8 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent,
+} from "react";
+import { Eye, PenLine } from "lucide-react";
 
 import { Textarea } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
+import { Markdown } from "@/components/ui/markdown";
 import { NoteEnvelopeSchema } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
 
@@ -18,6 +29,8 @@ const STATUS_TEXT: Record<SaveState, string> = {
 
 const DEBOUNCE_MS = 800;
 
+type Tab = "write" | "preview";
+
 interface Props {
   challengeId: string;
   initialContent: string;
@@ -26,6 +39,10 @@ interface Props {
 export function NotesEditor({ challengeId, initialContent }: Props) {
   const [content, setContent] = useState(initialContent);
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [tab, setTab] = useState<Tab>("write");
+  const baseId = useId();
+  const writeTabRef = useRef<HTMLButtonElement | null>(null);
+  const previewTabRef = useRef<HTMLButtonElement | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latest = useRef(initialContent);
   const lastSaved = useRef(initialContent);
@@ -104,16 +121,87 @@ export function NotesEditor({ challengeId, initialContent }: Props) {
     }
   }
 
+  function selectTab(next: Tab) {
+    setTab(next);
+    // Keep focus on the newly selected tab (arrow-key navigation).
+    (next === "write" ? writeTabRef : previewTabRef).current?.focus();
+  }
+
+  function handleTabKey(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+      event.preventDefault();
+      selectTab(tab === "write" ? "preview" : "write");
+    }
+  }
+
   return (
     <div className="stack gap-2">
-      <Textarea
-        className="textarea-notes"
-        value={content}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        placeholder="Tulis catatanmu di sini… (mendukung markdown)"
-        aria-label="Catatan pribadi"
-      />
+      <div className="tabs tabs-compact" role="tablist" aria-label="Mode catatan">
+        <button
+          ref={writeTabRef}
+          type="button"
+          role="tab"
+          id={`${baseId}-write-tab`}
+          aria-selected={tab === "write"}
+          aria-controls={`${baseId}-write-panel`}
+          tabIndex={tab === "write" ? 0 : -1}
+          className="tab"
+          onClick={() => setTab("write")}
+          onKeyDown={handleTabKey}
+        >
+          <Icon icon={PenLine} size={14} />
+          Tulis
+        </button>
+        <button
+          ref={previewTabRef}
+          type="button"
+          role="tab"
+          id={`${baseId}-preview-tab`}
+          aria-selected={tab === "preview"}
+          aria-controls={`${baseId}-preview-panel`}
+          tabIndex={tab === "preview" ? 0 : -1}
+          className="tab"
+          onClick={() => {
+            handleBlur();
+            setTab("preview");
+          }}
+          onKeyDown={handleTabKey}
+        >
+          <Icon icon={Eye} size={14} />
+          Pratinjau
+        </button>
+      </div>
+
+      <div
+        role="tabpanel"
+        id={`${baseId}-write-panel`}
+        aria-labelledby={`${baseId}-write-tab`}
+        hidden={tab !== "write"}
+      >
+        <Textarea
+          className="textarea-notes"
+          value={content}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          placeholder="Tulis catatanmu di sini… Mendukung markdown: **tebal**, _miring_, - daftar, [tautan](https://…)"
+          aria-label="Catatan pribadi"
+        />
+      </div>
+      <div
+        role="tabpanel"
+        id={`${baseId}-preview-panel`}
+        aria-labelledby={`${baseId}-preview-tab`}
+        hidden={tab !== "preview"}
+        className="notes-preview"
+        tabIndex={0}
+      >
+        {content.trim() ? (
+          <Markdown>{content}</Markdown>
+        ) : (
+          <p className="text-muted text-sm">Belum ada catatan.</p>
+        )}
+      </div>
+
       <span
         className={saveState === "error" ? "save-status text-error" : "save-status"}
         aria-live="polite"

@@ -66,6 +66,8 @@ export default async function ChallengePage({ params }: PageProps) {
           challenge.last_attempt_at,
           clock.now,
         )}
+        status={challenge.status}
+        deadline={challenge.deadline}
         deadlineInfo={getDeadlineInfo(challenge.deadline, clock.today)}
       />
 

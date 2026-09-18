@@ -60,7 +60,7 @@ export async function POST(request: Request, context: RouteContext) {
     // Ownership (RLS-scoped).
     const { data: challenge } = await supabase
       .from("challenges")
-      .select("id")
+      .select("id, status")
       .eq("id", id)
       .maybeSingle();
     if (!challenge) {
@@ -120,6 +120,17 @@ export async function POST(request: Request, context: RouteContext) {
       await storage.remove([path]);
       console.error("[attempt POST] insert failed:", lastError);
       return NextResponse.json({ error: "Gagal menyimpan percobaan." }, { status: 500 });
+    }
+
+    // Practising a paused challenge means you're back on it.
+    if (challenge.status === "parked") {
+      const { error: reactivateError } = await supabase
+        .from("challenges")
+        .update({ status: "active" })
+        .eq("id", id);
+      if (reactivateError) {
+        console.warn("[attempt POST] reactivate failed:", reactivateError);
+      }
     }
 
     const payload: AttemptCreateResponse = { attemptId };
