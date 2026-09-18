@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { GEMINI_MODEL, getGeminiClient } from "@/lib/gemini/client";
-import { buildOutlinePrompt, OUTLINE_SYSTEM_INSTRUCTION } from "@/lib/gemini/prompts";
+import { consumeAiQuota } from "@/lib/ai/quota";
+import { THINKING_BUDGET, generateJson } from "@/lib/gemini/generate";
+import { OUTLINE_SYSTEM_INSTRUCTION, buildOutlinePrompt } from "@/lib/gemini/prompts";
+import { GEMINI_ERROR_RESPONSE, GeminiError } from "@/lib/gemini/retry";
 import {
   MAX_DURATION_SEC,
   MIN_DURATION_SEC,
@@ -14,6 +16,9 @@ import { createClient } from "@/lib/supabase/server";
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
+const ROUTE_BUDGET_MS = 26_000;
+const GEMINI_TIMEOUT_MS = 20_000;
+
 const RequestSchema = z.object({
   topic: z.string().trim().min(3, "Topik terlalu pendek.").max(200),
 });
@@ -23,6 +28,7 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 export async function POST(request: Request) {
+  const started = Date.now();
   try {
     // --- Auth: only signed-in users may generate plans ---
     const supabase = await createClient();
@@ -43,57 +49,50 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- Call Gemini ---
-    const ai = getGeminiClient();
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+    // --- Quota ---
+    const quota = await consumeAiQuota(supabase, "generate");
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          error: quota.message,
+          code: "quota",
+          retryAfterSeconds: quota.retryAfterSeconds,
+        },
+        { status: 429, headers: { "Retry-After": String(quota.retryAfterSeconds) } },
+      );
+    }
+
+    // --- Gemini ---
+    const result = await generateJson({
+      label: "outline",
       contents: buildOutlinePrompt(parsed.data.topic),
-      config: {
-        systemInstruction: OUTLINE_SYSTEM_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseSchema: OUTLINE_RESPONSE_SCHEMA,
-        temperature: 0.7,
-      },
+      systemInstruction: OUTLINE_SYSTEM_INSTRUCTION,
+      responseSchema: OUTLINE_RESPONSE_SCHEMA,
+      zodSchema: OutlineGenerationSchema,
+      temperature: 0.7,
+      thinkingBudget: THINKING_BUDGET.outline,
+      timeoutMs: GEMINI_TIMEOUT_MS,
+      budgetMs: ROUTE_BUDGET_MS - (Date.now() - started),
     });
 
-    const text = response.text;
-    if (!text) {
-      return NextResponse.json(
-        { error: "AI tidak memberikan respons. Coba lagi." },
-        { status: 502 },
-      );
-    }
-
-    // --- Parse + validate the model output ---
-    let json: unknown;
-    try {
-      json = JSON.parse(text);
-    } catch {
-      return NextResponse.json(
-        { error: "Respons AI tidak dapat dibaca. Coba lagi." },
-        { status: 502 },
-      );
-    }
-
-    const result = OutlineGenerationSchema.safeParse(json);
-    if (!result.success) {
-      return NextResponse.json(
-        { error: "Format respons AI tidak sesuai. Coba lagi." },
-        { status: 502 },
-      );
-    }
-
     return NextResponse.json({
-      outline: result.data.outline,
-      sources: result.data.sources,
+      outline: result.outline,
+      sources: result.sources,
       estimated_duration_sec: clamp(
-        result.data.estimated_duration_sec,
+        result.estimated_duration_sec,
         MIN_DURATION_SEC,
         MAX_DURATION_SEC,
       ),
     });
   } catch (error) {
     console.error("[challenge/generate] failed:", error);
+    if (error instanceof GeminiError) {
+      const response = GEMINI_ERROR_RESPONSE[error.code];
+      return NextResponse.json(
+        { error: response.message, code: error.code },
+        { status: response.status },
+      );
+    }
     return NextResponse.json(
       { error: "Gagal membuat learning plan. Coba lagi sebentar." },
       { status: 500 },

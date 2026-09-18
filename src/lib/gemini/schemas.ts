@@ -95,8 +95,9 @@ const COVERAGE_STATUSES = ["covered", "partial", "missing"] as const;
 
 export const EvaluationResultSchema = z.object({
   transcript: z.string().default(""),
-  // Scores may come back as floats; route rounds + clamps. Kept lenient here.
-  overall_score: z.number(),
+  // No overall_score here on purpose: the server computes it from the
+  // weighted sub-scores (src/lib/utils/scoring.ts) and applies the hint cap.
+  // Sub-scores may come back as floats; scoring.ts rounds + clamps them.
   sub_scores: z.object({
     comprehensiveness: z.number(),
     accuracy: z.number(),
@@ -122,7 +123,6 @@ export const EVALUATION_RESPONSE_SCHEMA: Schema = {
   type: Type.OBJECT,
   properties: {
     transcript: { type: Type.STRING },
-    overall_score: { type: Type.INTEGER },
     sub_scores: {
       type: Type.OBJECT,
       properties: {
@@ -152,7 +152,6 @@ export const EVALUATION_RESPONSE_SCHEMA: Schema = {
   },
   required: [
     "transcript",
-    "overall_score",
     "sub_scores",
     "coverage",
     "feedback",
@@ -161,7 +160,6 @@ export const EVALUATION_RESPONSE_SCHEMA: Schema = {
   ],
   propertyOrdering: [
     "transcript",
-    "overall_score",
     "sub_scores",
     "coverage",
     "feedback",

@@ -264,9 +264,62 @@ export type Database = {
         };
         Relationships: [];
       };
+      ai_usage: {
+        Row: {
+          id: string;
+          user_id: string;
+          kind: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          kind: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          kind?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: { [_ in never]: never };
-    Functions: { [_ in never]: never };
+    Functions: {
+      /** Wins the evaluation claim: returns the attempt row, or nothing. */
+      claim_attempt_evaluation: {
+        Args: { p_attempt_id: string };
+        Returns: Database["public"]["Tables"]["attempts"]["Row"][];
+      };
+      /** Persists attempt result + challenge mastery + streak in one transaction. */
+      finalize_attempt_evaluation: {
+        Args: {
+          p_attempt_id: string;
+          p_transcript: string;
+          p_overall_score: number;
+          p_comprehensiveness_score: number;
+          p_accuracy_score: number;
+          p_clarity_score: number;
+          p_feedback: string;
+          p_strengths: Json;
+          p_improvements: Json;
+          p_coverage: Json;
+          p_mastery_state: MasteryState;
+          p_mastery_changed: boolean;
+          p_streak_count: number;
+          p_best_streak: number;
+          p_last_active_date: string | null;
+        };
+        Returns: undefined;
+      };
+      /** Checks + records one AI use for the caller (security definer). */
+      consume_ai_quota: {
+        Args: { p_kind: string; p_per_day: number; p_per_minute: number };
+        Returns: { allowed: boolean; retry_after_seconds: number }[];
+      };
+    };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
   };

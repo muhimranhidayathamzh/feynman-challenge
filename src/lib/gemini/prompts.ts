@@ -80,7 +80,7 @@ RUBRIK PENILAIAN (bobot):
 - comprehensiveness (40%): seberapa banyak poin outline yang tercakup dan dijelaskan.
 - accuracy (35%): apakah penjelasan benar secara konsep, tanpa miskonsepsi.
 - clarity (25%): apakah penjelasan mudah dipahami orang awam (inti Feynman Technique).
-overall_score adalah gabungan tertimbang dari ketiganya (bulatkan ke bilangan bulat 0–10).
+Skor keseluruhan dihitung oleh sistem dari ketiga sub-skor dengan bobot di atas; kamu TIDAK perlu menghitungnya.
 
 LEARNING OUTLINE (acuan kebenaran):
 ${outlineText}
@@ -88,11 +88,10 @@ ${outlineText}
 CATATAN PRIBADI PENGGUNA (konteks tambahan, BUKAN rubrik wajib):
 ${notesText}
 
-HINT YANG DIPAKAI: ${HINT_LABEL[hintLevel]} — skor maksimum dibatasi ke ${maxScore}. JANGAN beri overall_score melebihi ${maxScore}.
+HINT YANG DIPAKAI: ${HINT_LABEL[hintLevel]} (skor maksimum sistem untuk attempt ini: ${maxScore}). Nilai setiap sub-skor apa adanya; pembatasan skor dilakukan oleh sistem, bukan olehmu.
 
 FORMAT OUTPUT (JSON):
 - "transcript": hasil transkrip audio.
-- "overall_score": bilangan bulat 0–${maxScore}.
 - "sub_scores": { "comprehensiveness", "accuracy", "clarity" } masing-masing bilangan bulat 0–10.
 - "coverage": satu entri untuk SETIAP poin outline, berisi { "topic" (judul poin), "status" ("covered" | "partial" | "missing"), "note" (penjelasan singkat) }.
 - "feedback": paragraf feedback yang membangun dan menyemangati.
