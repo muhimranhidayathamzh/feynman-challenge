@@ -355,7 +355,7 @@ Prompt 3.5 — Siap dipamerkan. Ikuti "Aturan Umum" di prompts/improvement-plan.
 
 | Prompt | Judul | Status |
 |---|---|---|
-| 1.1 | Safety net | ⬜ |
+| 1.1 | Safety net | ✅ |
 | 1.2 | Upload langsung & kebersihan storage | ⬜ |
 | 1.3 | Evaluasi atomik, skor server, Gemini tangguh, kuota | ⬜ |
 | 1.4 | Client tangguh | ⬜ |
