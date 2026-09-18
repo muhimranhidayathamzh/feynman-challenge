@@ -166,6 +166,15 @@ export const EvaluationResultSchema = z.object({
   feedback: z.string().default(""),
   strengths: z.array(z.string()).default([]),
   improvements: z.array(z.string()).default([]),
+  // Socratic follow-ups aimed at the weakest point (Prompt 3.2).
+  follow_up_questions: z
+    .array(
+      z.object({
+        question: z.string().default(""),
+        outline_index: z.number().nullable().default(null),
+      }),
+    )
+    .default([]),
 });
 
 export type EvaluationResult = z.infer<typeof EvaluationResultSchema>;
@@ -205,6 +214,18 @@ export const EVALUATION_RESPONSE_SCHEMA: Schema = {
     feedback: { type: Type.STRING },
     strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
     improvements: { type: Type.ARRAY, items: { type: Type.STRING } },
+    follow_up_questions: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          question: { type: Type.STRING },
+          outline_index: { type: Type.INTEGER },
+        },
+        required: ["question", "outline_index"],
+        propertyOrdering: ["outline_index", "question"],
+      },
+    },
   },
   required: [
     "transcript",
@@ -215,6 +236,7 @@ export const EVALUATION_RESPONSE_SCHEMA: Schema = {
     "feedback",
     "strengths",
     "improvements",
+    "follow_up_questions",
   ],
   propertyOrdering: [
     "transcript",
@@ -225,5 +247,33 @@ export const EVALUATION_RESPONSE_SCHEMA: Schema = {
     "feedback",
     "strengths",
     "improvements",
+    "follow_up_questions",
   ],
+};
+
+// ----------------------------------------------------------------------------
+// Follow-up answer (short audio) — Prompt 3.2
+// ----------------------------------------------------------------------------
+const FOLLOWUP_VERDICTS = ["tepat", "sebagian", "keliru"] as const;
+
+export const FollowupResultSchema = z.object({
+  transcript: z.string().default(""),
+  audio_issue: z.enum(AUDIO_ISSUES).catch("none"),
+  verdict: z.enum(FOLLOWUP_VERDICTS).catch("sebagian"),
+  feedback: z.string().default(""),
+  hint: z.string().default(""),
+});
+export type FollowupResult = z.infer<typeof FollowupResultSchema>;
+
+export const FOLLOWUP_RESPONSE_SCHEMA: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    transcript: { type: Type.STRING },
+    audio_issue: { type: Type.STRING, enum: [...AUDIO_ISSUES] },
+    verdict: { type: Type.STRING, enum: [...FOLLOWUP_VERDICTS] },
+    feedback: { type: Type.STRING },
+    hint: { type: Type.STRING },
+  },
+  required: ["transcript", "audio_issue", "verdict", "feedback", "hint"],
+  propertyOrdering: ["transcript", "audio_issue", "verdict", "feedback", "hint"],
 };

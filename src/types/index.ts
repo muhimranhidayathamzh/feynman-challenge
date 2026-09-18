@@ -300,6 +300,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      attempt_followups: {
+        Row: {
+          id: string;
+          attempt_id: string;
+          question_index: number;
+          question: string;
+          outline_index: number | null;
+          audio_storage_path: string | null;
+          transcript: string | null;
+          verdict: "tepat" | "sebagian" | "keliru" | null;
+          feedback: string | null;
+          hint: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          attempt_id: string;
+          question_index: number;
+          question: string;
+          outline_index?: number | null;
+          audio_storage_path?: string | null;
+          transcript?: string | null;
+          verdict?: "tepat" | "sebagian" | "keliru" | null;
+          feedback?: string | null;
+          hint?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          attempt_id?: string;
+          question_index?: number;
+          question?: string;
+          outline_index?: number | null;
+          audio_storage_path?: string | null;
+          transcript?: string | null;
+          verdict?: "tepat" | "sebagian" | "keliru" | null;
+          feedback?: string | null;
+          hint?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       ai_usage: {
         Row: {
           id: string;

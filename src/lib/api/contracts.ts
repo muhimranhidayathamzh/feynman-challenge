@@ -149,6 +149,28 @@ export const EvaluateResponseSchema = z.object({
 export type EvaluateResponse = z.infer<typeof EvaluateResponseSchema>;
 
 // ---------------------------------------------------------------------------
+// POST /api/attempt/[attemptId]/followup
+// ---------------------------------------------------------------------------
+export const FollowupRequestSchema = z.object({
+  question_index: z.number().int().min(0).max(4),
+  storage_path: z.string().min(1).max(220),
+  duration_seconds: z.number().int().min(3).max(120),
+});
+export type FollowupRequest = z.infer<typeof FollowupRequestSchema>;
+
+export const FollowupAnswerSchema = z.object({
+  question_index: z.number().int(),
+  transcript: z.string().nullable(),
+  verdict: z.enum(["tepat", "sebagian", "keliru"]).nullable(),
+  feedback: z.string().nullable(),
+  hint: z.string().nullable(),
+});
+export type FollowupAnswer = z.infer<typeof FollowupAnswerSchema>;
+
+export const FollowupResponseSchema = z.object({ answer: FollowupAnswerSchema });
+export type FollowupResponse = z.infer<typeof FollowupResponseSchema>;
+
+// ---------------------------------------------------------------------------
 // PATCH /api/profile
 // ---------------------------------------------------------------------------
 export const ProfilePatchRequestSchema = z

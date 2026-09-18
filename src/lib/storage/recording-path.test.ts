@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildFollowupPath,
   buildRecordingPath,
   contentTypeForPath,
   extensionForMime,
+  isOwnFollowupPath,
   isOwnRecordingPath,
   splitRecordingPath,
   storageContentType,
@@ -69,5 +71,36 @@ describe("recording paths", () => {
       false,
     );
     expect(isOwnRecordingPath("", USER, CHALLENGE)).toBe(false);
+  });
+});
+
+describe("follow-up paths", () => {
+  const path = buildFollowupPath(USER, CHALLENGE, "webm", FILE);
+
+  it("lives in the challenge's followups sub-folder", () => {
+    expect(path).toBe(`${USER}/${CHALLENGE}/followups/${FILE}.webm`);
+    expect(isOwnFollowupPath(path, USER, CHALLENGE)).toBe(true);
+  });
+
+  it("is not accepted as a main recording and vice versa", () => {
+    expect(isOwnRecordingPath(path, USER, CHALLENGE)).toBe(false);
+    expect(
+      isOwnFollowupPath(
+        buildRecordingPath(USER, CHALLENGE, "webm", FILE),
+        USER,
+        CHALLENGE,
+      ),
+    ).toBe(false);
+  });
+
+  it("rejects other users and traversal", () => {
+    expect(isOwnFollowupPath(path, CHALLENGE, USER)).toBe(false);
+    expect(
+      isOwnFollowupPath(
+        `${USER}/${CHALLENGE}/followups/../${FILE}.webm`,
+        USER,
+        CHALLENGE,
+      ),
+    ).toBe(false);
   });
 });

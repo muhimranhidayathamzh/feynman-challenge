@@ -5,13 +5,27 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types";
 
 /** Kinds of AI calls that count against a user's quota. */
-export type AiUsageKind = "generate" | "evaluate" | "hints";
+export type AiUsageKind = "generate" | "evaluate" | "hints" | "followup";
+
+type Limits = Record<AiUsageKind, { perDay: number; perMinute: number }>;
 
 /** Per-user limits (decision D8 in prompts/improvement-plan.md). */
-export const AI_QUOTA: Record<AiUsageKind, { perDay: number; perMinute: number }> = {
+export const AI_QUOTA: Limits = {
   generate: { perDay: 20, perMinute: 3 },
   evaluate: { perDay: 30, perMinute: 3 },
   hints: { perDay: 30, perMinute: 3 },
+  followup: { perDay: 40, perMinute: 5 },
+};
+
+/**
+ * Tighter limits for anonymous demo accounts (decision D5): enough to try
+ * every feature once or twice, not enough to burn the shared Gemini quota.
+ */
+export const ANONYMOUS_AI_QUOTA: Limits = {
+  generate: { perDay: 3, perMinute: 2 },
+  evaluate: { perDay: 3, perMinute: 2 },
+  hints: { perDay: 5, perMinute: 2 },
+  followup: { perDay: 5, perMinute: 2 },
 };
 
 export type QuotaResult =
@@ -33,8 +47,9 @@ function formatWait(seconds: number): string {
 export async function consumeAiQuota(
   supabase: SupabaseClient<Database>,
   kind: AiUsageKind,
+  options: { anonymous?: boolean } = {},
 ): Promise<QuotaResult> {
-  const limits = AI_QUOTA[kind];
+  const limits = (options.anonymous ? ANONYMOUS_AI_QUOTA : AI_QUOTA)[kind];
   const { data, error } = await supabase.rpc("consume_ai_quota", {
     p_kind: kind,
     p_per_day: limits.perDay,
@@ -57,6 +72,8 @@ export async function consumeAiQuota(
   return {
     allowed: false,
     retryAfterSeconds: wait,
-    message: `Batas pemakaian AI tercapai. Kuota pulih dalam ${formatWait(wait)}.`,
+    message: options.anonymous
+      ? `Batas mode demo tercapai. Buat akun gratis untuk lanjut, atau tunggu ${formatWait(wait)}.`
+      : `Batas pemakaian AI tercapai. Kuota pulih dalam ${formatWait(wait)}.`,
   };
 }

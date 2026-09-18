@@ -141,3 +141,44 @@ begin
   end if;
 end;
 $$;
+
+-- ----------------------------------------------------------------------------
+-- Socratic follow-up answers (Prompt 3.2). One row per (attempt, question);
+-- answering again replaces the previous answer. Never affects scores.
+-- Audio lives at {user_id}/{challenge_id}/followups/{uuid}.{ext}.
+-- ----------------------------------------------------------------------------
+create table if not exists public.attempt_followups (
+  id                 uuid primary key default gen_random_uuid(),
+  attempt_id         uuid        not null references public.attempts (id) on delete cascade,
+  question_index     integer     not null check (question_index between 0 and 4),
+  question           text        not null,
+  outline_index      integer,
+  audio_storage_path text,
+  transcript         text,
+  verdict            text check (verdict in ('tepat', 'sebagian', 'keliru')),
+  feedback           text,
+  hint               text,
+  created_at         timestamptz not null default now(),
+  unique (attempt_id, question_index)
+);
+
+create index if not exists idx_attempt_followups_attempt
+  on public.attempt_followups (attempt_id);
+
+alter table public.attempt_followups enable row level security;
+
+drop policy if exists "Follow-ups are accessible by challenge owner" on public.attempt_followups;
+create policy "Follow-ups are accessible by challenge owner"
+  on public.attempt_followups for all
+  using (exists (
+    select 1
+    from public.attempts a
+    join public.challenges c on c.id = a.challenge_id
+    where a.id = attempt_id and c.user_id = (select auth.uid())
+  ))
+  with check (exists (
+    select 1
+    from public.attempts a
+    join public.challenges c on c.id = a.challenge_id
+    where a.id = attempt_id and c.user_id = (select auth.uid())
+  ));

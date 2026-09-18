@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -60,6 +60,8 @@ interface Props {
   transcript: string | null;
   /** Signed URL for the attempt's recording (null when unavailable). */
   audioUrl: string | null;
+  /** "Uji Pemahamanmu" section, rendered by the server page. */
+  followUp: ReactNode;
 }
 
 const POLL_INTERVAL_MS = 3000;
@@ -323,6 +325,8 @@ export function EvaluationResults(props: Props) {
       )}
 
       {props.transcript && <TranscriptView transcript={props.transcript} />}
+
+      {props.followUp}
 
       <AttemptHistory
         history={props.history}

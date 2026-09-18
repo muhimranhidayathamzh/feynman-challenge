@@ -9,6 +9,13 @@ export type RecordingExtension = "webm" | "mp4" | "ogg";
 
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 const RECORDING_PATH_RE = new RegExp(`^${UUID}/${UUID}/${UUID}\\.(webm|mp4|ogg)$`, "i");
+const FOLLOWUP_PATH_RE = new RegExp(
+  `^${UUID}/${UUID}/followups/${UUID}\\.(webm|mp4|ogg)$`,
+  "i",
+);
+
+/** Sub-folder (inside a challenge folder) for Socratic follow-up answers. */
+export const FOLLOWUPS_FOLDER = "followups";
 
 /** File extension for a MediaRecorder mime type (defaults to webm). */
 export function extensionForMime(mime: string): RecordingExtension {
@@ -61,4 +68,26 @@ export function isOwnRecordingPath(
 export function splitRecordingPath(path: string): { folder: string; name: string } {
   const index = path.lastIndexOf("/");
   return { folder: path.slice(0, index), name: path.slice(index + 1) };
+}
+
+/** {user}/{challenge}/followups/{uuid}.{ext} for a follow-up answer. */
+export function buildFollowupPath(
+  userId: string,
+  challengeId: string,
+  ext: RecordingExtension,
+  uuid: string = crypto.randomUUID(),
+): string {
+  return `${userId}/${challengeId}/${FOLLOWUPS_FOLDER}/${uuid}.${ext}`;
+}
+
+/** Same guarantees as isOwnRecordingPath, for the follow-ups sub-folder. */
+export function isOwnFollowupPath(
+  path: string,
+  userId: string,
+  challengeId: string,
+): boolean {
+  if (!FOLLOWUP_PATH_RE.test(path)) return false;
+  return path
+    .toLowerCase()
+    .startsWith(`${userId}/${challengeId}/${FOLLOWUPS_FOLDER}/`.toLowerCase());
 }

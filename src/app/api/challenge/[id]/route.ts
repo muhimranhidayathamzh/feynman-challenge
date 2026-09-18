@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { RECORDINGS_BUCKET } from "@/lib/storage/recording-path";
+import { FOLLOWUPS_FOLDER, RECORDINGS_BUCKET } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -154,6 +154,8 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
     // Then the recordings, best-effort: a leftover file must never block the
     // delete, it only costs storage quota.
+    // Storage has no recursive delete: clear the follow-ups sub-folder too.
+    await removeRecordingsFolder(supabase, `${user.id}/${id}/${FOLLOWUPS_FOLDER}`);
     await removeRecordingsFolder(supabase, `${user.id}/${id}`);
 
     return NextResponse.json({ ok: true });

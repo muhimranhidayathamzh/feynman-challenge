@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { EvaluationResults } from "@/components/evaluation/evaluation-results";
+import { FollowUpSection } from "@/components/evaluation/follow-up-section";
+import { parseStoredFollowUps } from "@/lib/utils/followups";
 import { RECORDINGS_BUCKET } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
 import { parseStoredCoverage } from "@/lib/utils/coverage";
@@ -59,11 +61,32 @@ export default async function ResultPage({ params }: PageProps) {
     audioUrl = signed?.signedUrl ?? null;
   }
 
-  const { data: historyRows } = await supabase
-    .from("attempts")
-    .select("attempt_number, overall_score")
-    .eq("challenge_id", id)
-    .order("attempt_number");
+  const [
+    {
+      data: { user },
+    },
+    { data: historyRows },
+    { data: outlineRows },
+    { data: followupRows },
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from("attempts")
+      .select("attempt_number, overall_score")
+      .eq("challenge_id", id)
+      .order("attempt_number"),
+    supabase
+      .from("challenge_outlines")
+      .select("id, title")
+      .eq("challenge_id", id)
+      .order("order_index"),
+    supabase
+      .from("attempt_followups")
+      .select("question_index, transcript, verdict, feedback, hint")
+      .eq("attempt_id", attemptId),
+  ]);
+
+  const followUpQuestions = parseStoredFollowUps(attempt.follow_up_questions);
 
   const history = (historyRows ?? []).map((row) => ({
     attemptNumber: row.attempt_number,
@@ -110,6 +133,18 @@ export default async function ResultPage({ params }: PageProps) {
       improvements={toStringArray(attempt.improvements)}
       transcript={attempt.transcript}
       audioUrl={audioUrl}
+      followUp={
+        user && followUpQuestions.length > 0 ? (
+          <FollowUpSection
+            attemptId={attemptId}
+            challengeId={id}
+            userId={user.id}
+            questions={followUpQuestions}
+            initialAnswers={followupRows ?? []}
+            outlineTitles={(outlineRows ?? []).map((row) => row.title)}
+          />
+        ) : null
+      }
     />
   );
 }

@@ -18,6 +18,7 @@ import { EVALUATION_RESPONSE_SCHEMA, EvaluationResultSchema } from "@/lib/gemini
 import { RECORDINGS_BUCKET, contentTypeForPath } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeCoverage, normalizeJargon } from "@/lib/utils/coverage";
+import { normalizeFollowUpQuestions } from "@/lib/utils/followups";
 import { computeMasteryAfterAttempt, effectiveMasteryState } from "@/lib/utils/mastery";
 import { computeReviewAfterAttempt } from "@/lib/utils/review";
 import { computeOverallScore, normalizeSubScores } from "@/lib/utils/scoring";
@@ -220,6 +221,10 @@ export async function POST(request: Request) {
       (outline ?? []).map((item) => item.title),
     );
     const jargon = normalizeJargon(result.unexplained_jargon);
+    const followUps = normalizeFollowUpQuestions(
+      result.follow_up_questions,
+      (outline ?? []).length,
+    );
 
     // --- Scores: computed by the server, never by the model ---
     const subScores = normalizeSubScores(result.sub_scores);
@@ -289,7 +294,7 @@ export async function POST(request: Request) {
       p_improvements: result.improvements as Json,
       p_coverage: coverage as Json,
       p_unexplained_jargon: jargon,
-      p_follow_up_questions: [],
+      p_follow_up_questions: followUps,
       p_mastery_state: newState,
       p_mastery_changed: newState !== challenge.mastery_state,
       p_review_box: review.box,
