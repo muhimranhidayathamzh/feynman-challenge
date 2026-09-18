@@ -364,7 +364,7 @@ Prompt 3.5 — Siap dipamerkan. Ikuti "Aturan Umum" di prompts/improvement-plan.
 | 2.1 | UI primitives & token | ✅ |
 | 2.2 | Satu bahasa & aksesibilitas | ✅ |
 | 2.3 | Lifecycle tantangan & markdown notes | ✅ |
-| 2.4 | Review sebelum kirim & playback | ⬜ |
+| 2.4 | Review sebelum kirim & playback | ✅ |
 | 2.5 | Auth lengkap & pengaturan | ⬜ |
 | 3.1 | Spaced repetition | ⬜ |
 | 3.2 | Coach Socratic | ⬜ |
