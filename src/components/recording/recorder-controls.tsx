@@ -5,6 +5,11 @@ import type { RecorderStatus } from "@/hooks/use-audio-recorder";
 interface Props {
   status: RecorderStatus;
   submitting: boolean;
+  /** Blocks starting (e.g. while hints are being prepared). */
+  startDisabled?: boolean;
+  startLabel?: string;
+  /** Blocks "Stop & Submit" (e.g. below the minimum duration). */
+  submitDisabled?: boolean;
   onStart: () => void;
   onPause: () => void;
   onResume: () => void;
@@ -14,6 +19,9 @@ interface Props {
 export function RecorderControls({
   status,
   submitting,
+  startDisabled = false,
+  startLabel = "🎙️ Mulai Rekam",
+  submitDisabled = false,
   onStart,
   onPause,
   onResume,
@@ -35,8 +43,13 @@ export function RecorderControls({
   if (status === "idle" || status === "stopped") {
     return (
       <div className="record-controls">
-        <button type="button" className="btn btn-primary btn-lg" onClick={onStart}>
-          🎙️ Mulai Rekam
+        <button
+          type="button"
+          className="btn btn-primary btn-lg"
+          onClick={onStart}
+          disabled={startDisabled}
+        >
+          {startLabel}
         </button>
       </div>
     );
@@ -53,7 +66,12 @@ export function RecorderControls({
           ▶️ Lanjut
         </button>
       )}
-      <button type="button" className="btn btn-primary btn-lg" onClick={onStopAndSubmit}>
+      <button
+        type="button"
+        className="btn btn-primary btn-lg"
+        onClick={onStopAndSubmit}
+        disabled={submitDisabled}
+      >
         ⏹️ Stop &amp; Submit
       </button>
     </div>

@@ -3,31 +3,14 @@ import { notFound } from "next/navigation";
 
 import { EvaluationResults } from "@/components/evaluation/evaluation-results";
 import { createClient } from "@/lib/supabase/server";
-import type { Coverage, Json } from "@/types";
+import { parseStoredCoverage } from "@/lib/utils/coverage";
+import type { Json } from "@/types";
 
 type PageProps = { params: Promise<{ id: string; attemptId: string }> };
 
 function toStringArray(value: Json | null): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((v): v is string => typeof v === "string");
-}
-
-function toCoverage(value: Json | null): Coverage[] {
-  if (!Array.isArray(value)) return [];
-  const out: Coverage[] = [];
-  for (const item of value) {
-    if (item && typeof item === "object" && !Array.isArray(item)) {
-      const { topic, status, note } = item;
-      if (
-        typeof topic === "string" &&
-        (status === "covered" || status === "partial" || status === "missing") &&
-        typeof note === "string"
-      ) {
-        out.push({ topic, status, note });
-      }
-    }
-  }
-  return out;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -106,7 +89,9 @@ export default async function ResultPage({ params }: PageProps) {
       evaluationError={attempt.evaluation_error}
       overallScore={attempt.overall_score}
       subScores={subScores}
-      coverage={toCoverage(attempt.coverage)}
+      coverage={parseStoredCoverage(attempt.coverage)}
+      audioIssue={attempt.audio_issue}
+      unexplainedJargon={toStringArray(attempt.unexplained_jargon)}
       feedback={attempt.feedback}
       strengths={toStringArray(attempt.strengths)}
       improvements={toStringArray(attempt.improvements)}

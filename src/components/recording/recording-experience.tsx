@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import {
   AttemptCreateResponseSchema,
+  HintsResponseSchema,
   type AttemptCreateRequest,
 } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
@@ -16,6 +17,7 @@ import {
   extensionForMime,
   storageContentType,
 } from "@/lib/storage/recording-path";
+import { MIN_RECORDING_SEC } from "@/lib/utils/constants";
 import { effectiveHint } from "@/lib/utils/labels";
 import type { HintLevel } from "@/types";
 
@@ -32,7 +34,12 @@ interface Props {
   keywords: string[];
   questions: string[];
   outline: OutlinePoint[];
+  /** Some outline points have no AI hints yet: generate them before recording. */
+  hintsMissing: boolean;
 }
+
+/** Don't hold the start button hostage if hint generation is slow. */
+const HINTS_WAIT_MAX_MS = 12_000;
 
 type SubmitPhase = "idle" | "uploading" | "registering" | "failed";
 
@@ -57,6 +64,7 @@ export function RecordingExperience({
   keywords,
   questions,
   outline,
+  hintsMissing,
 }: Props) {
   const router = useRouter();
   const recorder = useAudioRecorder();
@@ -65,13 +73,36 @@ export function RecordingExperience({
   const [pending, setPending] = useState<PendingRecording | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [preparingHints, setPreparingHints] = useState(hintsMissing);
   const submitGuard = useRef(false);
+  const hintsRequested = useRef(false);
 
   const { status, duration, stop, mimeType } = recorder;
   const hint = effectiveHint(revealed);
   const submitting = phase === "uploading" || phase === "registering";
   const recording = status === "recording";
   const paused = status === "paused";
+  const tooShort = duration < MIN_RECORDING_SEC;
+
+  // Fill in missing AI hints once, before the user starts. On success the
+  // server re-renders the page with the new hints; on failure the fallback
+  // hints computed on the server are used.
+  useEffect(() => {
+    if (!hintsMissing || hintsRequested.current) return;
+    hintsRequested.current = true;
+    const giveUp = setTimeout(() => setPreparingHints(false), HINTS_WAIT_MAX_MS);
+    void (async () => {
+      const result = await fetchJson(
+        `/api/challenge/${challengeId}/hints`,
+        HintsResponseSchema,
+        { method: "POST" },
+      );
+      if (result.ok && result.data.updated > 0) router.refresh();
+      clearTimeout(giveUp);
+      setPreparingHints(false);
+    })();
+    return () => clearTimeout(giveUp);
+  }, [hintsMissing, challengeId, router]);
 
   function handleReveal(level: HintLevel) {
     setRevealed((prev) => {
@@ -250,14 +281,24 @@ export function RecordingExperience({
           </div>
         </div>
       ) : (
-        <RecorderControls
-          status={status}
-          submitting={submitting}
-          onStart={() => void recorder.start()}
-          onPause={recorder.pause}
-          onResume={recorder.resume}
-          onStopAndSubmit={() => void handleStopAndSubmit()}
-        />
+        <>
+          <RecorderControls
+            status={status}
+            submitting={submitting}
+            startDisabled={preparingHints}
+            startLabel={preparingHints ? "Menyiapkan hint…" : undefined}
+            submitDisabled={tooShort}
+            onStart={() => void recorder.start()}
+            onPause={recorder.pause}
+            onResume={recorder.resume}
+            onStopAndSubmit={() => void handleStopAndSubmit()}
+          />
+          {(recording || paused) && tooShort && (
+            <p className="text-muted text-sm" aria-live="polite">
+              Rekam minimal {MIN_RECORDING_SEC} detik sebelum mengirim.
+            </p>
+          )}
+        </>
       )}
 
       {submitting && (

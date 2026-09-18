@@ -5,12 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import {
+  AUDIO_ISSUE_MESSAGES,
   AttemptStatusResponseSchema,
   EvaluateResponseSchema,
   describeEvaluationError,
 } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
-import type { Coverage, EvaluationStatus } from "@/types";
+import type { AudioIssue, Coverage, EvaluationStatus } from "@/types";
 
 import { AttemptHistory } from "./attempt-history";
 import { CoverageChecklist } from "./coverage-checklist";
@@ -31,6 +32,9 @@ interface Props {
   overallScore: number | null;
   subScores: { comprehensiveness: number; accuracy: number; clarity: number } | null;
   coverage: Coverage[];
+  /** Set when the audio could not be judged: the attempt has no score. */
+  audioIssue: AudioIssue | null;
+  unexplainedJargon: string[];
   feedback: string | null;
   strengths: string[];
   improvements: string[];
@@ -121,6 +125,42 @@ export function EvaluationResults(props: Props) {
     else if (props.status === "processing") startPolling();
     return stopPolling;
   }, [props.status, runEvaluation, startPolling, stopPolling]);
+
+  // ---- Completed, but the audio could not be judged (no score) ----
+  if (props.status === "completed" && props.audioIssue && props.audioIssue !== "none") {
+    return (
+      <section
+        className="center"
+        style={{ minHeight: "60vh", padding: "var(--space-4)" }}
+      >
+        <div
+          className="card stack text-center"
+          style={{ gap: "var(--space-4)", maxWidth: "30rem" }}
+        >
+          <h2>🎧 Rekaman belum bisa dinilai</h2>
+          <p className="text-secondary">{AUDIO_ISSUE_MESSAGES[props.audioIssue]}</p>
+          {props.feedback && <p className="text-secondary text-sm">{props.feedback}</p>}
+          <p className="text-muted text-sm">
+            Percobaan ini tidak memengaruhi skor, mastery, maupun streak-mu.
+          </p>
+          <div
+            className="row"
+            style={{ justifyContent: "center", gap: "var(--space-3)" }}
+          >
+            <Link
+              href={`/challenge/${props.challengeId}/record`}
+              className="btn btn-primary"
+            >
+              🎙️ Rekam ulang
+            </Link>
+            <Link href={`/challenge/${props.challengeId}`} className="btn btn-ghost">
+              Kembali
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   // ---- Not yet completed: evaluating / polling / stale / error ----
   if (props.status !== "completed" || props.overallScore === null || !props.subScores) {
@@ -247,6 +287,23 @@ export function EvaluationResults(props: Props) {
           improvements={props.improvements}
         />
       </div>
+
+      {props.unexplainedJargon.length > 0 && (
+        <div className="card stack" style={{ gap: "var(--space-3)" }}>
+          <h3>🧩 Istilah yang belum kamu jelaskan</h3>
+          <p className="text-secondary text-sm">
+            Inti Feynman Technique: jelaskan istilah ini dengan kata-kata sederhana di
+            percobaan berikutnya.
+          </p>
+          <ul className="jargon-list">
+            {props.unexplainedJargon.map((term) => (
+              <li key={term} className="badge">
+                {term}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {props.transcript && <TranscriptView transcript={props.transcript} />}
 

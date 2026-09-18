@@ -17,6 +17,7 @@ import {
 import { EVALUATION_RESPONSE_SCHEMA, EvaluationResultSchema } from "@/lib/gemini/schemas";
 import { RECORDINGS_BUCKET, contentTypeForPath } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
+import { normalizeCoverage, normalizeJargon } from "@/lib/utils/coverage";
 import { computeMasteryAfterAttempt, effectiveMasteryState } from "@/lib/utils/mastery";
 import { computeOverallScore, normalizeSubScores } from "@/lib/utils/scoring";
 import { computeStreakOnActivity } from "@/lib/utils/streak";
@@ -184,11 +185,40 @@ export async function POST(request: Request) {
       systemInstruction: EVALUATION_SYSTEM_INSTRUCTION,
       responseSchema: EVALUATION_RESPONSE_SCHEMA,
       zodSchema: EvaluationResultSchema,
-      temperature: 0.4,
+      // Low temperature: the same explanation should get the same score.
+      temperature: 0.2,
       thinkingBudget: THINKING_BUDGET.evaluation,
       timeoutMs: GEMINI_TIMEOUT_MS,
       budgetMs: ROUTE_BUDGET_MS - (Date.now() - started),
     });
+
+    // --- Audio could not be judged: complete WITHOUT scores ---
+    // No mastery, latest_score, last_attempt_at, or streak change.
+    if (result.audio_issue !== "none") {
+      const { error: rejectError } = await supabase.rpc("finalize_attempt_rejected", {
+        p_attempt_id: attemptId,
+        p_transcript: result.transcript,
+        p_audio_issue: result.audio_issue,
+        p_feedback: result.feedback,
+      });
+      if (rejectError) {
+        console.error("[evaluate] finalize_rejected failed:", rejectError);
+        throw new Error("finalize rejected failed");
+      }
+      const rejected: EvaluateResponse = {
+        evaluation_status: "completed",
+        overall_score: null,
+        audio_issue: result.audio_issue,
+      };
+      return NextResponse.json(rejected);
+    }
+
+    // --- Coverage: one entry per OUR outline point; jargon cleaned ---
+    const coverage = normalizeCoverage(
+      result.coverage,
+      (outline ?? []).map((item) => item.title),
+    );
+    const jargon = normalizeJargon(result.unexplained_jargon);
 
     // --- Scores: computed by the server, never by the model ---
     const subScores = normalizeSubScores(result.sub_scores);
@@ -243,7 +273,8 @@ export async function POST(request: Request) {
       p_feedback: result.feedback,
       p_strengths: result.strengths as Json,
       p_improvements: result.improvements as Json,
-      p_coverage: result.coverage as Json,
+      p_coverage: coverage as Json,
+      p_unexplained_jargon: jargon,
       p_mastery_state: newState,
       p_mastery_changed: newState !== challenge.mastery_state,
       p_streak_count: streak.streakCount,

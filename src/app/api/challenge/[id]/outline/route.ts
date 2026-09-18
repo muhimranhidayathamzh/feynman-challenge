@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { z } from "zod";
 
+import { regenerateMissingHints } from "@/lib/ai/hints";
 import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types";
@@ -24,6 +25,24 @@ const UpdateSchema = z.object({
 const ReorderSchema = z.object({
   reorder: z.array(z.uuid()).min(1),
 });
+
+/**
+ * Regenerates AI hints for points that lost them, after the response is sent
+ * (the user never waits for Gemini here). The recording screen re-checks and
+ * fills any gap, so a failure here is only logged.
+ */
+function scheduleHintRegeneration(supabase: DB, challengeId: string): void {
+  after(async () => {
+    try {
+      const result = await regenerateMissingHints(supabase, challengeId);
+      if (result.status !== "ok" && result.status !== "none-missing") {
+        console.warn(`[outline] hint regeneration skipped: ${result.status}`);
+      }
+    } catch (error) {
+      console.error("[outline] hint regeneration failed:", error);
+    }
+  });
+}
 
 /** Returns true when the signed-in user owns the challenge (RLS-scoped). */
 async function ownsChallenge(supabase: DB, id: string): Promise<boolean> {
@@ -81,6 +100,8 @@ export async function POST(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Gagal menambah poin." }, { status: 500 });
     }
 
+    // A new point starts without hints (column defaults); fill them in later.
+    scheduleHintRegeneration(supabase, id);
     return NextResponse.json({ item: created }, { status: 201 });
   } catch (error) {
     console.error("[outline POST] failed:", error);
@@ -130,9 +151,14 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     const { id: itemId, ...fields } = update.data;
+    // Changing what a point says makes its hints stale: clear them now,
+    // regenerate after the response.
+    const contentChanged = fields.title !== undefined || fields.description !== undefined;
     const { data: updated, error } = await supabase
       .from("challenge_outlines")
-      .update(fields)
+      .update(
+        contentChanged ? { ...fields, keywords: [], guiding_question: null } : fields,
+      )
       .eq("id", itemId)
       .eq("challenge_id", id)
       .select("*")
@@ -146,6 +172,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Poin tidak ditemukan." }, { status: 404 });
     }
 
+    if (contentChanged) scheduleHintRegeneration(supabase, id);
     return NextResponse.json({ item: updated });
   } catch (error) {
     console.error("[outline PATCH] failed:", error);

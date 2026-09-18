@@ -24,11 +24,16 @@ export function normalizeHttpUrl(value: string | null | undefined): string | nul
 }
 
 // ----------------------------------------------------------------------------
-// Zod schemas — validate the parsed JSON returned by Gemini.
+// Outline generation — Zod (validation) + Gemini structured-output schema.
+// Kept side by side so the two representations don't drift.
 // ----------------------------------------------------------------------------
 export const OutlineItemSchema = z.object({
   title: z.string().trim().min(1),
   description: z.string().trim().default(""),
+  // Hint tier 1: concepts that must appear in the explanation (not the title).
+  keywords: z.array(z.string()).default([]),
+  // Hint tier 2: a question that prompts the explanation without answering it.
+  guiding_question: z.string().trim().default(""),
 });
 
 export const GeneratedSourceSchema = z.object({
@@ -50,10 +55,11 @@ export type OutlineItem = z.infer<typeof OutlineItemSchema>;
 export type GeneratedSource = z.infer<typeof GeneratedSourceSchema>;
 export type OutlineGeneration = z.infer<typeof OutlineGenerationSchema>;
 
-// ----------------------------------------------------------------------------
-// Gemini structured-output schema — guides the model toward valid JSON.
-// Kept beside the Zod schema so the two representations don't drift.
-// ----------------------------------------------------------------------------
+const HINT_ITEM_PROPERTIES = {
+  keywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+  guiding_question: { type: Type.STRING },
+} as const;
+
 export const OUTLINE_RESPONSE_SCHEMA: Schema = {
   type: Type.OBJECT,
   properties: {
@@ -64,9 +70,10 @@ export const OUTLINE_RESPONSE_SCHEMA: Schema = {
         properties: {
           title: { type: Type.STRING },
           description: { type: Type.STRING },
+          ...HINT_ITEM_PROPERTIES,
         },
-        required: ["title", "description"],
-        propertyOrdering: ["title", "description"],
+        required: ["title", "description", "keywords", "guiding_question"],
+        propertyOrdering: ["title", "description", "keywords", "guiding_question"],
       },
     },
     sources: {
@@ -89,29 +96,73 @@ export const OUTLINE_RESPONSE_SCHEMA: Schema = {
 };
 
 // ----------------------------------------------------------------------------
+// Hint (re)generation for existing outline points.
+// ----------------------------------------------------------------------------
+export const HintsGenerationSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        index: z.number().int(),
+        keywords: z.array(z.string()).default([]),
+        guiding_question: z.string().trim().default(""),
+      }),
+    )
+    .default([]),
+});
+export type HintsGeneration = z.infer<typeof HintsGenerationSchema>;
+
+export const HINTS_RESPONSE_SCHEMA: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    items: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: { index: { type: Type.INTEGER }, ...HINT_ITEM_PROPERTIES },
+        required: ["index", "keywords", "guiding_question"],
+        propertyOrdering: ["index", "keywords", "guiding_question"],
+      },
+    },
+  },
+  required: ["items"],
+};
+
+// ----------------------------------------------------------------------------
 // Evaluation (audio multimodal) — §3
 // ----------------------------------------------------------------------------
 const COVERAGE_STATUSES = ["covered", "partial", "missing"] as const;
+export const AUDIO_ISSUES = [
+  "none",
+  "silent",
+  "too_short",
+  "unintelligible",
+  "off_topic",
+] as const;
 
 export const EvaluationResultSchema = z.object({
   transcript: z.string().default(""),
+  // Anything unexpected is treated as "none" (scored normally).
+  audio_issue: z.enum(AUDIO_ISSUES).catch("none"),
+  // One entry per outline point, keyed by its 1-based number. The server maps
+  // numbers back to OUR titles (src/lib/utils/coverage.ts).
+  coverage: z
+    .array(
+      z.object({
+        outline_index: z.number(),
+        status: z.enum(COVERAGE_STATUSES).catch("partial"),
+        note: z.string().default(""),
+        evidence: z.string().default(""),
+      }),
+    )
+    .default([]),
+  unexplained_jargon: z.array(z.string()).default([]),
   // No overall_score here on purpose: the server computes it from the
   // weighted sub-scores (src/lib/utils/scoring.ts) and applies the hint cap.
-  // Sub-scores may come back as floats; scoring.ts rounds + clamps them.
   sub_scores: z.object({
     comprehensiveness: z.number(),
     accuracy: z.number(),
     clarity: z.number(),
   }),
-  coverage: z
-    .array(
-      z.object({
-        topic: z.string(),
-        status: z.enum(COVERAGE_STATUSES).catch("partial"),
-        note: z.string().default(""),
-      }),
-    )
-    .default([]),
   feedback: z.string().default(""),
   strengths: z.array(z.string()).default([]),
   improvements: z.array(z.string()).default([]),
@@ -119,10 +170,28 @@ export const EvaluationResultSchema = z.object({
 
 export type EvaluationResult = z.infer<typeof EvaluationResultSchema>;
 
+// Ordering matters: the model writes the transcript and per-point evidence
+// before it commits to scores.
 export const EVALUATION_RESPONSE_SCHEMA: Schema = {
   type: Type.OBJECT,
   properties: {
     transcript: { type: Type.STRING },
+    audio_issue: { type: Type.STRING, enum: [...AUDIO_ISSUES] },
+    coverage: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          outline_index: { type: Type.INTEGER },
+          status: { type: Type.STRING, enum: [...COVERAGE_STATUSES] },
+          note: { type: Type.STRING },
+          evidence: { type: Type.STRING },
+        },
+        required: ["outline_index", "status", "note", "evidence"],
+        propertyOrdering: ["outline_index", "status", "evidence", "note"],
+      },
+    },
+    unexplained_jargon: { type: Type.ARRAY, items: { type: Type.STRING } },
     sub_scores: {
       type: Type.OBJECT,
       properties: {
@@ -133,35 +202,26 @@ export const EVALUATION_RESPONSE_SCHEMA: Schema = {
       required: ["comprehensiveness", "accuracy", "clarity"],
       propertyOrdering: ["comprehensiveness", "accuracy", "clarity"],
     },
-    coverage: {
-      type: Type.ARRAY,
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          topic: { type: Type.STRING },
-          status: { type: Type.STRING, enum: [...COVERAGE_STATUSES] },
-          note: { type: Type.STRING },
-        },
-        required: ["topic", "status", "note"],
-        propertyOrdering: ["topic", "status", "note"],
-      },
-    },
     feedback: { type: Type.STRING },
     strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
     improvements: { type: Type.ARRAY, items: { type: Type.STRING } },
   },
   required: [
     "transcript",
-    "sub_scores",
+    "audio_issue",
     "coverage",
+    "unexplained_jargon",
+    "sub_scores",
     "feedback",
     "strengths",
     "improvements",
   ],
   propertyOrdering: [
     "transcript",
-    "sub_scores",
+    "audio_issue",
     "coverage",
+    "unexplained_jargon",
+    "sub_scores",
     "feedback",
     "strengths",
     "improvements",

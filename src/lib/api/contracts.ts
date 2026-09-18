@@ -41,6 +41,8 @@ export const GenerateRequestSchema = z.object({
 export const PlanOutlineItemSchema = z.object({
   title: z.string(),
   description: z.string(),
+  keywords: z.array(z.string()),
+  guiding_question: z.string(),
 });
 export const PlanSourceSchema = z.object({
   title: z.string(),
@@ -129,12 +131,41 @@ export type AttemptStatusResponse = z.infer<typeof AttemptStatusResponseSchema>;
 // ---------------------------------------------------------------------------
 // POST /api/evaluate — 200 completed, or 202 processing (claim held elsewhere)
 // ---------------------------------------------------------------------------
+export const AudioIssueSchema = z.enum([
+  "none",
+  "silent",
+  "too_short",
+  "unintelligible",
+  "off_topic",
+]);
+
 export const EvaluateResponseSchema = z.object({
   evaluation_status: z.enum(["completed", "processing"]),
   overall_score: z.number().nullable().optional(),
   mastery_state: MasteryStateSchema.optional(),
+  /** Set when the audio could not be judged; the attempt then has no score. */
+  audio_issue: AudioIssueSchema.optional(),
 });
 export type EvaluateResponse = z.infer<typeof EvaluateResponseSchema>;
+
+// ---------------------------------------------------------------------------
+// POST /api/challenge/[id]/hints
+// ---------------------------------------------------------------------------
+export const HintsResponseSchema = z.object({ updated: z.number().int().nonnegative() });
+export type HintsResponse = z.infer<typeof HintsResponseSchema>;
+
+/** Friendly explanation for attempts.audio_issue (unscored attempts). */
+export const AUDIO_ISSUE_MESSAGES: Record<
+  Exclude<z.infer<typeof AudioIssueSchema>, "none">,
+  string
+> = {
+  silent: "Rekamannya terdengar hening. Pastikan mikrofon aktif dan tidak di-mute.",
+  too_short: "Penjelasannya terlalu singkat untuk dinilai. Coba jelaskan lebih lengkap.",
+  unintelligible:
+    "Suaranya kurang jelas untuk ditranskrip. Coba rekam di tempat yang lebih tenang dan dekatkan mikrofon.",
+  off_topic:
+    "Penjelasanmu sepertinya belum membahas topik ini. Coba fokus pada poin-poin outline.",
+};
 
 /** User-facing explanation for attempts.evaluation_error codes. */
 export const EVALUATION_ERROR_MESSAGES: Record<string, string> = {

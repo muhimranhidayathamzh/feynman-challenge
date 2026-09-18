@@ -4,23 +4,21 @@ import {
   AttemptCreateRequestSchema,
   type AttemptCreateResponse,
 } from "@/lib/api/contracts";
-
 import {
   RECORDINGS_BUCKET,
   isOwnRecordingPath,
   splitRecordingPath,
 } from "@/lib/storage/recording-path";
+import { MIN_RECORDING_SEC } from "@/lib/utils/constants";
 import { MAX_SCORE_BY_HINT } from "@/lib/utils/labels";
 import { createClient } from "@/lib/supabase/server";
+
+// The audio itself is uploaded by the browser straight to Storage
+// (see src/lib/audio/upload.ts). This route only registers the attempt.
 
 export const runtime = "nodejs";
 
 type RouteContext = { params: Promise<{ id: string }> };
-
-/**
- * The audio itself is uploaded by the browser straight to Storage
- * (see src/lib/audio/upload.ts). This route only registers the attempt.
- */
 
 const UNIQUE_VIOLATION = "23505";
 const MAX_INSERT_RETRIES = 3;
@@ -42,6 +40,13 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Metadata rekaman tidak valid." }, { status: 400 });
   }
   const { storage_path: path, hint_level_used, duration_seconds } = parsed.data;
+
+  if (duration_seconds < MIN_RECORDING_SEC) {
+    return NextResponse.json(
+      { error: `Rekaman terlalu pendek. Minimal ${MIN_RECORDING_SEC} detik.` },
+      { status: 400 },
+    );
+  }
 
   // The path must be exactly {user.id}/{id}/{uuid}.{ext}. Anything else is
   // rejected before we touch Storage or the database.

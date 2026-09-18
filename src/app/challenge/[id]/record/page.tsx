@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { RecordingExperience } from "@/components/recording/recording-experience";
 import { createClient } from "@/lib/supabase/server";
+import { buildHints } from "@/lib/utils/hints";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -42,11 +43,12 @@ export default async function RecordPage({ params }: PageProps) {
 
   const { data: outline } = await supabase
     .from("challenge_outlines")
-    .select("title, description")
+    .select("title, description, keywords, guiding_question")
     .eq("challenge_id", id)
     .order("order_index");
 
-  const items = outline ?? [];
+  // Shuffle seed = challenge id: stable across visits, different per challenge.
+  const hints = buildHints(outline ?? [], id);
 
   return (
     <RecordingExperience
@@ -54,9 +56,10 @@ export default async function RecordPage({ params }: PageProps) {
       userId={user.id}
       title={challenge.title}
       durationSec={challenge.recording_duration_sec ?? DEFAULT_DURATION_SEC}
-      keywords={items.map((o) => o.title)}
-      questions={items.map((o) => `Bisakah kamu menjelaskan: ${o.title}?`)}
-      outline={items.map((o) => ({ title: o.title, description: o.description }))}
+      keywords={hints.keywords}
+      questions={hints.questions}
+      outline={hints.outline}
+      hintsMissing={hints.missing}
     />
   );
 }

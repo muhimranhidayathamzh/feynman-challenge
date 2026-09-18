@@ -26,12 +26,21 @@ export type EvaluationStatus = "pending" | "processing" | "completed" | "error";
 
 export type CoverageStatus = "covered" | "partial" | "missing";
 
-/** One entry in an attempt's `coverage` jsonb array. */
-export interface Coverage {
+/** Why an attempt could not be scored ('none' = scored normally). */
+export type AudioIssue = "none" | "silent" | "too_short" | "unintelligible" | "off_topic";
+
+/**
+ * One entry in an attempt's `coverage` jsonb array. Older rows only have
+ * topic/status/note; newer ones add the 1-based outline_index and a short
+ * quote from the transcript as evidence.
+ */
+export type Coverage = {
   topic: string;
   status: CoverageStatus;
   note: string;
-}
+  evidence: string;
+  outline_index?: number;
+};
 
 // ----------------------------------------------------------------------------
 // Database — consumed by the Supabase client generic
@@ -125,6 +134,8 @@ export type Database = {
           order_index: number;
           title: string;
           description: string | null;
+          keywords: string[];
+          guiding_question: string | null;
           is_user_added: boolean;
           created_at: string;
         };
@@ -134,6 +145,8 @@ export type Database = {
           order_index: number;
           title: string;
           description?: string | null;
+          keywords?: string[];
+          guiding_question?: string | null;
           is_user_added?: boolean;
           created_at?: string;
         };
@@ -143,6 +156,8 @@ export type Database = {
           order_index?: number;
           title?: string;
           description?: string | null;
+          keywords?: string[];
+          guiding_question?: string | null;
           is_user_added?: boolean;
           created_at?: string;
         };
@@ -217,6 +232,8 @@ export type Database = {
           strengths: Json | null;
           improvements: Json | null;
           coverage: Json | null;
+          unexplained_jargon: Json | null;
+          audio_issue: AudioIssue | null;
           evaluation_status: EvaluationStatus;
           evaluation_started_at: string | null;
           evaluation_error: string | null;
@@ -239,6 +256,8 @@ export type Database = {
           strengths?: Json | null;
           improvements?: Json | null;
           coverage?: Json | null;
+          unexplained_jargon?: Json | null;
+          audio_issue?: AudioIssue | null;
           evaluation_status?: EvaluationStatus;
           evaluation_started_at?: string | null;
           evaluation_error?: string | null;
@@ -261,6 +280,8 @@ export type Database = {
           strengths?: Json | null;
           improvements?: Json | null;
           coverage?: Json | null;
+          unexplained_jargon?: Json | null;
+          audio_issue?: AudioIssue | null;
           evaluation_status?: EvaluationStatus;
           evaluation_started_at?: string | null;
           evaluation_error?: string | null;
@@ -310,11 +331,22 @@ export type Database = {
           p_strengths: Json;
           p_improvements: Json;
           p_coverage: Json;
+          p_unexplained_jargon: Json;
           p_mastery_state: MasteryState;
           p_mastery_changed: boolean;
           p_streak_count: number;
           p_best_streak: number;
           p_last_active_date: string | null;
+        };
+        Returns: undefined;
+      };
+      /** Completes an attempt whose audio could not be judged (no scores). */
+      finalize_attempt_rejected: {
+        Args: {
+          p_attempt_id: string;
+          p_transcript: string;
+          p_audio_issue: Exclude<AudioIssue, "none">;
+          p_feedback: string;
         };
         Returns: undefined;
       };

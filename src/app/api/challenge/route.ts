@@ -8,6 +8,7 @@ import {
   OutlineItemSchema,
 } from "@/lib/gemini/schemas";
 import type { CreateChallengeResponse } from "@/lib/api/contracts";
+import { sanitizeKeywords } from "@/lib/utils/hints";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -65,6 +66,8 @@ export async function POST(request: Request) {
       order_index: index,
       title: item.title,
       description: item.description.length > 0 ? item.description : null,
+      keywords: sanitizeKeywords(item.title, item.keywords),
+      guiding_question: item.guiding_question.length > 0 ? item.guiding_question : null,
       is_user_added: false,
     }));
 
