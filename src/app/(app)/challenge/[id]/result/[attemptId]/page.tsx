@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { EvaluationResults } from "@/components/evaluation/evaluation-results";
+import { RECORDINGS_BUCKET } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
 import { parseStoredCoverage } from "@/lib/utils/coverage";
 import type { Json } from "@/types";
 
 type PageProps = { params: Promise<{ id: string; attemptId: string }> };
+
+const AUDIO_URL_TTL_SEC = 60 * 60;
 
 function toStringArray(value: Json | null): string[] {
   if (!Array.isArray(value)) return [];
@@ -44,6 +47,16 @@ export default async function ResultPage({ params }: PageProps) {
     .maybeSingle();
   if (!challenge) {
     notFound();
+  }
+
+  // Short-lived signed URL so the learner can replay their own recording
+  // (the bucket is private; RLS lets only the owner sign their files).
+  let audioUrl: string | null = null;
+  if (attempt.audio_storage_path) {
+    const { data: signed } = await supabase.storage
+      .from(RECORDINGS_BUCKET)
+      .createSignedUrl(attempt.audio_storage_path, AUDIO_URL_TTL_SEC);
+    audioUrl = signed?.signedUrl ?? null;
   }
 
   const { data: historyRows } = await supabase
@@ -96,6 +109,7 @@ export default async function ResultPage({ params }: PageProps) {
       strengths={toStringArray(attempt.strengths)}
       improvements={toStringArray(attempt.improvements)}
       transcript={attempt.transcript}
+      audioUrl={audioUrl}
     />
   );
 }

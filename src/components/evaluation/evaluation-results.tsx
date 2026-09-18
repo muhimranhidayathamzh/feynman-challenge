@@ -19,6 +19,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
@@ -57,6 +58,8 @@ interface Props {
   strengths: string[];
   improvements: string[];
   transcript: string | null;
+  /** Signed URL for the attempt's recording (null when unavailable). */
+  audioUrl: string | null;
 }
 
 const POLL_INTERVAL_MS = 3000;
@@ -177,6 +180,9 @@ export function EvaluationResults(props: Props) {
           <p className="text-muted text-sm">
             Percobaan ini tidak memengaruhi skor, tingkat penguasaan, maupun streak-mu.
           </p>
+          {props.audioUrl && (
+            <AudioPlayer src={props.audioUrl} label="Rekaman percobaan ini" />
+          )}
           <div className="state-actions">
             <ButtonLink href={recordHref} icon={Mic}>
               Rekam ulang
@@ -303,6 +309,16 @@ export function EvaluationResults(props: Props) {
               </li>
             ))}
           </ul>
+        </Card>
+      )}
+
+      {props.audioUrl && (
+        <Card className="stack gap-3">
+          <CardTitle icon={Headphones}>Rekamanmu</CardTitle>
+          <AudioPlayer
+            src={props.audioUrl}
+            label={`Rekaman percobaan #${props.attemptNumber}`}
+          />
         </Card>
       )}
 

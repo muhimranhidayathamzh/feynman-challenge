@@ -11,12 +11,13 @@ interface Props {
   /** Blocks starting (e.g. while hints are being prepared). */
   startDisabled?: boolean;
   startLabel?: string;
-  /** Blocks "Selesai & Kirim" (e.g. below the minimum duration). */
-  submitDisabled?: boolean;
+  /** Blocks "Selesai". */
+  finishDisabled?: boolean;
   onStart: () => void;
   onPause: () => void;
   onResume: () => void;
-  onStopAndSubmit: () => void;
+  /** Stops recording and moves to review (it never sends by itself). */
+  onFinish: () => void;
 }
 
 export function RecorderControls({
@@ -24,11 +25,11 @@ export function RecorderControls({
   submitting,
   startDisabled = false,
   startLabel = "Mulai Rekam",
-  submitDisabled = false,
+  finishDisabled = false,
   onStart,
   onPause,
   onResume,
-  onStopAndSubmit,
+  onFinish,
 }: Props) {
   if (submitting) {
     return (
@@ -67,8 +68,8 @@ export function RecorderControls({
           Lanjut
         </Button>
       )}
-      <Button size="lg" icon={Square} onClick={onStopAndSubmit} disabled={submitDisabled}>
-        Selesai &amp; Kirim
+      <Button size="lg" icon={Square} onClick={onFinish} disabled={finishDisabled}>
+        Selesai
       </Button>
     </div>
   );

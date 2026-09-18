@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Mic, Send } from "lucide-react";
+import { ArrowLeft, Mic, RotateCcw, Send, Trash2 } from "lucide-react";
 
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import {
   AttemptCreateResponseSchema,
@@ -14,12 +17,15 @@ import {
 import { fetchJson } from "@/lib/api/fetch-json";
 import { UploadError, uploadRecording } from "@/lib/audio/upload";
 import {
+  RECORDINGS_BUCKET,
   buildRecordingPath,
   extensionForMime,
   storageContentType,
 } from "@/lib/storage/recording-path";
+import { createClient } from "@/lib/supabase/client";
 import { MIN_RECORDING_SEC } from "@/lib/utils/constants";
 import { effectiveHint } from "@/lib/utils/labels";
+import { formatClock } from "@/lib/utils/timer";
 import type { HintLevel } from "@/types";
 
 import { CountdownTimer } from "./countdown-timer";
@@ -42,11 +48,15 @@ interface Props {
 /** Don't hold the start button hostage if hint generation is slow. */
 const HINTS_WAIT_MAX_MS = 12_000;
 
-type SubmitPhase = "idle" | "uploading" | "registering" | "failed";
+/**
+ * idle -> recording/paused (recorder status) -> review -> uploading ->
+ * registering -> result page. A failed send returns to review with the same
+ * blob, so nothing recorded is ever lost.
+ */
+type Phase = "record" | "review" | "uploading" | "registering";
 
 /**
- * A finished recording that has not been accepted by the server yet. Kept in
- * memory so a failed upload/registration can be retried without re-recording.
+ * A finished recording that has not been accepted by the server yet.
  * `uploadedPath` is set once Storage has the file, so a retry skips the upload.
  */
 interface PendingRecording {
@@ -69,9 +79,11 @@ export function RecordingExperience({
 }: Props) {
   const router = useRouter();
   const recorder = useAudioRecorder();
+  // Revealed hints survive "Rekam ulang": once a tier is opened, the cap stays.
   const [revealed, setRevealed] = useState<ReadonlySet<HintLevel>>(new Set());
-  const [phase, setPhase] = useState<SubmitPhase>("idle");
+  const [phase, setPhase] = useState<Phase>("record");
   const [pending, setPending] = useState<PendingRecording | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [preparingHints, setPreparingHints] = useState(hintsMissing);
@@ -80,10 +92,9 @@ export function RecordingExperience({
 
   const { status, duration, stop, mimeType } = recorder;
   const hint = effectiveHint(revealed);
-  const submitting = phase === "uploading" || phase === "registering";
+  const sending = phase === "uploading" || phase === "registering";
   const recording = status === "recording";
   const paused = status === "paused";
-  const tooShort = duration < MIN_RECORDING_SEC;
 
   // Fill in missing AI hints once, before the user starts. On success the
   // server re-renders the page with the new hints; on failure the fallback
@@ -105,6 +116,18 @@ export function RecordingExperience({
     return () => clearTimeout(giveUp);
   }, [hintsMissing, challengeId, router]);
 
+  // A playable URL for the pending blob; revoked when the blob changes or on unmount.
+  const pendingBlob = pending?.blob ?? null;
+  useEffect(() => {
+    if (!pendingBlob) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(pendingBlob);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [pendingBlob]);
+
   function handleReveal(level: HintLevel) {
     setRevealed((prev) => {
       const next = new Set(prev);
@@ -113,7 +136,26 @@ export function RecordingExperience({
     });
   }
 
-  /** Upload (if needed) + register. Never throws; leaves `pending` intact on failure. */
+  /** Stop recording and go to review (never sends by itself). */
+  const handleFinish = useCallback(async () => {
+    if (pending) return;
+    const blob = await stop();
+    if (!blob || blob.size === 0) {
+      setSubmitError("Tidak ada audio yang terekam. Coba rekam lagi.");
+      return;
+    }
+    setSubmitError(null);
+    setPending({
+      blob,
+      mimeType,
+      durationSeconds: Math.round(duration),
+      hintLevel: hint.level,
+      uploadedPath: null,
+    });
+    setPhase("review");
+  }, [pending, stop, mimeType, duration, hint.level]);
+
+  /** Upload (if needed) + register. On failure, back to review with the same blob. */
   const submit = useCallback(
     async (item: PendingRecording) => {
       if (submitGuard.current) return;
@@ -123,7 +165,7 @@ export function RecordingExperience({
 
       const fail = (message: string) => {
         submitGuard.current = false;
-        setPhase("failed");
+        setPhase("review");
         setSubmitError(message);
       };
 
@@ -177,42 +219,33 @@ export function RecordingExperience({
     [challengeId, userId, router],
   );
 
-  const handleStopAndSubmit = useCallback(async () => {
-    if (submitGuard.current || pending) return;
-    const blob = await stop();
-    if (!blob) {
-      setSubmitError("Tidak ada audio untuk dikirim. Coba rekam lagi.");
-      return;
+  function discard() {
+    // If a previous send got as far as Storage, don't leave the file behind.
+    const orphan = pending?.uploadedPath;
+    if (orphan) {
+      void createClient()
+        .storage.from(RECORDINGS_BUCKET)
+        .remove([orphan])
+        .catch(() => undefined);
     }
-    const item: PendingRecording = {
-      blob,
-      mimeType,
-      durationSeconds: Math.round(duration),
-      hintLevel: hint.level,
-      uploadedPath: null,
-    };
-    setPending(item);
-    await submit(item);
-  }, [pending, stop, mimeType, duration, hint.level, submit]);
-
-  function handleResend() {
-    if (pending) void submit(pending);
-  }
-
-  function handleRerecord() {
     recorder.reset();
     setPending(null);
-    setPhase("idle");
+    setPhase("record");
     setSubmitError(null);
     setUploadProgress(0);
   }
 
-  // Auto stop & submit when the countdown runs out.
+  function rerecord() {
+    discard();
+    void recorder.start();
+  }
+
+  // Time's up: stop and let the user review (no auto-send).
   useEffect(() => {
-    if (recording && duration >= durationSec && !submitGuard.current && !pending) {
-      void handleStopAndSubmit();
+    if (recording && duration >= durationSec && !pending) {
+      void handleFinish();
     }
-  }, [recording, duration, durationSec, pending, handleStopAndSubmit]);
+  }, [recording, duration, durationSec, pending, handleFinish]);
 
   // Warn before leaving while a recording is in progress or not yet sent.
   const mustWarn = recording || paused || pending !== null;
@@ -227,6 +260,8 @@ export function RecordingExperience({
   }, [mustWarn]);
 
   const progressPct = Math.round(uploadProgress * 100);
+  const reviewing = pending !== null && (phase === "review" || sending);
+  const tooShort = (pending?.durationSeconds ?? 0) < MIN_RECORDING_SEC;
 
   return (
     <main className="record-shell">
@@ -249,10 +284,6 @@ export function RecordingExperience({
 
       <h1 className="record-title">{title}</h1>
 
-      <CountdownTimer totalSeconds={durationSec} elapsedSeconds={duration} />
-
-      <WaveformVisualizer stream={recorder.stream} active={recording} />
-
       {recorder.error && (
         <div className="alert alert-error w-full" role="alert">
           {recorder.error.message}
@@ -264,74 +295,106 @@ export function RecordingExperience({
         </div>
       )}
 
-      {phase === "failed" && pending ? (
-        <div className="stack gap-3 w-full">
-          <p className="text-secondary text-sm">
-            Rekamanmu ({pending.durationSeconds} detik) masih tersimpan di perangkat ini.
-          </p>
-          <div className="record-controls">
-            <Button size="lg" icon={Send} onClick={handleResend}>
-              Kirim ulang
-            </Button>
-            <Button variant="secondary" size="lg" icon={Mic} onClick={handleRerecord}>
-              Rekam ulang
-            </Button>
+      {reviewing && pending ? (
+        <Card as="section" className="stack gap-4 w-full" aria-labelledby="review-title">
+          <div className="row-between">
+            <h2 id="review-title" className="text-xl">
+              Dengarkan dulu
+            </h2>
+            <span className="badge tabular-nums">
+              {formatClock(pending.durationSeconds)}
+            </span>
           </div>
-        </div>
+          {previewUrl && (
+            <AudioPlayer src={previewUrl} label="Rekaman yang baru dibuat" />
+          )}
+          <p className="text-secondary text-sm text-left">
+            Sudah jelas dan lengkap? Kirim untuk dinilai AI, atau rekam ulang.
+            {revealed.size > 0 &&
+              ` Petunjuk yang sudah dibuka tetap membatasi skor maks ke ${hint.cap}.`}
+          </p>
+          {tooShort && (
+            <p className="text-warning text-sm text-left" role="status">
+              Rekaman di bawah {MIN_RECORDING_SEC} detik terlalu pendek untuk dinilai.
+            </p>
+          )}
+
+          {sending ? (
+            <div className="stack gap-2 w-full">
+              <div
+                className="bar-track"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progressPct}
+                aria-label="Progres unggah"
+              >
+                <div
+                  className="bar-fill bar-fill-accent"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+              <span className="text-secondary text-sm" aria-live="polite">
+                {phase === "uploading"
+                  ? `Mengunggah rekaman… ${progressPct}%`
+                  : "Menyiapkan evaluasi…"}
+              </span>
+            </div>
+          ) : (
+            <div className="record-controls">
+              <Button
+                size="lg"
+                icon={Send}
+                onClick={() => void submit(pending)}
+                disabled={tooShort}
+              >
+                {submitError ? "Kirim ulang" : "Kirim"}
+              </Button>
+              <Button variant="secondary" size="lg" icon={RotateCcw} onClick={rerecord}>
+                Rekam ulang
+              </Button>
+              <Button variant="ghost" size="lg" icon={Trash2} onClick={discard}>
+                Buang
+              </Button>
+            </div>
+          )}
+        </Card>
       ) : (
         <>
+          <CountdownTimer totalSeconds={durationSec} elapsedSeconds={duration} />
+
+          <WaveformVisualizer stream={recorder.stream} active={recording} />
+
           <RecorderControls
             status={status}
-            submitting={submitting}
+            submitting={false}
             startDisabled={preparingHints}
             startLabel={preparingHints ? "Menyiapkan petunjuk…" : undefined}
-            submitDisabled={tooShort}
             onStart={() => void recorder.start()}
             onPause={recorder.pause}
             onResume={recorder.resume}
-            onStopAndSubmit={() => void handleStopAndSubmit()}
+            onFinish={() => void handleFinish()}
           />
-          {(recording || paused) && tooShort && (
-            <p className="text-muted text-sm" aria-live="polite">
-              Rekam minimal {MIN_RECORDING_SEC} detik sebelum mengirim.
-            </p>
+
+          {(recording || paused) && (
+            <HintPanel
+              keywords={keywords}
+              questions={questions}
+              outline={outline}
+              revealed={revealed}
+              currentCap={hint.cap}
+              disabled={false}
+              onReveal={handleReveal}
+            />
           )}
         </>
       )}
 
-      {submitting && (
-        <div className="stack gap-2 w-full">
-          <div
-            className="bar-track"
-            role="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={progressPct}
-            aria-label="Progres unggah"
-          >
-            <div
-              className="bar-fill bar-fill-accent"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-          <span className="text-secondary text-sm" aria-live="polite">
-            {phase === "uploading"
-              ? `Mengunggah rekaman… ${progressPct}%`
-              : "Menyiapkan evaluasi…"}
-          </span>
-        </div>
-      )}
-
-      {(recording || paused) && (
-        <HintPanel
-          keywords={keywords}
-          questions={questions}
-          outline={outline}
-          revealed={revealed}
-          currentCap={hint.cap}
-          disabled={submitting}
-          onReveal={handleReveal}
-        />
+      {!reviewing && !recording && !paused && (
+        <p className="row gap-2 text-muted text-sm">
+          <Icon icon={Mic} size={14} />
+          Rekaman bisa kamu dengarkan dulu sebelum dikirim.
+        </p>
       )}
     </main>
   );
