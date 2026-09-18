@@ -368,6 +368,6 @@ Prompt 3.5 — Siap dipamerkan. Ikuti "Aturan Umum" di prompts/improvement-plan.
 | 2.5 | Auth lengkap & pengaturan | ✅ |
 | 3.1 | Spaced repetition | ✅ |
 | 3.2 | Coach Socratic | ✅ |
-| 3.3 | Gap ke sumber & tren coverage | ⬜ |
+| 3.3 | Gap ke sumber & tren coverage | ✅ |
 | 3.4 | PWA yang benar | ⬜ |
 | 3.5 | Mode demo & README | ⬜ |
