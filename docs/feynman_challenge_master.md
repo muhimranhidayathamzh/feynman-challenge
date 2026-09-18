@@ -688,9 +688,10 @@ Extends Supabase `auth.users`. Created automatically via trigger on sign-up.
 |---|---|---|
 | `id` | `uuid` PK | FK → `auth.users.id` |
 | `display_name` | `text` | |
-| `streak_count` | `integer` | Current consecutive days meeting deadlines |
+| `streak_count` | `integer` | Consecutive calendar days (user's timezone) with at least one completed evaluation |
 | `best_streak` | `integer` | All-time best streak |
 | `last_active_date` | `date` | For streak calculation |
+| `timezone` | `text` | IANA timezone, default `Asia/Jakarta`. Every "what day is it" computation (streak, deadline, decay) uses it |
 | `created_at` | `timestamptz` | |
 
 ---
@@ -703,8 +704,8 @@ Core entity — represents one learning challenge.
 | `id` | `uuid` PK | |
 | `user_id` | `uuid` FK → profiles | |
 | `title` | `text` | Topic the user wants to learn |
-| `deadline` | `timestamptz` | Original deadline |
-| `extended_deadline` | `timestamptz` | Nullable — set when auto-extended |
+| `deadline` | `date` | A calendar day in the user's timezone. Auto-extension (+2 days) is derived at read time, never stored |
+| `last_attempt_at` | `timestamptz` | When the latest evaluation completed. Drives mastery decay and "needs review" |
 | `mastery_state` | `text` | `not_started` \| `attempted` \| `developing` \| `proficient` \| `mastered` \| `solidified` |
 | `mastery_updated_at` | `timestamptz` | When mastery state last changed |
 | `latest_score` | `integer` | Most recent attempt score (nullable) |

@@ -99,3 +99,19 @@ export function applyMasteryDecay(
   }
   return state;
 }
+
+/**
+ * The state to reason and display with: the stored state after time-based
+ * decay. The database keeps the last *earned* state; decay is derived from
+ * `last_attempt_at` on every read so nothing has to run on a schedule.
+ * Also used as the starting point when a new attempt is evaluated, so a
+ * challenge that decayed cannot jump straight from "mastered" to "solidified".
+ */
+export function effectiveMasteryState(
+  stored: MasteryState,
+  lastAttemptAt: string | null,
+  now: Date = new Date(),
+): MasteryState {
+  if (!lastAttemptAt) return stored;
+  return applyMasteryDecay(stored, lastAttemptAt, now);
+}

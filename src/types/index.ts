@@ -46,6 +46,7 @@ export type Database = {
           streak_count: number;
           best_streak: number;
           last_active_date: string | null;
+          timezone: string;
           created_at: string;
         };
         Insert: {
@@ -54,6 +55,7 @@ export type Database = {
           streak_count?: number;
           best_streak?: number;
           last_active_date?: string | null;
+          timezone?: string;
           created_at?: string;
         };
         Update: {
@@ -62,6 +64,7 @@ export type Database = {
           streak_count?: number;
           best_streak?: number;
           last_active_date?: string | null;
+          timezone?: string;
           created_at?: string;
         };
         Relationships: [];
@@ -71,8 +74,9 @@ export type Database = {
           id: string;
           user_id: string;
           title: string;
+          /** Calendar day "YYYY-MM-DD" in the user's timezone. */
           deadline: string | null;
-          extended_deadline: string | null;
+          last_attempt_at: string | null;
           mastery_state: MasteryState;
           mastery_updated_at: string;
           latest_score: number | null;
@@ -87,7 +91,7 @@ export type Database = {
           user_id: string;
           title: string;
           deadline?: string | null;
-          extended_deadline?: string | null;
+          last_attempt_at?: string | null;
           mastery_state?: MasteryState;
           mastery_updated_at?: string;
           latest_score?: number | null;
@@ -102,7 +106,7 @@ export type Database = {
           user_id?: string;
           title?: string;
           deadline?: string | null;
-          extended_deadline?: string | null;
+          last_attempt_at?: string | null;
           mastery_state?: MasteryState;
           mastery_updated_at?: string;
           latest_score?: number | null;

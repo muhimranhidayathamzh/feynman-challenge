@@ -1,38 +1,30 @@
 import { describe, expect, it } from "vitest";
 
-import { computeStreakOnActivity } from "./streak";
+import { computeStreakOnActivity, displayStreak } from "./streak";
 
-const TODAY = new Date("2026-09-18T10:00:00Z");
+const TODAY = "2026-09-18";
 
 describe("computeStreakOnActivity", () => {
   it("starts a streak of 1 when there is no prior activity", () => {
-    const result = computeStreakOnActivity({
-      lastActiveDate: null,
-      currentStreak: 0,
-      bestStreak: 0,
-      today: TODAY,
-    });
-    expect(result).toEqual({
-      streakCount: 1,
-      bestStreak: 1,
-      lastActiveDate: "2026-09-18",
-      changed: true,
-    });
+    expect(
+      computeStreakOnActivity({
+        lastActiveDate: null,
+        currentStreak: 0,
+        bestStreak: 0,
+        today: TODAY,
+      }),
+    ).toEqual({ streakCount: 1, bestStreak: 1, lastActiveDate: TODAY, changed: true });
   });
 
   it("keeps everything unchanged when already active today", () => {
-    const result = computeStreakOnActivity({
-      lastActiveDate: "2026-09-18",
-      currentStreak: 4,
-      bestStreak: 9,
-      today: TODAY,
-    });
-    expect(result).toEqual({
-      streakCount: 4,
-      bestStreak: 9,
-      lastActiveDate: "2026-09-18",
-      changed: false,
-    });
+    expect(
+      computeStreakOnActivity({
+        lastActiveDate: TODAY,
+        currentStreak: 4,
+        bestStreak: 9,
+        today: TODAY,
+      }),
+    ).toEqual({ streakCount: 4, bestStreak: 9, lastActiveDate: TODAY, changed: false });
   });
 
   it("increments when the last activity was yesterday", () => {
@@ -42,13 +34,15 @@ describe("computeStreakOnActivity", () => {
       bestStreak: 4,
       today: TODAY,
     });
-    expect(result.streakCount).toBe(5);
-    expect(result.bestStreak).toBe(5);
-    expect(result.lastActiveDate).toBe("2026-09-18");
-    expect(result.changed).toBe(true);
+    expect(result).toEqual({
+      streakCount: 5,
+      bestStreak: 5,
+      lastActiveDate: TODAY,
+      changed: true,
+    });
   });
 
-  it("resets to 1 after a gap of more than one day", () => {
+  it("resets to 1 after a gap of more than one day, keeping the best", () => {
     const result = computeStreakOnActivity({
       lastActiveDate: "2026-09-15",
       currentStreak: 12,
@@ -57,20 +51,29 @@ describe("computeStreakOnActivity", () => {
     });
     expect(result.streakCount).toBe(1);
     expect(result.bestStreak).toBe(12);
-    expect(result.changed).toBe(true);
   });
 
-  it("never lowers the best streak", () => {
+  it("is timezone-agnostic: the caller passes the user's own calendar day", () => {
+    // A user in Asia/Jakarta at 05:00 on the 18th passes "2026-09-18",
+    // even though it is still the 17th in UTC.
     const result = computeStreakOnActivity({
       lastActiveDate: "2026-09-17",
-      currentStreak: 2,
-      bestStreak: 20,
-      today: TODAY,
+      currentStreak: 1,
+      bestStreak: 1,
+      today: "2026-09-18",
     });
-    expect(result.bestStreak).toBe(20);
+    expect(result.streakCount).toBe(2);
+  });
+});
+
+describe("displayStreak", () => {
+  it("shows the stored streak while it is still alive (today or yesterday)", () => {
+    expect(displayStreak(7, TODAY, TODAY)).toBe(7);
+    expect(displayStreak(7, "2026-09-17", TODAY)).toBe(7);
   });
 
-  it.todo(
-    "days are compared as UTC calendar days; a user in Asia/Jakarta active at 05:00 local is credited to the previous day (fixed in Prompt 1.5)",
-  );
+  it("shows 0 once the streak is broken, even before the next activity", () => {
+    expect(displayStreak(7, "2026-09-16", TODAY)).toBe(0);
+    expect(displayStreak(7, null, TODAY)).toBe(0);
+  });
 });

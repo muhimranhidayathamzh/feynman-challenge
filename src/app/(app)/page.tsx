@@ -9,13 +9,11 @@ import {
   type DueSoonItem,
 } from "@/components/dashboard/due-soon-section";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
-import {
-  autoExtendedDate,
-  daysUntil,
-  getDeadlineInfo,
-  needsAutoExtend,
-} from "@/lib/utils/deadline";
-import { applyMasteryDecay } from "@/lib/utils/mastery";
+import { calendarDay, dayDiff } from "@/lib/utils/date";
+import { getDeadlineInfo } from "@/lib/utils/deadline";
+import { effectiveMasteryState } from "@/lib/utils/mastery";
+import { displayStreak } from "@/lib/utils/streak";
+import { getUserClock } from "@/lib/utils/user-day";
 import { createClient } from "@/lib/supabase/server";
 
 const DUE_SOON_STATUSES = new Set([
@@ -29,6 +27,11 @@ interface DueSoonInternal extends DueSoonItem {
   effectiveDate: string;
 }
 
+/**
+ * Read-only: every derived value (auto-extended deadlines, mastery decay,
+ * live streak) is computed here from stored data + the user's current day.
+ * Nothing is written during render.
+ */
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
@@ -38,68 +41,34 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [{ data: profile }, { data: challenges }, { data: attempts }] = await Promise.all(
-    [
-      supabase
-        .from("profiles")
-        .select("display_name, streak_count, best_streak")
-        .eq("id", user.id)
-        .maybeSingle(),
-      supabase
-        .from("challenges")
-        .select(
-          "id, title, deadline, extended_deadline, mastery_state, latest_score, status",
-        )
-        .order("updated_at", { ascending: false }),
-      supabase
-        .from("attempts")
-        .select("challenge_id, created_at")
-        .order("created_at", { ascending: false }),
-    ],
-  );
+  const [{ data: profile }, { data: challenges }, clock] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("display_name, streak_count, best_streak, last_active_date")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("challenges")
+      .select("id, title, deadline, mastery_state, latest_score, status, last_attempt_at")
+      .order("updated_at", { ascending: false }),
+    getUserClock(supabase, user.id),
+  ]);
 
   const rows = challenges ?? [];
-  const now = new Date();
-
-  // Last review (most recent attempt) per challenge.
-  const lastReview = new Map<string, string>();
-  for (const attempt of attempts ?? []) {
-    if (!lastReview.has(attempt.challenge_id)) {
-      lastReview.set(attempt.challenge_id, attempt.created_at);
-    }
-  }
-
-  // Auto-extend overdue active deadlines (+2 days), persisted + reflected locally.
-  const toExtend = rows.filter(
-    (c) => c.status === "active" && needsAutoExtend(c.deadline, c.extended_deadline),
-  );
-  if (toExtend.length > 0) {
-    await Promise.all(
-      toExtend.map((c) => {
-        const ext = c.deadline ? autoExtendedDate(c.deadline) : null;
-        if (!ext) return Promise.resolve();
-        c.extended_deadline = ext;
-        return supabase
-          .from("challenges")
-          .update({ extended_deadline: ext })
-          .eq("id", c.id);
-      }),
-    );
-  }
+  const { now, today, timeZone } = clock;
 
   const allCards: ChallengeCardData[] = rows.map((c) => ({
     id: c.id,
     title: c.title,
-    masteryState: c.mastery_state,
+    masteryState: effectiveMasteryState(c.mastery_state, c.last_attempt_at, now),
     latestScore: c.latest_score,
-    deadline: c.deadline,
-    extendedDeadline: c.extended_deadline,
+    deadline: getDeadlineInfo(c.deadline, today),
   }));
 
   const dueSoon: DueSoonItem[] = rows
     .flatMap<DueSoonInternal>((c) => {
       if (c.status !== "active") return [];
-      const info = getDeadlineInfo(c.deadline, c.extended_deadline, now);
+      const info = getDeadlineInfo(c.deadline, today);
       if (!DUE_SOON_STATUSES.has(info.status)) return [];
       return [
         {
@@ -115,15 +84,20 @@ export default async function DashboardPage() {
     .map(({ id, title, status, nudge }) => ({ id, title, status, nudge }));
 
   const decay: DecayItem[] = rows.flatMap<DecayItem>((c) => {
-    if (c.mastery_state !== "mastered") return [];
-    const last = lastReview.get(c.id);
-    if (!last) return [];
-    if (applyMasteryDecay("mastered", last, now) !== "developing") return [];
-    return [{ id: c.id, title: c.title, daysSinceReview: -daysUntil(last, now) }];
+    if (c.mastery_state !== "mastered" || !c.last_attempt_at) return [];
+    if (effectiveMasteryState("mastered", c.last_attempt_at, now) === "mastered")
+      return [];
+    const lastDay = calendarDay(new Date(c.last_attempt_at), timeZone);
+    return [{ id: c.id, title: c.title, daysSinceReview: dayDiff(lastDay, today) }];
   });
 
   const displayName =
     profile?.display_name?.trim() || user.email?.split("@")[0] || "Kamu";
+  const streak = displayStreak(
+    profile?.streak_count ?? 0,
+    profile?.last_active_date ?? null,
+    today,
+  );
 
   return (
     <div className="stack" style={{ gap: "var(--space-8)" }}>
@@ -134,10 +108,7 @@ export default async function DashboardPage() {
           </h1>
           <p className="text-secondary">Siap menjelaskan sesuatu hari ini?</p>
         </div>
-        <StreakDisplay
-          streakCount={profile?.streak_count ?? 0}
-          bestStreak={profile?.best_streak ?? 0}
-        />
+        <StreakDisplay streakCount={streak} bestStreak={profile?.best_streak ?? 0} />
       </header>
 
       {rows.length === 0 ? (

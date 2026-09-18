@@ -6,14 +6,17 @@ import { useState } from "react";
 
 import { useAuth } from "@/lib/auth/auth-provider";
 
-export function Header() {
-  const { user, signOut } = useAuth();
+interface Props {
+  /** From profiles.display_name (server), not from auth metadata. */
+  displayName: string;
+  /** Live streak: already 0 when the streak is broken. */
+  streakCount: number;
+}
+
+export function Header({ displayName, streakCount }: Props) {
+  const { signOut } = useAuth();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
-
-  const metadata = user?.user_metadata as { display_name?: string } | undefined;
-  const displayName =
-    metadata?.display_name?.trim() || user?.email?.split("@")[0] || "Kamu";
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -29,10 +32,14 @@ export function Header() {
       </Link>
 
       <div className="row" style={{ gap: "var(--space-3)" }}>
-        {/* Streak placeholder — real streak wired in Phase 5 */}
-        <span className="badge" title="Streak harian" aria-label="Streak harian">
-          🔥 0
-        </span>
+        <Link
+          href="/"
+          className="badge"
+          title="Streak harian"
+          aria-label={`Streak harian: ${streakCount} hari`}
+        >
+          🔥 {streakCount}
+        </Link>
 
         <span className="text-secondary text-sm show-from-sm">{displayName}</span>
 

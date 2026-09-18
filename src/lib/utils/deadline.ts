@@ -1,90 +1,103 @@
 // ============================================================================
 // Deadline system — pure functions. Gentle accountability per master spec §6.5.
+//
+// A deadline is a calendar day in the user's timezone. Missing it does not
+// punish: the effective deadline silently becomes deadline + AUTO_EXTEND_DAYS.
+// That extension is DERIVED here on every read; nothing is written back.
 // ============================================================================
+import { addDays, dayDiff, type CalendarDay } from "./date";
 
 export const AUTO_EXTEND_DAYS = 2;
 
 export type DeadlineStatus =
-  "none" | "upcoming" | "due_soon" | "due_today" | "overdue" | "extended_overdue";
+  | "none"
+  | "upcoming"
+  | "due_soon"
+  | "due_today"
+  | "overdue" // original day passed; inside the automatic +2-day grace
+  | "extended_overdue"; // grace passed too
 
 export interface DeadlineInfo {
   status: DeadlineStatus;
-  effectiveDate: string | null;
+  /** The day that currently counts (original, or original + grace). */
+  effectiveDate: CalendarDay | null;
+  /** Days from today to effectiveDate (negative = past). */
   daysUntil: number | null;
   nudge: string | null;
   isExtended: boolean;
 }
 
-/** Calendar-day difference (target − today), independent of time-of-day. */
-export function daysUntil(dateIso: string, now: Date = new Date()): number {
-  const target = new Date(dateIso);
-  const t = Date.UTC(target.getFullYear(), target.getMonth(), target.getDate());
-  const n = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-  return Math.round((t - n) / 86_400_000);
-}
+export const NO_DEADLINE: DeadlineInfo = {
+  status: "none",
+  effectiveDate: null,
+  daysUntil: null,
+  nudge: null,
+  isExtended: false,
+};
 
-/** Deadline status + a supportive nudge message for the dashboard. */
+/** Deadline status + a supportive nudge, given the user's current day. */
 export function getDeadlineInfo(
-  deadline: string | null,
-  extendedDeadline: string | null,
-  now: Date = new Date(),
+  deadline: CalendarDay | null,
+  today: CalendarDay,
 ): DeadlineInfo {
-  const effectiveDate = extendedDeadline ?? deadline;
-  const isExtended = extendedDeadline !== null;
+  if (!deadline) return NO_DEADLINE;
 
-  if (!effectiveDate) {
+  const days = dayDiff(today, deadline);
+
+  if (days >= 0) {
+    if (days === 0) {
+      return {
+        status: "due_today",
+        effectiveDate: deadline,
+        daysUntil: 0,
+        nudge: "Hari ini! Kamu pasti bisa 💪",
+        isExtended: false,
+      };
+    }
+    if (days === 1) {
+      return {
+        status: "due_soon",
+        effectiveDate: deadline,
+        daysUntil: 1,
+        nudge: "Besok! Sudah siap? 🎙️",
+        isExtended: false,
+      };
+    }
+    if (days <= 3) {
+      return {
+        status: "due_soon",
+        effectiveDate: deadline,
+        daysUntil: days,
+        nudge: `${days} hari lagi ⏰`,
+        isExtended: false,
+      };
+    }
     return {
-      status: "none",
-      effectiveDate: null,
-      daysUntil: null,
+      status: "upcoming",
+      effectiveDate: deadline,
+      daysUntil: days,
       nudge: null,
-      isExtended,
+      isExtended: false,
     };
   }
 
-  const days = daysUntil(effectiveDate, now);
-
-  let status: DeadlineStatus;
-  let nudge: string | null;
-
-  if (days < 0) {
-    if (isExtended) {
-      status = "extended_overdue";
-      nudge = "Mau reschedule atau istirahat dulu?";
-    } else {
-      status = "overdue";
-      nudge = "Nggak apa-apa, waktu ditambah!";
-    }
-  } else if (days === 0) {
-    status = "due_today";
-    nudge = "Hari ini! Kamu pasti bisa 💪";
-  } else if (days === 1) {
-    status = "due_soon";
-    nudge = "Besok! Sudah siap? 🎙️";
-  } else if (days <= 3) {
-    status = "due_soon";
-    nudge = `${days} hari lagi ⏰`;
-  } else {
-    status = "upcoming";
-    nudge = null;
+  // Original day has passed: grace period applies automatically.
+  const extended = addDays(deadline, AUTO_EXTEND_DAYS);
+  const daysExtended = dayDiff(today, extended);
+  if (daysExtended >= 0) {
+    return {
+      status: "overdue",
+      effectiveDate: extended,
+      daysUntil: daysExtended,
+      nudge: "Nggak apa-apa, waktu ditambah!",
+      isExtended: true,
+    };
   }
-
-  return { status, effectiveDate, daysUntil: days, nudge, isExtended };
-}
-
-/** True when an active deadline has passed and hasn't been extended yet. */
-export function needsAutoExtend(
-  deadline: string | null,
-  extendedDeadline: string | null,
-  now: Date = new Date(),
-): boolean {
-  if (!deadline || extendedDeadline) return false;
-  return daysUntil(deadline, now) < 0;
-}
-
-/** Original deadline + AUTO_EXTEND_DAYS, as an ISO string. */
-export function autoExtendedDate(deadline: string): string {
-  const date = new Date(deadline);
-  date.setDate(date.getDate() + AUTO_EXTEND_DAYS);
-  return date.toISOString();
+  return {
+    status: "extended_overdue",
+    effectiveDate: extended,
+    daysUntil: daysExtended,
+    nudge: "Mau reschedule atau istirahat dulu?",
+    isExtended: true,
+  };
 }

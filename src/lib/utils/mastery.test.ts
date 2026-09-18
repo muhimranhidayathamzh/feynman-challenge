@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyMasteryDecay,
   computeMasteryAfterAttempt,
+  effectiveMasteryState,
   type MasteryInput,
 } from "./mastery";
 
@@ -114,8 +115,23 @@ describe("applyMasteryDecay", () => {
     expect(applyMasteryDecay("solidified", daysAgo(90), NOW)).toBe("solidified");
     expect(applyMasteryDecay("developing", daysAgo(90), NOW)).toBe("developing");
   });
+});
 
-  it.todo(
-    "decay is only computed for display; the stored state is never updated, so the next attempt starts from the stale 'mastered' state (fixed in Prompt 1.5)",
-  );
+describe("effectiveMasteryState", () => {
+  it("returns the stored state when there was never an attempt", () => {
+    expect(effectiveMasteryState("mastered", null, NOW)).toBe("mastered");
+  });
+
+  it("applies decay from last_attempt_at", () => {
+    expect(effectiveMasteryState("mastered", daysAgo(31), NOW)).toBe("developing");
+    expect(effectiveMasteryState("mastered", daysAgo(10), NOW)).toBe("mastered");
+  });
+
+  it("a decayed challenge cannot jump to solidified on the next attempt", () => {
+    const current = effectiveMasteryState("mastered", daysAgo(40), NOW);
+    expect(current).toBe("developing");
+    expect(
+      run({ current, score: 9, previousScore: 9, masteryUpdatedAt: daysAgo(40) }),
+    ).toBe("mastered");
+  });
 });

@@ -42,7 +42,10 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        data: { display_name: displayName.trim() || null },
+        data: {
+          display_name: displayName.trim() || null,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
         emailRedirectTo:
           typeof window !== "undefined"
             ? `${window.location.origin}/api/auth/callback`

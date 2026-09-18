@@ -21,7 +21,8 @@ export function CreateForm() {
   const [plan, setPlan] = useState<GeneratedPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const today = new Date().toISOString().slice(0, 10);
+  // Local calendar day for the picker's minimum (en-CA formats as YYYY-MM-DD).
+  const today = new Date().toLocaleDateString("en-CA");
   const busy = status === "generating" || status === "creating";
   const editing = status === "idle" || status === "generating";
 
@@ -52,13 +53,11 @@ export function CreateForm() {
     setError(null);
     setStatus("creating");
 
-    const deadlineIso = deadline ? new Date(`${deadline}T23:59:59`).toISOString() : null;
-
     const result = await fetchJson("/api/challenge", CreateChallengeResponseSchema, {
       method: "POST",
       json: {
         topic: topic.trim(),
-        deadline: deadlineIso,
+        deadline: deadline || null,
         estimated_duration_sec: plan.estimated_duration_sec,
         outline: plan.outline,
         sources: plan.sources,

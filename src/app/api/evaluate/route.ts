@@ -17,9 +17,10 @@ import {
 import { EVALUATION_RESPONSE_SCHEMA, EvaluationResultSchema } from "@/lib/gemini/schemas";
 import { RECORDINGS_BUCKET, contentTypeForPath } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
-import { computeMasteryAfterAttempt } from "@/lib/utils/mastery";
+import { computeMasteryAfterAttempt, effectiveMasteryState } from "@/lib/utils/mastery";
 import { computeOverallScore, normalizeSubScores } from "@/lib/utils/scoring";
 import { computeStreakOnActivity } from "@/lib/utils/streak";
+import { getUserClock } from "@/lib/utils/user-day";
 import type { Json } from "@/types";
 
 export const runtime = "nodejs";
@@ -204,8 +205,14 @@ export async function POST(request: Request) {
       .limit(1);
     const previousScore = prevAttempts?.[0]?.overall_score ?? null;
 
+    // Start from the decay-applied state so a lapsed "mastered" challenge
+    // has to earn its way back instead of jumping to "solidified".
+    const currentState = effectiveMasteryState(
+      challenge.mastery_state,
+      challenge.last_attempt_at,
+    );
     const newState = computeMasteryAfterAttempt({
-      current: challenge.mastery_state,
+      current: currentState,
       score: overall,
       previousScore,
       masteryUpdatedAt: challenge.mastery_updated_at,
@@ -217,10 +224,12 @@ export async function POST(request: Request) {
       .select("streak_count, best_streak, last_active_date")
       .eq("id", user.id)
       .maybeSingle();
+    const { today } = await getUserClock(supabase, user.id);
     const streak = computeStreakOnActivity({
       lastActiveDate: profile?.last_active_date ?? null,
       currentStreak: profile?.streak_count ?? 0,
       bestStreak: profile?.best_streak ?? 0,
+      today,
     });
 
     // --- Persist everything in one transaction ---

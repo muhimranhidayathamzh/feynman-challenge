@@ -14,7 +14,7 @@ export const runtime = "nodejs";
 
 const CreateChallengeSchema = z.object({
   topic: z.string().trim().min(3).max(200),
-  deadline: z.iso.datetime({ offset: true }).nullable().optional(),
+  deadline: z.iso.date().nullable().optional(),
   estimated_duration_sec: z
     .number()
     .int()

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { ChallengePatchResponseSchema, OkResponseSchema } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
+import type { DeadlineInfo } from "@/lib/utils/deadline";
 import type { MasteryState } from "@/types";
 
 import { DeadlineBadge } from "./deadline-badge";
@@ -14,17 +15,11 @@ interface Props {
   id: string;
   initialTitle: string;
   masteryState: MasteryState;
-  deadline: string | null;
-  extendedDeadline: string | null;
+  /** Computed on the server in the user's timezone. */
+  deadlineInfo: DeadlineInfo;
 }
 
-export function NotebookHeader({
-  id,
-  initialTitle,
-  masteryState,
-  deadline,
-  extendedDeadline,
-}: Props) {
+export function NotebookHeader({ id, initialTitle, masteryState, deadlineInfo }: Props) {
   const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [draft, setDraft] = useState(initialTitle);
@@ -154,7 +149,7 @@ export function NotebookHeader({
 
       <div className="row" style={{ gap: "var(--space-2)", flexWrap: "wrap" }}>
         <MasteryIndicator state={masteryState} />
-        <DeadlineBadge deadline={deadline} extendedDeadline={extendedDeadline} />
+        <DeadlineBadge info={deadlineInfo} />
       </div>
     </div>
   );

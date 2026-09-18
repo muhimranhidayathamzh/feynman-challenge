@@ -42,7 +42,7 @@ async function removeRecordingsFolder(
 const PatchSchema = z
   .object({
     title: z.string().trim().min(3).max(200).optional(),
-    deadline: z.iso.datetime({ offset: true }).nullable().optional(),
+    deadline: z.iso.date().nullable().optional(),
     status: z.enum(["active", "parked", "completed"]).optional(),
   })
   .refine((value) => Object.keys(value).length > 0, {

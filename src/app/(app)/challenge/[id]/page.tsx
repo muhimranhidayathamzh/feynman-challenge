@@ -7,6 +7,9 @@ import { NotesEditor } from "@/components/challenge/notes-editor";
 import { OutlineEditor } from "@/components/challenge/outline-editor";
 import { SourceList } from "@/components/challenge/source-list";
 import { createClient } from "@/lib/supabase/server";
+import { getDeadlineInfo } from "@/lib/utils/deadline";
+import { effectiveMasteryState } from "@/lib/utils/mastery";
+import { getUserClock } from "@/lib/utils/user-day";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -35,6 +38,8 @@ export default async function ChallengePage({ params }: PageProps) {
     notFound();
   }
 
+  const clock = await getUserClock(supabase, challenge.user_id);
+
   const [{ data: outline }, { data: sources }, { data: note }] = await Promise.all([
     supabase
       .from("challenge_outlines")
@@ -57,9 +62,12 @@ export default async function ChallengePage({ params }: PageProps) {
       <NotebookHeader
         id={challenge.id}
         initialTitle={challenge.title}
-        masteryState={challenge.mastery_state}
-        deadline={challenge.deadline}
-        extendedDeadline={challenge.extended_deadline}
+        masteryState={effectiveMasteryState(
+          challenge.mastery_state,
+          challenge.last_attempt_at,
+          clock.now,
+        )}
+        deadlineInfo={getDeadlineInfo(challenge.deadline, clock.today)}
       />
 
       <div className="card stack" style={{ gap: "var(--space-4)" }}>
