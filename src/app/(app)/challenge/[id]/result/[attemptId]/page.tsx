@@ -7,6 +7,7 @@ import { parseStoredFollowUps } from "@/lib/utils/followups";
 import { RECORDINGS_BUCKET } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
 import { parseStoredCoverage } from "@/lib/utils/coverage";
+import { compareCoverage, matchCoverageToOutline } from "@/lib/utils/coverage-progress";
 import type { Json } from "@/types";
 
 type PageProps = { params: Promise<{ id: string; attemptId: string }> };
@@ -68,6 +69,7 @@ export default async function ResultPage({ params }: PageProps) {
     { data: historyRows },
     { data: outlineRows },
     { data: followupRows },
+    { data: previousAttempt },
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase
@@ -84,7 +86,34 @@ export default async function ResultPage({ params }: PageProps) {
       .from("attempt_followups")
       .select("question_index, transcript, verdict, feedback, hint")
       .eq("attempt_id", attemptId),
+    // The previous SCORED attempt (rejected recordings have no coverage).
+    supabase
+      .from("attempts")
+      .select("attempt_number, coverage")
+      .eq("challenge_id", id)
+      .eq("evaluation_status", "completed")
+      .not("overall_score", "is", null)
+      .lt("attempt_number", attempt.attempt_number)
+      .order("attempt_number", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
+
+  const outline = outlineRows ?? [];
+  const coverage = parseStoredCoverage(attempt.coverage);
+  const outlineIds = matchCoverageToOutline(coverage, outline);
+  const coverageRows = coverage.map((entry, index) => ({
+    ...entry,
+    outline_id: outlineIds[index] ?? null,
+  }));
+  const previousCoverage = parseStoredCoverage(previousAttempt?.coverage ?? null);
+  const comparison =
+    previousAttempt && coverage.length > 0 && previousCoverage.length > 0
+      ? {
+          previousAttemptNumber: previousAttempt.attempt_number,
+          result: compareCoverage(coverage, previousCoverage, outline),
+        }
+      : null;
 
   const followUpQuestions = parseStoredFollowUps(attempt.follow_up_questions);
 
@@ -125,7 +154,8 @@ export default async function ResultPage({ params }: PageProps) {
       evaluationError={attempt.evaluation_error}
       overallScore={attempt.overall_score}
       subScores={subScores}
-      coverage={parseStoredCoverage(attempt.coverage)}
+      coverage={coverageRows}
+      comparison={comparison}
       audioIssue={attempt.audio_issue}
       unexplainedJargon={toStringArray(attempt.unexplained_jargon)}
       feedback={attempt.feedback}
@@ -141,7 +171,7 @@ export default async function ResultPage({ params }: PageProps) {
             userId={user.id}
             questions={followUpQuestions}
             initialAnswers={followupRows ?? []}
-            outlineTitles={(outlineRows ?? []).map((row) => row.title)}
+            outlineTitles={outline.map((row) => row.title)}
           />
         ) : null
       }

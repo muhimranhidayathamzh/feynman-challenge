@@ -1,27 +1,66 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/field";
 import { OkResponseSchema, OutlineItemEnvelopeSchema } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
+import { outlineAnchorId, type TrendPoint } from "@/lib/utils/coverage-progress";
+
+import { CoverageTrendLegend } from "./coverage-trend";
 
 import { OutlineItem, type OutlineItemData } from "./outline-item";
 
 interface Props {
   challengeId: string;
   initialItems: OutlineItemData[];
+  /** Coverage trend per outline item id (items never assessed are absent). */
+  trend: Record<string, TrendPoint[]>;
 }
 
-export function OutlineEditor({ challengeId, initialItems }: Props) {
+const HIGHLIGHT_MS = 4000;
+const ANCHOR_PREFIX = `#${outlineAnchorId("")}`;
+
+export function OutlineEditor({ challengeId, initialItems, trend }: Props) {
   const [items, setItems] = useState<OutlineItemData[]>(initialItems);
   const [newTitle, setNewTitle] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+
+  // Arriving from "Pelajari lagi" (#outline-<id>): bring that point into view,
+  // move focus to it, and highlight it for a moment.
+  useEffect(() => {
+    function reveal() {
+      const { hash } = window.location;
+      if (!hash.startsWith(ANCHOR_PREFIX)) return;
+      const id = decodeURIComponent(hash.slice(ANCHOR_PREFIX.length));
+      const element = document.getElementById(outlineAnchorId(id));
+      if (!element) return;
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      element.scrollIntoView({
+        block: "center",
+        behavior: reduceMotion ? "auto" : "smooth",
+      });
+      element.focus({ preventScroll: true });
+      setHighlightId(id);
+    }
+    reveal();
+    window.addEventListener("hashchange", reveal);
+    return () => window.removeEventListener("hashchange", reveal);
+  }, []);
+
+  useEffect(() => {
+    if (!highlightId) return;
+    const timer = setTimeout(() => setHighlightId(null), HIGHLIGHT_MS);
+    return () => clearTimeout(timer);
+  }, [highlightId]);
+
+  const hasTrend = items.some((item) => trend[item.id] !== undefined);
 
   const base = `/api/challenge/${challengeId}/outline`;
 
@@ -129,6 +168,8 @@ export function OutlineEditor({ challengeId, initialItems }: Props) {
         </div>
       )}
 
+      {hasTrend && <CoverageTrendLegend />}
+
       {items.length === 0 ? (
         <p className="text-muted text-sm">Belum ada poin outline.</p>
       ) : (
@@ -142,6 +183,8 @@ export function OutlineEditor({ challengeId, initialItems }: Props) {
               disabled={busy}
               dragging={dragIndex === index}
               dropTarget={overIndex === index && dragIndex !== index}
+              highlighted={highlightId === item.id}
+              trend={trend[item.id]}
               onSave={handleSave}
               onDelete={handleDelete}
               onMove={handleMove}

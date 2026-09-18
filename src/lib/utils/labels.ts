@@ -1,6 +1,6 @@
 import { Book, FileText, Link, ScrollText, Video, type LucideIcon } from "lucide-react";
 
-import type { HintLevel, MasteryState, SourceType } from "@/types";
+import type { CoverageStatus, HintLevel, MasteryState, SourceType } from "@/types";
 
 /** Display metadata for each learning-source type. */
 export const SOURCE_TYPE_META: Record<SourceType, { icon: LucideIcon; label: string }> = {
@@ -19,6 +19,13 @@ export const MASTERY_META: Record<MasteryState, { label: string; color: string }
   proficient: { label: "Cakap", color: "var(--mastery-proficient)" },
   mastered: { label: "Dikuasai", color: "var(--mastery-mastered)" },
   solidified: { label: "Mantap", color: "var(--mastery-solidified)" },
+};
+
+/** Short label for a coverage verdict on one outline point. */
+export const COVERAGE_STATUS_LABEL: Record<CoverageStatus, string> = {
+  covered: "Tercakup",
+  partial: "Sebagian",
+  missing: "Belum dibahas",
 };
 
 /** Human-friendly recording-duration estimate, e.g. "± 3 menit". */

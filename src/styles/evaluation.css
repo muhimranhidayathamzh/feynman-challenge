@@ -66,6 +66,34 @@
   font-style: italic;
 }
 
+/* --- Point-by-point comparison (Prompt 3.3) --- */
+.compare-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+}
+
+.compare-row > .font-medium {
+  flex: 1 1 12rem;
+}
+
+.compare-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--text-muted);
+}
+
+.compare-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
 .jargon-list {
   display: flex;
   flex-wrap: wrap;

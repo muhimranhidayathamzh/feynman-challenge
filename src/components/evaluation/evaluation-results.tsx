@@ -30,10 +30,12 @@ import {
   describeEvaluationError,
 } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
-import type { AudioIssue, Coverage, EvaluationStatus } from "@/types";
+import type { CoverageComparison as Comparison } from "@/lib/utils/coverage-progress";
+import type { AudioIssue, EvaluationStatus } from "@/types";
 
 import { AttemptHistory } from "./attempt-history";
-import { CoverageChecklist } from "./coverage-checklist";
+import { CoverageChecklist, type CoverageRow } from "./coverage-checklist";
+import { CoverageComparison } from "./coverage-comparison";
 import { FeedbackCard } from "./feedback-card";
 import { ScoreRing } from "./score-ring";
 import { SubScores } from "./sub-scores";
@@ -50,7 +52,9 @@ interface Props {
   evaluationError: string | null;
   overallScore: number | null;
   subScores: { comprehensiveness: number; accuracy: number; clarity: number } | null;
-  coverage: Coverage[];
+  coverage: CoverageRow[];
+  /** Per-point progress against the previous scored attempt, if any. */
+  comparison: { previousAttemptNumber: number; result: Comparison } | null;
   /** Set when the audio could not be judged: the attempt has no score. */
   audioIssue: AudioIssue | null;
   unexplainedJargon: string[];
@@ -284,8 +288,16 @@ export function EvaluationResults(props: Props) {
       {props.coverage.length > 0 && (
         <Card className="stack gap-3">
           <CardTitle icon={ListChecks}>Cakupan Materi</CardTitle>
-          <CoverageChecklist items={props.coverage} />
+          <CoverageChecklist items={props.coverage} challengeId={props.challengeId} />
         </Card>
+      )}
+
+      {props.comparison && (
+        <CoverageComparison
+          challengeId={props.challengeId}
+          previousAttemptNumber={props.comparison.previousAttemptNumber}
+          comparison={props.comparison.result}
+        />
       )}
 
       <Card className="stack gap-3">

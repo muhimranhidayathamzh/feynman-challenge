@@ -6,6 +6,9 @@ import { ArrowDown, ArrowUp, Check, GripVertical, Pencil, Trash2 } from "lucide-
 import { Button, IconButton } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
+import { outlineAnchorId, type TrendPoint } from "@/lib/utils/coverage-progress";
+
+import { CoverageTrend } from "./coverage-trend";
 
 export interface OutlineItemData {
   id: string;
@@ -20,6 +23,10 @@ interface Props {
   disabled: boolean;
   dragging: boolean;
   dropTarget: boolean;
+  /** Briefly highlighted after arriving via "Pelajari lagi". */
+  highlighted: boolean;
+  /** Coverage of this point in the last attempts (oldest first). */
+  trend: TrendPoint[] | undefined;
   onSave: (id: string, title: string, description: string) => void;
   onDelete: (id: string) => void;
   onMove: (index: number, dir: -1 | 1) => void;
@@ -35,6 +42,8 @@ export function OutlineItem({
   disabled,
   dragging,
   dropTarget,
+  highlighted,
+  trend,
   onSave,
   onDelete,
   onMove,
@@ -59,12 +68,14 @@ export function OutlineItem({
     setEditing(false);
   }
 
-  const className = `editor-row${dragging ? " dragging" : ""}${
+  const className = `editor-row focus-target${dragging ? " dragging" : ""}${
     dropTarget ? " drop-target" : ""
-  }`;
+  }${highlighted ? " is-highlighted" : ""}`;
 
   return (
     <li
+      id={outlineAnchorId(item.id)}
+      tabIndex={-1}
       className={className}
       draggable={!editing && !disabled}
       onDragStart={() => onDragStart(index)}
@@ -116,6 +127,7 @@ export function OutlineItem({
           {item.description && (
             <span className="text-secondary text-sm">{item.description}</span>
           )}
+          {trend && <CoverageTrend points={trend} />}
         </div>
       )}
 

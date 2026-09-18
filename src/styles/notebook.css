@@ -59,6 +59,80 @@
   align-items: center;
 }
 
+.editor-row {
+  /* Clear the sticky header when scrolled to via #outline-<id>. */
+  scroll-margin-top: calc(var(--header-h) + var(--space-4));
+}
+
+/* Arrived via "Pelajari lagi" on the results page (Prompt 3.3). */
+.editor-row.is-highlighted {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  animation: outlineHighlight 1.2s var(--ease-out) 2;
+}
+
+@keyframes outlineHighlight {
+  50% {
+    box-shadow: 0 0 0 6px var(--accent-glow);
+  }
+}
+
+/* --- Coverage trend dots (Prompt 3.3) --- */
+.coverage-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.trend-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.trend-dot {
+  --dot-color: var(--text-muted);
+  display: inline-block;
+  width: var(--space-3);
+  height: var(--space-3);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--dot-color);
+  flex-shrink: 0;
+}
+
+.trend-dot-covered {
+  --dot-color: var(--success);
+  background: var(--dot-color);
+}
+
+.trend-dot-partial {
+  --dot-color: var(--warning);
+  background: linear-gradient(90deg, var(--dot-color) 50%, transparent 50%);
+}
+
+.trend-dot-missing {
+  --dot-color: var(--error);
+}
+
+.trend-dot-none {
+  border-style: dashed;
+  opacity: 0.6;
+}
+
+.trend-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+.trend-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
 .editor-row.dragging {
   opacity: 0.5;
   border-color: var(--accent-primary);
