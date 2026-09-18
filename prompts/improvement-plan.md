@@ -359,7 +359,7 @@ Prompt 3.5 — Siap dipamerkan. Ikuti "Aturan Umum" di prompts/improvement-plan.
 | 1.2 | Upload langsung & kebersihan storage | ✅ |
 | 1.3 | Evaluasi atomik, skor server, Gemini tangguh, kuota | ✅ |
 | 1.4 | Client tangguh | ✅ |
-| 1.5 | Zona waktu & state turunan | ⬜ |
+| 1.5 | Zona waktu & state turunan | ✅ |
 | 1.6 | Kualitas AI: hint + evaluasi terpercaya | ⬜ |
 | 2.1 | UI primitives & token | ⬜ |
 | 2.2 | Satu bahasa & aksesibilitas | ⬜ |
