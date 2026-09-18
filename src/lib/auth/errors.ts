@@ -32,6 +32,8 @@ const MESSAGES: Record<string, string> = {
   reauthentication_needed:
     "Demi keamanan, keluar lalu masuk lagi sebelum mengganti kata sandi.",
   oauth_provider_not_supported: "Masuk dengan Google belum diaktifkan di server.",
+  anonymous_provider_disabled:
+    "Mode demo belum diaktifkan di server. Daftar akun gratis dulu.",
 };
 
 /** Older API versions return no code; recognise them by their message. */
@@ -41,6 +43,7 @@ const MESSAGE_FALLBACKS: [RegExp, string][] = [
   [/already registered|already exists/i, "user_already_exists"],
   [/password should be at least/i, "weak_password"],
   [/rate limit/i, "over_request_rate_limit"],
+  [/anonymous sign-ins are disabled/i, "anonymous_provider_disabled"],
   [/provider is not enabled|unsupported provider/i, "oauth_provider_not_supported"],
 ];
 

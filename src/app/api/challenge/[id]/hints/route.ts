@@ -30,7 +30,9 @@ export async function POST(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
     }
 
-    const result = await regenerateMissingHints(supabase, id);
+    const result = await regenerateMissingHints(supabase, id, {
+      anonymous: user.is_anonymous ?? false,
+    });
     switch (result.status) {
       case "ok": {
         const payload: HintsResponse = { updated: result.updated };

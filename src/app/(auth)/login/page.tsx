@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { LoginForm } from "@/components/auth/login-form";
+import { getAuthFeatures } from "@/lib/auth/features";
 import { safeNext } from "@/lib/auth/redirect";
 
 export const metadata: Metadata = { title: "Masuk" };
@@ -26,5 +27,12 @@ export default async function LoginPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const code = Array.isArray(params.error) ? params.error[0] : params.error;
   const initialError = (code && CALLBACK_ERRORS[code]) || null;
-  return <LoginForm next={safeNext(params.next)} initialError={initialError} />;
+  const features = await getAuthFeatures();
+  return (
+    <LoginForm
+      next={safeNext(params.next)}
+      initialError={initialError}
+      features={features}
+    />
+  );
 }

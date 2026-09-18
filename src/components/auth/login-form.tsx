@@ -11,6 +11,9 @@ import { Field, Input } from "@/components/ui/field";
 import { authErrorCode, authErrorMessage } from "@/lib/auth/errors";
 import { createClient } from "@/lib/supabase/client";
 
+import type { AuthFeatures } from "@/lib/auth/auth-features";
+
+import { DemoButton } from "./demo-button";
 import { GoogleButton } from "./google-button";
 
 interface Props {
@@ -18,9 +21,11 @@ interface Props {
   next: string;
   /** Error forwarded by the auth callback (?error=), if any. */
   initialError: string | null;
+  /** Provider switches from Supabase; disabled options are hidden. */
+  features: AuthFeatures;
 }
 
-export function LoginForm({ next, initialError }: Props) {
+export function LoginForm({ next, initialError, features }: Props) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -99,11 +104,15 @@ export function LoginForm({ next, initialError }: Props) {
         </div>
       )}
 
-      <GoogleButton next={next} onError={setError} />
+      {features.google && (
+        <>
+          <GoogleButton next={next} onError={setError} />
 
-      <div className="divider" role="separator">
-        <span>atau dengan email</span>
-      </div>
+          <div className="divider" role="separator">
+            <span>atau dengan email</span>
+          </div>
+        </>
+      )}
 
       <form className="stack" onSubmit={handleSubmit}>
         <Field id="email" label="Email">
@@ -156,6 +165,22 @@ export function LoginForm({ next, initialError }: Props) {
           Daftar
         </Link>
       </p>
+
+      {features.anonymous && (
+        <>
+          <div className="divider" role="separator">
+            <span>atau lihat dulu</span>
+          </div>
+
+          <div className="stack gap-2">
+            <DemoButton onError={setError} />
+            <p className="text-muted text-xs text-center">
+              Mode demo berisi tantangan contoh lengkap dengan hasil evaluasinya. Kuota AI
+              dibatasi, dan progresmu bisa disimpan jadi akun kapan saja.
+            </p>
+          </div>
+        </>
+      )}
     </Card>
   );
 }

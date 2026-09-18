@@ -20,7 +20,7 @@ const EXTRA_ASSETS = ["/icon.svg", "/icons/icon-192.png"];
 
 /** Build assets referenced by an HTML document. */
 function staticAssetsIn(html) {
-  const found = html.match(/\/_next\/static\/[^"'\s\<>()]+/g) || [];
+  const found = html.match(/\/_next\/static\/[^"'\s\\<>()]+/g) || [];
   return [...new Set(found)];
 }
 

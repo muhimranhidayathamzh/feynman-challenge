@@ -51,7 +51,9 @@ export async function POST(request: Request) {
     }
 
     // --- Quota ---
-    const quota = await consumeAiQuota(supabase, "generate");
+    const quota = await consumeAiQuota(supabase, "generate", {
+      anonymous: user.is_anonymous ?? false,
+    });
     if (!quota.allowed) {
       return NextResponse.json(
         {

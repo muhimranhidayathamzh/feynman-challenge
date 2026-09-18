@@ -31,10 +31,14 @@ const ReorderSchema = z.object({
  * (the user never waits for Gemini here). The recording screen re-checks and
  * fills any gap, so a failure here is only logged.
  */
-function scheduleHintRegeneration(supabase: DB, challengeId: string): void {
+function scheduleHintRegeneration(
+  supabase: DB,
+  challengeId: string,
+  anonymous: boolean,
+): void {
   after(async () => {
     try {
-      const result = await regenerateMissingHints(supabase, challengeId);
+      const result = await regenerateMissingHints(supabase, challengeId, { anonymous });
       if (result.status !== "ok" && result.status !== "none-missing") {
         console.warn(`[outline] hint regeneration skipped: ${result.status}`);
       }
@@ -101,7 +105,7 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     // A new point starts without hints (column defaults); fill them in later.
-    scheduleHintRegeneration(supabase, id);
+    scheduleHintRegeneration(supabase, id, user.is_anonymous ?? false);
     return NextResponse.json({ item: created }, { status: 201 });
   } catch (error) {
     console.error("[outline POST] failed:", error);
@@ -172,7 +176,9 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Poin tidak ditemukan." }, { status: 404 });
     }
 
-    if (contentChanged) scheduleHintRegeneration(supabase, id);
+    if (contentChanged) {
+      scheduleHintRegeneration(supabase, id, user.is_anonymous ?? false);
+    }
     return NextResponse.json({ item: updated });
   } catch (error) {
     console.error("[outline PATCH] failed:", error);

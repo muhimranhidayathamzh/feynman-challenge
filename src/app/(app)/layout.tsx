@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { DemoBanner } from "@/components/layout/demo-banner";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { createClient } from "@/lib/supabase/server";
@@ -38,10 +39,15 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <a href="#main-content" className="skip-link">
         Lewati ke konten utama
       </a>
-      <Header displayName={displayName} streakCount={streakCount} />
+      <Header
+        displayName={displayName}
+        streakCount={streakCount}
+        isAnonymous={user?.is_anonymous ?? false}
+      />
       <div className="app-body">
         <Sidebar />
         <main id="main-content" className="app-main" tabIndex={-1}>
+          {user?.is_anonymous && <DemoBanner />}
           {children}
         </main>
       </div>

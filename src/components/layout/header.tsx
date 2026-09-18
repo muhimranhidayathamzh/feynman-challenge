@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Brain, Flame, LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Icon } from "@/components/ui/icon";
 import { useAuth } from "@/lib/auth/auth-provider";
 
@@ -14,12 +15,15 @@ interface Props {
   displayName: string;
   /** Live streak: already 0 when the streak is broken. */
   streakCount: number;
+  /** Demo account: logging out loses its data for good, so confirm first. */
+  isAnonymous: boolean;
 }
 
-export function Header({ displayName, streakCount }: Props) {
+export function Header({ displayName, streakCount, isAnonymous }: Props) {
   const { signOut } = useAuth();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [confirmDemoLogout, setConfirmDemoLogout] = useState(false);
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -52,12 +56,23 @@ export function Header({ displayName, streakCount }: Props) {
           variant="ghost"
           size="sm"
           icon={LogOut}
-          onClick={handleLogout}
+          onClick={isAnonymous ? () => setConfirmDemoLogout(true) : handleLogout}
           loading={loggingOut}
         >
           Keluar
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={confirmDemoLogout}
+        title="Keluar dari mode demo?"
+        message="Akun demo tidak punya email atau kata sandi. Setelah keluar, tantangan dan hasil di akun ini tidak bisa dibuka lagi. Simpan progres dulu di Pengaturan jika ingin menyimpannya."
+        confirmLabel="Tetap keluar"
+        tone="danger"
+        busy={loggingOut}
+        onConfirm={() => void handleLogout()}
+        onCancel={() => setConfirmDemoLogout(false)}
+      />
     </header>
   );
 }

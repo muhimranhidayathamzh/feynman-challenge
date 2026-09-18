@@ -251,3 +251,11 @@
 .badge-accent {
   color: var(--accent-text);
 }
+
+/* --- Demo account conversion steps (Prompt 3.5) --- */
+.convert-steps {
+  list-style: decimal;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-1);
+}

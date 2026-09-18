@@ -120,7 +120,9 @@ export async function POST(request: Request) {
   };
 
   // --- Quota: counted only after the claim, so retries aren't double-charged ---
-  const quota = await consumeAiQuota(supabase, "evaluate");
+  const quota = await consumeAiQuota(supabase, "evaluate", {
+    anonymous: user.is_anonymous ?? false,
+  });
   if (!quota.allowed) {
     await markError("quota");
     return NextResponse.json(

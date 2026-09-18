@@ -26,7 +26,7 @@ export type HintsRegenResult =
 export async function regenerateMissingHints(
   supabase: SupabaseClient<Database>,
   challengeId: string,
-  options: { budgetMs?: number } = {},
+  options: { budgetMs?: number; anonymous?: boolean } = {},
 ): Promise<HintsRegenResult> {
   const [{ data: challenge }, { data: items, error: itemsError }] = await Promise.all([
     supabase.from("challenges").select("title").eq("id", challengeId).maybeSingle(),
@@ -45,7 +45,9 @@ export async function regenerateMissingHints(
     .filter(({ item }) => isHintMissing(item));
   if (targets.length === 0) return { status: "none-missing" };
 
-  const quota = await consumeAiQuota(supabase, "hints");
+  const quota = await consumeAiQuota(supabase, "hints", {
+    anonymous: options.anonymous ?? false,
+  });
   if (!quota.allowed) {
     return {
       status: "quota",
