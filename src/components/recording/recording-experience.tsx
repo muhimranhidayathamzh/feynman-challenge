@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, Mic, Send } from "lucide-react";
 
+import { Button, ButtonLink } from "@/components/ui/button";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import {
   AttemptCreateResponseSchema,
@@ -229,12 +230,17 @@ export function RecordingExperience({
 
   return (
     <main className="record-shell">
-      <div className="row-between" style={{ width: "100%" }}>
-        <Link href={`/challenge/${challengeId}`} className="btn btn-ghost btn-sm">
-          ← Batal
-        </Link>
+      <div className="row-between w-full">
+        <ButtonLink
+          href={`/challenge/${challengeId}`}
+          variant="ghost"
+          size="sm"
+          icon={ArrowLeft}
+        >
+          Batal
+        </ButtonLink>
         {recording && (
-          <span className="row text-sm" style={{ gap: "var(--space-2)" }}>
+          <span className="row text-sm gap-2">
             <span className="record-rec-dot" aria-hidden="true" />
             Merekam…
           </span>
@@ -248,36 +254,28 @@ export function RecordingExperience({
       <WaveformVisualizer stream={recorder.stream} active={recording} />
 
       {recorder.error && (
-        <div className="alert alert-error" role="alert" style={{ width: "100%" }}>
+        <div className="alert alert-error w-full" role="alert">
           {recorder.error.message}
         </div>
       )}
       {submitError && (
-        <div className="alert alert-error" role="alert" style={{ width: "100%" }}>
+        <div className="alert alert-error w-full" role="alert">
           {submitError}
         </div>
       )}
 
       {phase === "failed" && pending ? (
-        <div className="stack" style={{ width: "100%", gap: "var(--space-3)" }}>
+        <div className="stack gap-3 w-full">
           <p className="text-secondary text-sm">
             Rekamanmu ({pending.durationSeconds} detik) masih tersimpan di perangkat ini.
           </p>
           <div className="record-controls">
-            <button
-              type="button"
-              className="btn btn-primary btn-lg"
-              onClick={handleResend}
-            >
-              🔁 Kirim ulang
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary btn-lg"
-              onClick={handleRerecord}
-            >
-              🎙️ Rekam ulang
-            </button>
+            <Button size="lg" icon={Send} onClick={handleResend}>
+              Kirim ulang
+            </Button>
+            <Button variant="secondary" size="lg" icon={Mic} onClick={handleRerecord}>
+              Rekam ulang
+            </Button>
           </div>
         </div>
       ) : (
@@ -302,7 +300,7 @@ export function RecordingExperience({
       )}
 
       {submitting && (
-        <div className="stack" style={{ width: "100%", gap: "var(--space-2)" }}>
+        <div className="stack gap-2 w-full">
           <div
             className="bar-track"
             role="progressbar"
@@ -312,8 +310,8 @@ export function RecordingExperience({
             aria-label="Progres unggah"
           >
             <div
-              className="bar-fill"
-              style={{ width: `${progressPct}%`, background: "var(--accent-primary)" }}
+              className="bar-fill bar-fill-accent"
+              style={{ width: `${progressPct}%` }}
             />
           </div>
           <span className="text-secondary text-sm" aria-live="polite">

@@ -1,0 +1,100 @@
+/* ---------------------------------------------------------------------------
+   Notebook editor (outline / sources / notes)
+   ------------------------------------------------------------------------- */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: 1;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.icon-btn:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.icon-btn[data-danger="true"]:hover:not(:disabled) {
+  color: var(--error);
+}
+
+.drag-handle {
+  cursor: grab;
+  color: var(--text-muted);
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.editor-row,
+.source-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  transition:
+    border-color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.source-row {
+  align-items: center;
+}
+
+.editor-row.dragging {
+  opacity: 0.5;
+  border-color: var(--accent-primary);
+}
+
+.editor-row.drop-target {
+  border-color: var(--accent-primary);
+}
+
+.save-status {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* --- Primitives in the notebook (Prompt 2.1) --- */
+.textarea-compact {
+  min-height: 4rem;
+}
+
+.textarea-notes {
+  min-height: 10rem;
+}
+
+.drag-handle {
+  display: inline-flex;
+  padding-top: 0.15rem;
+}
+
+.source-type-icon {
+  color: var(--text-secondary);
+  flex: 0 0 auto;
+}
+
+.mastery-dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: var(--radius-full);
+}

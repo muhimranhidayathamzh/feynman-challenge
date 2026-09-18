@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ClipboardList, Library, Mic, NotebookPen } from "lucide-react";
 
 import { NotebookHeader } from "@/components/challenge/notebook-header";
 import { NotesEditor } from "@/components/challenge/notes-editor";
 import { OutlineEditor } from "@/components/challenge/outline-editor";
 import { SourceList } from "@/components/challenge/source-list";
+import { ButtonLink } from "@/components/ui/button";
+import { Card, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { getDeadlineInfo } from "@/lib/utils/deadline";
 import { effectiveMasteryState } from "@/lib/utils/mastery";
@@ -55,10 +57,7 @@ export default async function ChallengePage({ params }: PageProps) {
   ]);
 
   return (
-    <section
-      className="stack"
-      style={{ gap: "var(--space-6)", maxWidth: "44rem", marginInline: "auto" }}
-    >
+    <section className="page">
       <NotebookHeader
         id={challenge.id}
         initialTitle={challenge.title}
@@ -70,8 +69,8 @@ export default async function ChallengePage({ params }: PageProps) {
         deadlineInfo={getDeadlineInfo(challenge.deadline, clock.today)}
       />
 
-      <div className="card stack" style={{ gap: "var(--space-4)" }}>
-        <h3>📋 Learning Outline</h3>
+      <Card className="stack gap-4">
+        <CardTitle icon={ClipboardList}>Learning Outline</CardTitle>
         <OutlineEditor
           challengeId={challenge.id}
           initialItems={(outline ?? []).map((item) => ({
@@ -80,10 +79,10 @@ export default async function ChallengePage({ params }: PageProps) {
             description: item.description,
           }))}
         />
-      </div>
+      </Card>
 
-      <div className="card stack" style={{ gap: "var(--space-4)" }}>
-        <h3>📚 Sumber Belajar</h3>
+      <Card className="stack gap-4">
+        <CardTitle icon={Library}>Sumber Belajar</CardTitle>
         <SourceList
           challengeId={challenge.id}
           initialSources={(sources ?? []).map((source) => ({
@@ -93,19 +92,16 @@ export default async function ChallengePage({ params }: PageProps) {
             type: source.source_type,
           }))}
         />
-      </div>
+      </Card>
 
-      <div className="card stack" style={{ gap: "var(--space-4)" }}>
-        <h3>✏️ Catatan</h3>
+      <Card className="stack gap-4">
+        <CardTitle icon={NotebookPen}>Catatan</CardTitle>
         <NotesEditor challengeId={challenge.id} initialContent={note?.content ?? ""} />
-      </div>
+      </Card>
 
-      <Link
-        href={`/challenge/${challenge.id}/record`}
-        className="btn btn-primary btn-lg btn-block"
-      >
-        🎙️ Start Recording
-      </Link>
+      <ButtonLink href={`/challenge/${challenge.id}/record`} size="lg" block icon={Mic}>
+        Start Recording
+      </ButtonLink>
     </section>
   );
 }

@@ -3,7 +3,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  BookOpen,
+  ChartColumn,
+  CircleAlert,
+  Headphones,
+  Hourglass,
+  ListChecks,
+  LoaderCircle,
+  MessageSquareText,
+  Mic,
+  Puzzle,
+  RefreshCw,
+  RotateCcw,
+} from "lucide-react";
 
+import { Button, ButtonLink } from "@/components/ui/button";
+import { Card, CardTitle } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
 import {
   AUDIO_ISSUE_MESSAGES,
   AttemptStatusResponseSchema,
@@ -126,38 +144,30 @@ export function EvaluationResults(props: Props) {
     return stopPolling;
   }, [props.status, runEvaluation, startPolling, stopPolling]);
 
+  const notebookHref = `/challenge/${props.challengeId}`;
+  const recordHref = `/challenge/${props.challengeId}/record`;
+
   // ---- Completed, but the audio could not be judged (no score) ----
   if (props.status === "completed" && props.audioIssue && props.audioIssue !== "none") {
     return (
-      <section
-        className="center"
-        style={{ minHeight: "60vh", padding: "var(--space-4)" }}
-      >
-        <div
-          className="card stack text-center"
-          style={{ gap: "var(--space-4)", maxWidth: "30rem" }}
-        >
-          <h2>🎧 Rekaman belum bisa dinilai</h2>
+      <section className="state-screen">
+        <Card className="state-card">
+          <Icon icon={Headphones} size={40} className="state-icon" />
+          <h2>Rekaman belum bisa dinilai</h2>
           <p className="text-secondary">{AUDIO_ISSUE_MESSAGES[props.audioIssue]}</p>
           {props.feedback && <p className="text-secondary text-sm">{props.feedback}</p>}
           <p className="text-muted text-sm">
             Percobaan ini tidak memengaruhi skor, mastery, maupun streak-mu.
           </p>
-          <div
-            className="row"
-            style={{ justifyContent: "center", gap: "var(--space-3)" }}
-          >
-            <Link
-              href={`/challenge/${props.challengeId}/record`}
-              className="btn btn-primary"
-            >
-              🎙️ Rekam ulang
-            </Link>
-            <Link href={`/challenge/${props.challengeId}`} className="btn btn-ghost">
+          <div className="state-actions">
+            <ButtonLink href={recordHref} icon={Mic}>
+              Rekam ulang
+            </ButtonLink>
+            <ButtonLink href={notebookHref} variant="ghost">
               Kembali
-            </Link>
+            </ButtonLink>
           </div>
-        </div>
+        </Card>
       </section>
     );
   }
@@ -165,79 +175,52 @@ export function EvaluationResults(props: Props) {
   // ---- Not yet completed: evaluating / polling / stale / error ----
   if (props.status !== "completed" || props.overallScore === null || !props.subScores) {
     return (
-      <section
-        className="center"
-        style={{ minHeight: "60vh", padding: "var(--space-4)" }}
-      >
+      <section className="state-screen">
         {view === "error" ? (
-          <div
-            className="card stack text-center"
-            style={{ gap: "var(--space-4)", maxWidth: "28rem" }}
-          >
-            <h2>😕 Evaluasi gagal</h2>
+          <Card className="state-card">
+            <Icon icon={CircleAlert} size={40} className="state-icon" />
+            <h2>Evaluasi gagal</h2>
             <p className="text-secondary">{error}</p>
-            <div
-              className="row"
-              style={{ justifyContent: "center", gap: "var(--space-3)" }}
-            >
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => void runEvaluation()}
-              >
+            <div className="state-actions">
+              <Button icon={RotateCcw} onClick={() => void runEvaluation()}>
                 Coba lagi
-              </button>
-              <Link href={`/challenge/${props.challengeId}`} className="btn btn-ghost">
+              </Button>
+              <ButtonLink href={notebookHref} variant="ghost">
                 Kembali
-              </Link>
+              </ButtonLink>
             </div>
-          </div>
+          </Card>
         ) : view === "stale" ? (
-          <div
-            className="card stack text-center"
-            style={{ gap: "var(--space-4)", maxWidth: "28rem" }}
-          >
-            <h2>⏳ Masih diproses</h2>
+          <Card className="state-card">
+            <Icon icon={Hourglass} size={40} className="state-icon" />
+            <h2>Masih diproses</h2>
             <p className="text-secondary">
               Evaluasi memakan waktu lebih lama dari biasanya. Muat ulang untuk melihat
               status terbaru.
             </p>
-            <div
-              className="row"
-              style={{ justifyContent: "center", gap: "var(--space-3)" }}
-            >
-              <button type="button" className="btn btn-primary" onClick={startPolling}>
+            <div className="state-actions">
+              <Button icon={RefreshCw} onClick={startPolling}>
                 Muat ulang
-              </button>
-              <Link href={`/challenge/${props.challengeId}`} className="btn btn-ghost">
+              </Button>
+              <ButtonLink href={notebookHref} variant="ghost">
                 Kembali
-              </Link>
+              </ButtonLink>
             </div>
-          </div>
+          </Card>
         ) : (
-          <div
-            className="glass stack center text-center animate-fade-in"
-            style={{
-              gap: "var(--space-4)",
-              maxWidth: "28rem",
-              padding: "var(--space-8)",
-            }}
+          <Card
+            variant="glass"
+            className="state-card evaluating-card animate-fade-in"
             aria-live="polite"
             aria-busy="true"
           >
-            <span
-              className="animate-spin"
-              style={{ fontSize: "2rem" }}
-              aria-hidden="true"
-            >
-              ◌
-            </span>
+            <Icon icon={LoaderCircle} size={36} className="state-icon animate-spin" />
             <h2>Menganalisis penjelasanmu…</h2>
             <p className="text-secondary">
               AI sedang mendengarkan rekaman dan menilainya berdasarkan outline. Biasanya
               butuh 10–30 detik.
             </p>
-          </div>
+          </Card>
         )}
       </section>
     );
@@ -245,13 +228,11 @@ export function EvaluationResults(props: Props) {
 
   // ---- Completed ----
   return (
-    <section
-      className="stack"
-      style={{ gap: "var(--space-6)", maxWidth: "44rem", marginInline: "auto" }}
-    >
-      <div className="stack" style={{ gap: "var(--space-1)" }}>
-        <Link href={`/challenge/${props.challengeId}`} className="text-secondary text-sm">
-          ← {props.challengeTitle}
+    <section className="page">
+      <div className="stack gap-1">
+        <Link href={notebookHref} className="back-link text-secondary text-sm">
+          <Icon icon={ArrowLeft} size={14} />
+          {props.challengeTitle}
         </Link>
         <h1>
           Hasil Evaluasi{" "}
@@ -259,38 +240,38 @@ export function EvaluationResults(props: Props) {
         </h1>
       </div>
 
-      <div className="card center animate-fade-in-up">
+      <Card className="center animate-fade-in-up">
         <ScoreRing score={props.overallScore} previousScore={props.previousScore} />
-      </div>
+      </Card>
 
-      <div className="card stack animate-fade-in-up" style={{ gap: "var(--space-4)" }}>
-        <h3>Rincian Skor</h3>
+      <Card className="stack gap-4 animate-fade-in-up">
+        <CardTitle icon={ChartColumn}>Rincian Skor</CardTitle>
         <SubScores
           comprehensiveness={props.subScores.comprehensiveness}
           accuracy={props.subScores.accuracy}
           clarity={props.subScores.clarity}
         />
-      </div>
+      </Card>
 
       {props.coverage.length > 0 && (
-        <div className="card stack" style={{ gap: "var(--space-3)" }}>
-          <h3>📋 Coverage Analysis</h3>
+        <Card className="stack gap-3">
+          <CardTitle icon={ListChecks}>Coverage Analysis</CardTitle>
           <CoverageChecklist items={props.coverage} />
-        </div>
+        </Card>
       )}
 
-      <div className="card stack" style={{ gap: "var(--space-3)" }}>
-        <h3>📝 Feedback AI</h3>
+      <Card className="stack gap-3">
+        <CardTitle icon={MessageSquareText}>Feedback AI</CardTitle>
         <FeedbackCard
           feedback={props.feedback ?? ""}
           strengths={props.strengths}
           improvements={props.improvements}
         />
-      </div>
+      </Card>
 
       {props.unexplainedJargon.length > 0 && (
-        <div className="card stack" style={{ gap: "var(--space-3)" }}>
-          <h3>🧩 Istilah yang belum kamu jelaskan</h3>
+        <Card className="stack gap-3">
+          <CardTitle icon={Puzzle}>Istilah yang belum kamu jelaskan</CardTitle>
           <p className="text-secondary text-sm">
             Inti Feynman Technique: jelaskan istilah ini dengan kata-kata sederhana di
             percobaan berikutnya.
@@ -302,7 +283,7 @@ export function EvaluationResults(props: Props) {
               </li>
             ))}
           </ul>
-        </div>
+        </Card>
       )}
 
       {props.transcript && <TranscriptView transcript={props.transcript} />}
@@ -312,19 +293,13 @@ export function EvaluationResults(props: Props) {
         currentAttemptNumber={props.attemptNumber}
       />
 
-      <div className="row" style={{ gap: "var(--space-3)", flexWrap: "wrap" }}>
-        <Link
-          href={`/challenge/${props.challengeId}/record`}
-          className="btn btn-primary btn-lg"
-        >
-          🔄 Coba Lagi
-        </Link>
-        <Link
-          href={`/challenge/${props.challengeId}`}
-          className="btn btn-secondary btn-lg"
-        >
-          📓 Kembali ke Notebook
-        </Link>
+      <div className="row flex-wrap gap-3">
+        <ButtonLink href={recordHref} size="lg" icon={RotateCcw}>
+          Coba Lagi
+        </ButtonLink>
+        <ButtonLink href={notebookHref} variant="secondary" size="lg" icon={BookOpen}>
+          Kembali ke Notebook
+        </ButtonLink>
       </div>
     </section>
   );

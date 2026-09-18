@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { Leaf } from "lucide-react";
+
+import { Icon } from "@/components/ui/icon";
 
 export interface DecayItem {
   id: string;
@@ -10,16 +13,16 @@ export function DecayAlert({ items }: { items: DecayItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <section className="stack" style={{ gap: "var(--space-3)" }}>
-      <h2 style={{ fontSize: "var(--text-xl)" }}>🍂 Perlu Review</h2>
-      <div className="stack" style={{ gap: "var(--space-2)" }}>
+    <section className="stack gap-3" aria-labelledby="decay-title">
+      <h2 id="decay-title" className="section-title">
+        <Icon icon={Leaf} size={20} />
+        Perlu Review
+      </h2>
+      <div className="stack gap-2">
         {items.map((item) => (
           <Link key={item.id} href={`/challenge/${item.id}`} className="alert-row">
             <span className="font-medium">{item.title}</span>
-            <span
-              className="text-sm"
-              style={{ color: "var(--mastery-developing)", whiteSpace: "nowrap" }}
-            >
+            <span className="text-sm nowrap text-warning">
               {item.daysSinceReview} hari sejak review
             </span>
           </Link>

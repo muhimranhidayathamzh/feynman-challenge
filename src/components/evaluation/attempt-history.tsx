@@ -1,3 +1,7 @@
+import { TrendingUp } from "lucide-react";
+
+import { Card, CardTitle } from "@/components/ui/card";
+import { cx } from "@/lib/utils/cx";
 import { scoreColor } from "@/lib/utils/labels";
 
 interface HistoryEntry {
@@ -15,34 +19,31 @@ export function AttemptHistory({ history, currentAttemptNumber }: Props) {
   if (history.length <= 1) return null;
 
   return (
-    <div className="card stack" style={{ gap: "var(--space-4)" }}>
-      <h3>📈 Progress</h3>
+    <Card className="stack gap-4">
+      <CardTitle icon={TrendingUp}>Progress</CardTitle>
       <div className="hist-bars">
         {history.map((entry) => {
           const score = entry.score ?? 0;
           const isCurrent = entry.attemptNumber === currentAttemptNumber;
           return (
-            <div key={entry.attemptNumber} className="hist-col">
+            <div
+              key={entry.attemptNumber}
+              className={cx("hist-col", isCurrent && "is-current")}
+              aria-current={isCurrent ? "true" : undefined}
+            >
               <span className="text-sm font-semibold">{entry.score ?? "—"}</span>
-              <div className="hist-bar" style={{ opacity: isCurrent ? 1 : 0.55 }}>
+              <div className="hist-bar">
+                {/* Height and colour are data, so they stay inline. */}
                 <div
                   className="hist-bar-fill"
-                  style={{
-                    height: `${score * 10}%`,
-                    background: scoreColor(score),
-                  }}
+                  style={{ height: `${score * 10}%`, background: scoreColor(score) }}
                 />
               </div>
-              <span
-                className="text-muted text-sm"
-                style={isCurrent ? { color: "var(--accent-primary)" } : undefined}
-              >
-                #{entry.attemptNumber}
-              </span>
+              <span className="hist-label text-sm">#{entry.attemptNumber}</span>
             </div>
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 }

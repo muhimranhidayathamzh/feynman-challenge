@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Brain, Flame, LogOut } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { useAuth } from "@/lib/auth/auth-provider";
 
 interface Props {
@@ -27,30 +30,33 @@ export function Header({ displayName, streakCount }: Props) {
 
   return (
     <header className="app-header">
-      <Link href="/" className="brand gradient-text" aria-label="Beranda">
-        🧠 Feynman Challenge
+      <Link href="/" className="brand" aria-label="Feynman Challenge, ke beranda">
+        <Icon icon={Brain} size={22} className="brand-icon" />
+        <span className="gradient-text">Feynman Challenge</span>
       </Link>
 
-      <div className="row" style={{ gap: "var(--space-3)" }}>
+      <div className="row gap-3">
         <Link
           href="/"
-          className="badge"
+          className="badge badge-warning"
           title="Streak harian"
           aria-label={`Streak harian: ${streakCount} hari`}
         >
-          🔥 {streakCount}
+          <Icon icon={Flame} size={14} />
+          {streakCount}
         </Link>
 
         <span className="text-secondary text-sm show-from-sm">{displayName}</span>
 
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm"
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={LogOut}
           onClick={handleLogout}
-          disabled={loggingOut}
+          loading={loggingOut}
         >
-          {loggingOut ? "Keluar…" : "Keluar"}
-        </button>
+          Keluar
+        </Button>
       </div>
     </header>
   );

@@ -2,10 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ResultLoading() {
   return (
-    <section
-      className="stack"
-      style={{ gap: "var(--space-6)", maxWidth: "44rem", marginInline: "auto" }}
-    >
+    <section className="page" aria-busy="true" aria-label="Memuat hasil evaluasi">
       <Skeleton width="50%" height="2rem" radius="var(--radius-md)" />
       <div className="card center">
         <Skeleton width="220px" height="220px" radius="var(--radius-full)" />

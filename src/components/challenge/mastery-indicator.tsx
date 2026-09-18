@@ -6,15 +6,11 @@ export function MasteryIndicator({ state }: { state: MasteryState }) {
 
   return (
     <span className="badge" title={`Mastery: ${meta.label}`}>
+      {/* The colour is data (one per mastery state), so it stays inline. */}
       <span
+        className="mastery-dot"
         aria-hidden="true"
-        style={{
-          width: "0.6rem",
-          height: "0.6rem",
-          borderRadius: "var(--radius-full)",
-          background: meta.color,
-          display: "inline-block",
-        }}
+        style={{ background: meta.color }}
       />
       {meta.label}
     </span>

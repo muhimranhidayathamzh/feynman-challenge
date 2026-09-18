@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { Plus } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/field";
 import { OkResponseSchema, OutlineItemEnvelopeSchema } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
 
@@ -119,7 +122,7 @@ export function OutlineEditor({ challengeId, initialItems }: Props) {
   }
 
   return (
-    <div className="stack" style={{ gap: "var(--space-3)" }}>
+    <div className="stack gap-3">
       {error && (
         <div className="alert alert-error" role="alert">
           {error}
@@ -129,7 +132,7 @@ export function OutlineEditor({ challengeId, initialItems }: Props) {
       {items.length === 0 ? (
         <p className="text-muted text-sm">Belum ada poin outline.</p>
       ) : (
-        <ol className="stack" style={{ gap: "var(--space-2)" }}>
+        <ol className="stack gap-2">
           {items.map((item, index) => (
             <OutlineItem
               key={item.id}
@@ -150,22 +153,23 @@ export function OutlineEditor({ challengeId, initialItems }: Props) {
         </ol>
       )}
 
-      <form className="row" onSubmit={handleAdd} style={{ gap: "var(--space-2)" }}>
-        <input
-          className="input"
+      <form className="row gap-2" onSubmit={handleAdd}>
+        <Input
           value={newTitle}
           onChange={(event) => setNewTitle(event.target.value)}
           placeholder="Tambah poin outline…"
           maxLength={200}
           disabled={busy}
+          aria-label="Poin outline baru"
         />
-        <button
+        <Button
           type="submit"
-          className="btn btn-secondary"
+          variant="secondary"
+          icon={Plus}
           disabled={busy || newTitle.trim().length === 0}
         >
-          + Tambah
-        </button>
+          Tambah
+        </Button>
       </form>
     </div>
   );

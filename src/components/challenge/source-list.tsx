@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { Plus } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Input, Select } from "@/components/ui/field";
 import { OkResponseSchema, SourceEnvelopeSchema } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
 import { SOURCE_TYPE_META } from "@/lib/utils/labels";
@@ -71,7 +74,7 @@ export function SourceList({ challengeId, initialSources }: Props) {
   }
 
   return (
-    <div className="stack" style={{ gap: "var(--space-3)" }}>
+    <div className="stack gap-3">
       {error && (
         <div className="alert alert-error" role="alert">
           {error}
@@ -81,7 +84,7 @@ export function SourceList({ challengeId, initialSources }: Props) {
       {sources.length === 0 ? (
         <p className="text-muted text-sm">Belum ada sumber belajar.</p>
       ) : (
-        <ul className="stack" style={{ gap: "var(--space-2)" }}>
+        <ul className="stack gap-2">
           {sources.map((source) => (
             <SourceItem
               key={source.id}
@@ -93,46 +96,48 @@ export function SourceList({ challengeId, initialSources }: Props) {
         </ul>
       )}
 
-      <form className="stack" onSubmit={handleAdd} style={{ gap: "var(--space-2)" }}>
-        <input
-          className="input"
+      <form className="stack gap-2" onSubmit={handleAdd}>
+        <Input
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           placeholder="Judul sumber…"
           maxLength={300}
           disabled={busy}
+          aria-label="Judul sumber baru"
         />
-        <div className="row" style={{ gap: "var(--space-2)" }}>
-          <input
-            className="input"
+        <div className="row flex-wrap gap-2">
+          <Input
+            className="flex-1"
             type="url"
             value={url}
             onChange={(event) => setUrl(event.target.value)}
             placeholder="URL (opsional)"
             disabled={busy}
-            style={{ flex: 1 }}
+            aria-label="URL sumber (opsional)"
           />
-          <select
-            className="input"
+          <Select
             value={type}
-            onChange={(event) => setType(event.target.value as SourceType)}
+            onChange={(event) => {
+              const next = SOURCE_TYPES.find((value) => value === event.target.value);
+              if (next) setType(next);
+            }}
             disabled={busy}
             aria-label="Tipe sumber"
-            style={{ width: "auto" }}
           >
             {SOURCE_TYPES.map((value) => (
               <option key={value} value={value}>
-                {SOURCE_TYPE_META[value].icon} {SOURCE_TYPE_META[value].label}
+                {SOURCE_TYPE_META[value].label}
               </option>
             ))}
-          </select>
-          <button
+          </Select>
+          <Button
             type="submit"
-            className="btn btn-secondary"
+            variant="secondary"
+            icon={Plus}
             disabled={busy || title.trim().length === 0}
           >
-            + Tambah
-          </button>
+            Tambah
+          </Button>
         </div>
       </form>
     </div>

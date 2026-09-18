@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
+import { House, RotateCcw, TriangleAlert } from "lucide-react";
+
+import { Button, ButtonLink } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
 
 export default function Error({
   error,
@@ -15,27 +19,22 @@ export default function Error({
   }, [error]);
 
   return (
-    <main className="center" style={{ minHeight: "70vh", padding: "var(--space-4)" }}>
-      <div
-        className="card stack text-center"
-        style={{ gap: "var(--space-4)", maxWidth: "28rem" }}
-      >
-        <span style={{ fontSize: "2.5rem" }} aria-hidden="true">
-          😵‍💫
-        </span>
+    <main className="state-screen">
+      <Card className="state-card">
+        <Icon icon={TriangleAlert} size={40} className="state-icon" />
         <h2>Ada yang tidak beres</h2>
         <p className="text-secondary">
           Terjadi kesalahan tak terduga. Coba lagi atau kembali ke dashboard.
         </p>
-        <div className="row" style={{ justifyContent: "center", gap: "var(--space-3)" }}>
-          <button type="button" className="btn btn-primary" onClick={reset}>
+        <div className="state-actions">
+          <Button icon={RotateCcw} onClick={reset}>
             Coba lagi
-          </button>
-          <Link href="/" className="btn btn-ghost">
+          </Button>
+          <ButtonLink href="/" variant="ghost" icon={House}>
             Ke Dashboard
-          </Link>
+          </ButtonLink>
         </div>
-      </div>
+      </Card>
     </main>
   );
 }

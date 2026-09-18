@@ -3,7 +3,11 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { LogIn } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Field, Input } from "@/components/ui/field";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -35,9 +39,9 @@ export default function LoginPage() {
   }
 
   return (
-    <section className="glass stack" style={{ gap: "var(--space-5)" }}>
-      <div className="stack" style={{ gap: "var(--space-1)" }}>
-        <h2 style={{ fontSize: "var(--text-xl)" }}>Masuk</h2>
+    <Card as="section" variant="glass" className="stack gap-5">
+      <div className="stack gap-1">
+        <h2 className="text-xl">Masuk</h2>
         <p className="text-secondary text-sm">Lanjutkan tantangan belajarmu.</p>
       </div>
 
@@ -48,13 +52,8 @@ export default function LoginPage() {
       )}
 
       <form className="stack" onSubmit={handleSubmit}>
-        <div className="field">
-          <label className="label" htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            className="input"
+        <Field id="email" label="Email">
+          <Input
             type="email"
             autoComplete="email"
             required
@@ -63,15 +62,10 @@ export default function LoginPage() {
             onChange={(event) => setEmail(event.target.value)}
             disabled={loading}
           />
-        </div>
+        </Field>
 
-        <div className="field">
-          <label className="label" htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            className="input"
+        <Field id="password" label="Password">
+          <Input
             type="password"
             autoComplete="current-password"
             required
@@ -80,16 +74,18 @@ export default function LoginPage() {
             onChange={(event) => setPassword(event.target.value)}
             disabled={loading}
           />
-        </div>
+        </Field>
 
-        <button
+        <Button
           type="submit"
-          className="btn btn-primary btn-block btn-lg"
-          style={{ marginTop: "var(--space-2)" }}
-          disabled={loading}
+          size="lg"
+          block
+          className="mt-2"
+          icon={LogIn}
+          loading={loading}
         >
-          {loading ? "Memproses…" : "Masuk"}
-        </button>
+          Masuk
+        </Button>
       </form>
 
       <p className="text-secondary text-sm text-center">
@@ -98,6 +94,6 @@ export default function LoginPage() {
           Daftar
         </Link>
       </p>
-    </section>
+    </Card>
   );
 }

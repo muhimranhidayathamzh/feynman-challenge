@@ -3,7 +3,12 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Mail, UserPlus } from "lucide-react";
 
+import { ButtonLink, Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Field, Input } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
@@ -73,23 +78,24 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <section className="glass stack text-center" style={{ gap: "var(--space-4)" }}>
-        <h2 style={{ fontSize: "var(--text-xl)" }}>Cek email kamu 📬</h2>
+      <Card as="section" variant="glass" className="stack gap-4 text-center items-center">
+        <Icon icon={Mail} size={36} className="state-icon" />
+        <h2 className="text-xl">Cek email kamu</h2>
         <p className="text-secondary text-sm">
           Kami mengirim tautan konfirmasi ke <strong>{email}</strong>. Klik tautan itu
           untuk mengaktifkan akunmu.
         </p>
-        <Link href="/login" className="btn btn-secondary btn-block">
+        <ButtonLink href="/login" variant="secondary" block>
           Kembali ke halaman masuk
-        </Link>
-      </section>
+        </ButtonLink>
+      </Card>
     );
   }
 
   return (
-    <section className="glass stack" style={{ gap: "var(--space-5)" }}>
-      <div className="stack" style={{ gap: "var(--space-1)" }}>
-        <h2 style={{ fontSize: "var(--text-xl)" }}>Buat akun</h2>
+    <Card as="section" variant="glass" className="stack gap-5">
+      <div className="stack gap-1">
+        <h2 className="text-xl">Buat akun</h2>
         <p className="text-secondary text-sm">
           Mulai kuasai materi apapun lewat menjelaskan ulang.
         </p>
@@ -102,13 +108,8 @@ export default function SignupPage() {
       )}
 
       <form className="stack" onSubmit={handleSubmit}>
-        <div className="field">
-          <label className="label" htmlFor="displayName">
-            Nama tampilan <span className="text-muted">(opsional)</span>
-          </label>
-          <input
-            id="displayName"
-            className="input"
+        <Field id="displayName" label="Nama tampilan" optional>
+          <Input
             type="text"
             autoComplete="name"
             placeholder="Nama kamu"
@@ -116,15 +117,10 @@ export default function SignupPage() {
             onChange={(event) => setDisplayName(event.target.value)}
             disabled={loading}
           />
-        </div>
+        </Field>
 
-        <div className="field">
-          <label className="label" htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            className="input"
+        <Field id="email" label="Email">
+          <Input
             type="email"
             autoComplete="email"
             required
@@ -133,15 +129,10 @@ export default function SignupPage() {
             onChange={(event) => setEmail(event.target.value)}
             disabled={loading}
           />
-        </div>
+        </Field>
 
-        <div className="field">
-          <label className="label" htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            className="input"
+        <Field id="password" label="Password">
+          <Input
             type="password"
             autoComplete="new-password"
             required
@@ -151,15 +142,10 @@ export default function SignupPage() {
             onChange={(event) => setPassword(event.target.value)}
             disabled={loading}
           />
-        </div>
+        </Field>
 
-        <div className="field">
-          <label className="label" htmlFor="confirm">
-            Konfirmasi password
-          </label>
-          <input
-            id="confirm"
-            className="input"
+        <Field id="confirm" label="Konfirmasi password">
+          <Input
             type="password"
             autoComplete="new-password"
             required
@@ -168,16 +154,18 @@ export default function SignupPage() {
             onChange={(event) => setConfirm(event.target.value)}
             disabled={loading}
           />
-        </div>
+        </Field>
 
-        <button
+        <Button
           type="submit"
-          className="btn btn-primary btn-block btn-lg"
-          style={{ marginTop: "var(--space-2)" }}
-          disabled={loading}
+          size="lg"
+          block
+          className="mt-2"
+          icon={UserPlus}
+          loading={loading}
         >
-          {loading ? "Memproses…" : "Daftar"}
-        </button>
+          Daftar
+        </Button>
       </form>
 
       <p className="text-secondary text-sm text-center">
@@ -186,6 +174,6 @@ export default function SignupPage() {
           Masuk
         </Link>
       </p>
-    </section>
+    </Card>
   );
 }

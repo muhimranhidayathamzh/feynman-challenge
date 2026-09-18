@@ -1,6 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { ArrowDown, ArrowUp, Check, GripVertical, Pencil, Trash2 } from "lucide-react";
+
+import { Button, IconButton } from "@/components/ui/button";
+import { Input, Textarea } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
 
 export interface OutlineItemData {
   id: string;
@@ -67,57 +72,46 @@ export function OutlineItem({
       onDragOver={(event) => event.preventDefault()}
       onDragEnd={onDragEnd}
     >
-      <span
-        className="drag-handle"
-        aria-hidden="true"
-        title="Seret untuk mengurutkan"
-        style={{ paddingTop: "0.15rem" }}
-      >
-        ⠿
+      <span className="drag-handle" title="Seret untuk mengurutkan">
+        <Icon icon={GripVertical} size={16} />
       </span>
       <span className="badge" aria-hidden="true">
         {index + 1}
       </span>
 
       {editing ? (
-        <div className="stack" style={{ flex: 1, gap: "var(--space-2)" }}>
-          <input
-            className="input"
+        <div className="stack flex-1 gap-2">
+          <Input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             maxLength={200}
             aria-label="Judul poin"
             autoFocus
           />
-          <textarea
-            className="textarea"
+          <Textarea
+            className="textarea-compact"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             placeholder="Deskripsi (opsional)"
             maxLength={1000}
-            style={{ minHeight: "4rem" }}
             aria-label="Deskripsi poin"
           />
-          <div className="row" style={{ gap: "var(--space-2)" }}>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
+          <div className="row gap-2">
+            <Button
+              size="sm"
+              icon={Check}
               onClick={handleSave}
               disabled={title.trim().length === 0}
             >
               Simpan
-            </button>
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
-              onClick={() => setEditing(false)}
-            >
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
               Batal
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
-        <div className="stack" style={{ flex: 1, gap: "var(--space-1)" }}>
+        <div className="stack flex-1 gap-1">
           <span className="font-semibold">{item.title}</span>
           {item.description && (
             <span className="text-secondary text-sm">{item.description}</span>
@@ -126,48 +120,32 @@ export function OutlineItem({
       )}
 
       {!editing && (
-        <div className="row" style={{ gap: 0 }}>
-          <button
-            type="button"
-            className="icon-btn"
+        <div className="row gap-0">
+          <IconButton
+            icon={ArrowUp}
+            label={`Pindahkan "${item.title}" ke atas`}
             onClick={() => onMove(index, -1)}
             disabled={disabled || index === 0}
-            aria-label="Pindah ke atas"
-            title="Naik"
-          >
-            ↑
-          </button>
-          <button
-            type="button"
-            className="icon-btn"
+          />
+          <IconButton
+            icon={ArrowDown}
+            label={`Pindahkan "${item.title}" ke bawah`}
             onClick={() => onMove(index, 1)}
             disabled={disabled || index === total - 1}
-            aria-label="Pindah ke bawah"
-            title="Turun"
-          >
-            ↓
-          </button>
-          <button
-            type="button"
-            className="icon-btn"
+          />
+          <IconButton
+            icon={Pencil}
+            label={`Edit "${item.title}"`}
             onClick={startEdit}
             disabled={disabled}
-            aria-label="Edit poin"
-            title="Edit"
-          >
-            ✏️
-          </button>
-          <button
-            type="button"
-            className="icon-btn"
-            data-danger="true"
+          />
+          <IconButton
+            icon={Trash2}
+            label={`Hapus "${item.title}"`}
+            danger
             onClick={() => onDelete(item.id)}
             disabled={disabled}
-            aria-label="Hapus poin"
-            title="Hapus"
-          >
-            🗑️
-          </button>
+          />
         </div>
       )}
     </li>

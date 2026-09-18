@@ -1,5 +1,8 @@
 "use client";
 
+import { Mic, Pause, Play, Square } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import type { RecorderStatus } from "@/hooks/use-audio-recorder";
 
 interface Props {
@@ -20,7 +23,7 @@ export function RecorderControls({
   status,
   submitting,
   startDisabled = false,
-  startLabel = "🎙️ Mulai Rekam",
+  startLabel = "Mulai Rekam",
   submitDisabled = false,
   onStart,
   onPause,
@@ -30,12 +33,9 @@ export function RecorderControls({
   if (submitting) {
     return (
       <div className="record-controls">
-        <button type="button" className="btn btn-primary btn-lg" disabled>
-          <span className="animate-spin" aria-hidden="true">
-            ◌
-          </span>
+        <Button size="lg" loading>
           Mengirim…
-        </button>
+        </Button>
       </div>
     );
   }
@@ -43,14 +43,15 @@ export function RecorderControls({
   if (status === "idle" || status === "stopped") {
     return (
       <div className="record-controls">
-        <button
-          type="button"
-          className="btn btn-primary btn-lg"
+        <Button
+          size="lg"
+          icon={Mic}
           onClick={onStart}
+          loading={startDisabled}
           disabled={startDisabled}
         >
           {startLabel}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -58,22 +59,17 @@ export function RecorderControls({
   return (
     <div className="record-controls">
       {status === "recording" ? (
-        <button type="button" className="btn btn-secondary btn-lg" onClick={onPause}>
-          ⏸️ Jeda
-        </button>
+        <Button variant="secondary" size="lg" icon={Pause} onClick={onPause}>
+          Jeda
+        </Button>
       ) : (
-        <button type="button" className="btn btn-secondary btn-lg" onClick={onResume}>
-          ▶️ Lanjut
-        </button>
+        <Button variant="secondary" size="lg" icon={Play} onClick={onResume}>
+          Lanjut
+        </Button>
       )}
-      <button
-        type="button"
-        className="btn btn-primary btn-lg"
-        onClick={onStopAndSubmit}
-        disabled={submitDisabled}
-      >
-        ⏹️ Stop &amp; Submit
-      </button>
+      <Button size="lg" icon={Square} onClick={onStopAndSubmit} disabled={submitDisabled}>
+        Stop &amp; Submit
+      </Button>
     </div>
   );
 }

@@ -1,0 +1,173 @@
+/* ---------------------------------------------------------------------------
+   Layout helpers — replace one-off inline styles. Loaded after all component
+   and feature styles so a helper always wins over a component default.
+   ------------------------------------------------------------------------- */
+
+/* Gap (pairs with .stack / .row / .row-between) */
+.gap-0 {
+  gap: 0;
+}
+.gap-1 {
+  gap: var(--space-1);
+}
+.gap-2 {
+  gap: var(--space-2);
+}
+.gap-3 {
+  gap: var(--space-3);
+}
+.gap-4 {
+  gap: var(--space-4);
+}
+.gap-5 {
+  gap: var(--space-5);
+}
+.gap-6 {
+  gap: var(--space-6);
+}
+.gap-8 {
+  gap: var(--space-8);
+}
+
+/* Flex */
+.flex-1 {
+  flex: 1;
+  min-width: 0;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.items-start {
+  align-items: flex-start;
+}
+.items-center {
+  align-items: center;
+}
+.justify-center {
+  justify-content: center;
+}
+.self-start {
+  align-self: flex-start;
+}
+
+/* Sizing */
+.w-full {
+  width: 100%;
+}
+.mx-auto {
+  margin-inline: auto;
+}
+.max-w-sm {
+  max-width: 28rem;
+}
+.max-w-md {
+  max-width: 32rem;
+}
+.max-w-lg {
+  max-width: 40rem;
+}
+.max-w-xl {
+  max-width: 44rem;
+}
+.mt-2 {
+  margin-top: var(--space-2);
+}
+
+/* Text */
+.text-xs {
+  font-size: var(--text-xs);
+}
+.text-2xl {
+  font-size: var(--text-2xl);
+}
+.nowrap {
+  white-space: nowrap;
+}
+.pre-wrap {
+  white-space: pre-wrap;
+}
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+.leading-normal {
+  line-height: var(--leading-normal);
+}
+.text-error {
+  color: var(--error-text);
+}
+.text-warning {
+  color: var(--warning);
+}
+.text-success {
+  color: var(--success);
+}
+.text-accent {
+  color: var(--accent-text);
+}
+
+/* --- Page scaffolds ------------------------------------------------------ */
+
+/** Standard content page: vertical rhythm, readable width, centered. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+}
+
+.page-narrow {
+  max-width: 40rem;
+}
+
+.page-wide {
+  max-width: none;
+  gap: var(--space-8);
+}
+
+/** Centered full-height state (loading, error, empty, 404). */
+.state-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: var(--space-4);
+}
+
+.state-screen-tall {
+  min-height: 80vh;
+}
+
+/** The card inside a state screen. */
+.state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 28rem;
+  text-align: center;
+}
+
+.state-icon {
+  color: var(--accent-text);
+}
+
+.state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+/** Dashboard / page section heading with a decorative icon. */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xl);
+}
+
+.section-title svg {
+  color: var(--accent-text);
+}

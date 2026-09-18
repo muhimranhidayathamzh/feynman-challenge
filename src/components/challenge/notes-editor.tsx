@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 
+import { Textarea } from "@/components/ui/field";
 import { NoteEnvelopeSchema } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
 
@@ -104,20 +105,18 @@ export function NotesEditor({ challengeId, initialContent }: Props) {
   }
 
   return (
-    <div className="stack" style={{ gap: "var(--space-2)" }}>
-      <textarea
-        className="textarea"
+    <div className="stack gap-2">
+      <Textarea
+        className="textarea-notes"
         value={content}
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder="Tulis catatanmu di sini… (mendukung markdown)"
-        style={{ minHeight: "10rem" }}
         aria-label="Catatan pribadi"
       />
       <span
-        className="save-status"
+        className={saveState === "error" ? "save-status text-error" : "save-status"}
         aria-live="polite"
-        style={saveState === "error" ? { color: "var(--error)" } : undefined}
       >
         {STATUS_TEXT[saveState]}
       </span>

@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { House, Plus, type LucideIcon } from "lucide-react";
+
+import { Icon } from "@/components/ui/icon";
 
 interface NavItem {
   href: string;
   label: string;
-  icon: string;
+  icon: LucideIcon;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "Beranda", icon: "🏠" },
-  { href: "/challenge/new", label: "Tantangan Baru", icon: "➕" },
+  { href: "/", label: "Beranda", icon: House },
+  { href: "/challenge/new", label: "Tantangan Baru", icon: Plus },
 ];
 
 export function Sidebar() {
@@ -31,8 +34,8 @@ export function Sidebar() {
             data-active={active}
             aria-current={active ? "page" : undefined}
           >
-            <span className="app-nav-icon" aria-hidden="true">
-              {item.icon}
+            <span className="app-nav-icon">
+              <Icon icon={item.icon} size={20} />
             </span>
             {item.label}
           </Link>

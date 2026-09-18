@@ -1,3 +1,7 @@
+import { Flame } from "lucide-react";
+
+import { Icon } from "@/components/ui/icon";
+
 interface Props {
   streakCount: number;
   bestStreak: number;
@@ -6,10 +10,8 @@ interface Props {
 export function StreakDisplay({ streakCount, bestStreak }: Props) {
   return (
     <div className="streak-chip" title="Streak harian">
-      <span style={{ fontSize: "var(--text-xl)" }} aria-hidden="true">
-        🔥
-      </span>
-      <div className="stack" style={{ gap: 0 }}>
+      <Icon icon={Flame} size={24} className="streak-icon" />
+      <div className="stack gap-0">
         <span className="font-bold">
           {streakCount} <span className="text-secondary font-medium">hari</span>
         </span>

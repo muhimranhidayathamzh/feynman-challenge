@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Brain, ChartColumn, Plus } from "lucide-react";
 
 import { ChallengeList } from "@/components/dashboard/challenge-list";
 import type { ChallengeCardData } from "@/components/dashboard/challenge-card";
@@ -9,6 +9,9 @@ import {
   type DueSoonItem,
 } from "@/components/dashboard/due-soon-section";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
+import { ButtonLink } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
 import { calendarDay, dayDiff } from "@/lib/utils/date";
 import { getDeadlineInfo } from "@/lib/utils/deadline";
 import { effectiveMasteryState } from "@/lib/utils/mastery";
@@ -100,11 +103,11 @@ export default async function DashboardPage() {
   );
 
   return (
-    <div className="stack" style={{ gap: "var(--space-8)" }}>
-      <header className="row-between" style={{ flexWrap: "wrap", gap: "var(--space-4)" }}>
-        <div className="stack" style={{ gap: "var(--space-1)" }}>
+    <div className="page page-wide">
+      <header className="row-between flex-wrap gap-4">
+        <div className="stack gap-1">
           <h1>
-            Halo, <span className="gradient-text">{displayName}</span> 👋
+            Halo, <span className="gradient-text">{displayName}</span>
           </h1>
           <p className="text-secondary">Siap menjelaskan sesuatu hari ini?</p>
         </div>
@@ -112,38 +115,34 @@ export default async function DashboardPage() {
       </header>
 
       {rows.length === 0 ? (
-        <div
-          className="glass stack text-center animate-fade-in-up"
-          style={{
-            gap: "var(--space-4)",
-            maxWidth: "32rem",
-            marginInline: "auto",
-            alignItems: "center",
-          }}
+        <Card
+          variant="glass"
+          className="stack gap-4 text-center items-center max-w-md mx-auto animate-fade-in-up"
         >
-          <span style={{ fontSize: "3rem" }} aria-hidden="true">
-            🧠
-          </span>
+          <Icon icon={Brain} size={48} className="state-icon" />
           <h2>Belum ada tantangan</h2>
           <p className="text-secondary">
             Buat tantangan pertamamu — pilih topik, biarkan AI menyusun outline, lalu
             jelaskan ulang lewat audio.
           </p>
-          <Link href="/challenge/new" className="btn btn-primary btn-lg">
-            ➕ Buat Tantangan Pertama
-          </Link>
-        </div>
+          <ButtonLink href="/challenge/new" size="lg" icon={Plus}>
+            Buat Tantangan Pertama
+          </ButtonLink>
+        </Card>
       ) : (
         <>
           <DueSoonSection items={dueSoon} />
           <DecayAlert items={decay} />
 
-          <section className="stack" style={{ gap: "var(--space-3)" }}>
+          <section className="stack gap-3" aria-labelledby="all-challenges-title">
             <div className="row-between">
-              <h2 style={{ fontSize: "var(--text-xl)" }}>📊 Semua Challenge</h2>
-              <Link href="/challenge/new" className="btn btn-secondary btn-sm">
-                ➕ Baru
-              </Link>
+              <h2 id="all-challenges-title" className="section-title">
+                <Icon icon={ChartColumn} size={20} />
+                Semua Challenge
+              </h2>
+              <ButtonLink href="/challenge/new" variant="secondary" size="sm" icon={Plus}>
+                Baru
+              </ButtonLink>
             </div>
             <ChallengeList challenges={allCards} />
           </section>

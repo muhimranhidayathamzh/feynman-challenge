@@ -1,12 +1,14 @@
+import { Book, FileText, Link, ScrollText, Video, type LucideIcon } from "lucide-react";
+
 import type { HintLevel, MasteryState, SourceType } from "@/types";
 
 /** Display metadata for each learning-source type. */
-export const SOURCE_TYPE_META: Record<SourceType, { icon: string; label: string }> = {
-  video: { icon: "🎥", label: "Video" },
-  article: { icon: "📄", label: "Artikel" },
-  book: { icon: "📖", label: "Buku" },
-  paper: { icon: "📑", label: "Paper" },
-  other: { icon: "🔗", label: "Lainnya" },
+export const SOURCE_TYPE_META: Record<SourceType, { icon: LucideIcon; label: string }> = {
+  video: { icon: Video, label: "Video" },
+  article: { icon: FileText, label: "Artikel" },
+  book: { icon: Book, label: "Buku" },
+  paper: { icon: ScrollText, label: "Paper" },
+  other: { icon: Link, label: "Lainnya" },
 };
 
 /** Display metadata for each mastery state (label + CSS color variable). */

@@ -1,0 +1,187 @@
+/* ---------------------------------------------------------------------------
+   App shell & navigation
+   Mobile: sticky header + fixed bottom nav.
+   Desktop (>=768): sticky header + sticky left sidebar.
+   ------------------------------------------------------------------------- */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: var(--header-h);
+  padding: var(--space-2) var(--space-4);
+  background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  font-weight: var(--weight-bold);
+  font-size: var(--text-base);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 480px) {
+  .brand {
+    font-size: var(--text-lg);
+  }
+}
+
+.app-header > .row {
+  flex: 0 0 auto;
+}
+
+.app-body {
+  flex: 1;
+  display: flex;
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-6) var(--space-4);
+  /* leave room for the fixed bottom nav on mobile */
+  padding-bottom: calc(72px + var(--space-6));
+}
+
+.app-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-glass);
+}
+
+.app-nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  flex: 1;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.app-nav-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.app-nav-link[data-active="true"] {
+  color: var(--accent-text);
+  background: var(--accent-glow);
+}
+
+.app-nav-icon {
+  display: inline-flex;
+  line-height: 1;
+}
+
+@media (min-width: 768px) {
+  .app-main {
+    padding: var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+
+  .app-nav {
+    position: sticky;
+    top: var(--header-h);
+    inset: auto;
+    align-self: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    width: var(--nav-w);
+    height: calc(100dvh - var(--header-h));
+    padding: var(--space-4);
+    border-top: none;
+    border-right: 1px solid var(--border-glass);
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .app-nav-link {
+    flex: 0 0 auto;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-sm);
+  }
+
+  .app-nav-icon {
+    font-size: var(--text-base);
+  }
+}
+
+/* --- Brand & auth shell (Prompt 2.1) --- */
+.brand-icon {
+  color: var(--accent-text);
+  flex: 0 0 auto;
+}
+
+.auth-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--space-4);
+}
+
+.auth-column {
+  width: 100%;
+  max-width: 26rem;
+}
+
+.auth-title {
+  font-size: var(--text-3xl);
+}
+
+.not-found-code {
+  font-size: var(--text-5xl);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}

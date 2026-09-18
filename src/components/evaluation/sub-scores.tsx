@@ -25,11 +25,11 @@ export function SubScores(props: Props) {
   }, []);
 
   return (
-    <div className="stack" style={{ gap: "var(--space-4)" }}>
+    <div className="stack gap-4">
       {ROWS.map((row) => {
         const value = props[row.key];
         return (
-          <div key={row.key} className="stack" style={{ gap: "var(--space-2)" }}>
+          <div key={row.key} className="stack gap-2">
             <div className="row-between">
               <span className="text-sm">
                 {row.label} <span className="text-muted">({row.weight})</span>

@@ -1,5 +1,10 @@
 "use client";
 
+import { Lightbulb, LockOpen, TriangleAlert } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { HINT_TIERS } from "@/lib/utils/labels";
 import type { HintLevel } from "@/types";
 
@@ -30,30 +35,30 @@ export function HintPanel({
   function renderContent(level: HintLevel) {
     if (level === "keywords") {
       return (
-        <div className="row" style={{ flexWrap: "wrap", gap: "var(--space-2)" }}>
-          {keywords.map((kw, index) => (
-            <span key={`${index}-${kw}`} className="badge">
-              {kw}
-            </span>
+        <ul className="row flex-wrap gap-2">
+          {keywords.map((keyword, index) => (
+            <li key={`${index}-${keyword}`} className="badge">
+              {keyword}
+            </li>
           ))}
-        </div>
+        </ul>
       );
     }
     if (level === "guiding_questions") {
       return (
-        <ul className="stack" style={{ gap: "var(--space-1)" }}>
-          {questions.map((q, index) => (
-            <li key={`${index}-${q}`} className="text-secondary text-sm">
-              • {q}
+        <ul className="hint-questions stack gap-1">
+          {questions.map((question, index) => (
+            <li key={`${index}-${question}`} className="text-secondary text-sm">
+              {question}
             </li>
           ))}
         </ul>
       );
     }
     return (
-      <ol className="stack" style={{ gap: "var(--space-2)" }}>
+      <ol className="stack gap-2">
         {outline.map((item, index) => (
-          <li key={`${index}-${item.title}`} className="stack" style={{ gap: "2px" }}>
+          <li key={`${index}-${item.title}`} className="stack gap-1">
             <span className="font-medium text-sm">
               {index + 1}. {item.title}
             </span>
@@ -67,12 +72,13 @@ export function HintPanel({
   }
 
   return (
-    <div className="stack" style={{ gap: "var(--space-3)", width: "100%" }}>
+    <section className="stack gap-3 w-full" aria-labelledby="hint-panel-title">
       <div className="row-between">
-        <h3 className="text-lg">💡 Butuh bantuan?</h3>
-        <span className="badge" title="Skor maksimum saat ini">
-          Skor maks: {currentCap}/10
-        </span>
+        <h3 id="hint-panel-title" className="section-title text-lg">
+          <Icon icon={Lightbulb} size={18} />
+          Butuh bantuan?
+        </h3>
+        <Badge title="Skor maksimum saat ini">Skor maks: {currentCap}/10</Badge>
       </div>
 
       {HINT_TIERS.map((tier) => {
@@ -81,36 +87,33 @@ export function HintPanel({
           <div key={tier.level} className="hint-tier" data-revealed={isRevealed}>
             <div className="row-between">
               <span className="font-semibold">{tier.label}</span>
-              {!isRevealed && <span className="badge">maks {tier.cap}</span>}
+              {!isRevealed && <Badge>maks {tier.cap}</Badge>}
             </div>
 
             {isRevealed ? (
-              <div style={{ marginTop: "var(--space-2)" }}>
-                {renderContent(tier.level)}
-              </div>
+              <div className="mt-2">{renderContent(tier.level)}</div>
             ) : (
-              <div
-                className="stack"
-                style={{ gap: "var(--space-2)", marginTop: "var(--space-2)" }}
-              >
+              <div className="stack gap-2 mt-2">
                 <span className="text-secondary text-sm">{tier.description}</span>
                 <span className="hint-warning">
-                  ⚠️ Membuka hint ini akan membatasi skor maks ke {tier.cap}.
+                  <Icon icon={TriangleAlert} size={14} />
+                  Membuka hint ini akan membatasi skor maks ke {tier.cap}.
                 </span>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={LockOpen}
+                  className="self-start"
                   onClick={() => onReveal(tier.level)}
                   disabled={disabled}
-                  style={{ alignSelf: "flex-start" }}
                 >
                   Buka hint
-                </button>
+                </Button>
               </div>
             )}
           </div>
         );
       })}
-    </div>
+    </section>
   );
 }

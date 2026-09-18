@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 
+import { Icon } from "@/components/ui/icon";
 import { scoreColor } from "@/lib/utils/labels";
 
 interface Props {
@@ -36,9 +38,20 @@ export function ScoreRing({ score, previousScore = null }: Props) {
   const delta = previousScore !== null ? score - previousScore : null;
 
   return (
-    <div className="stack center" style={{ gap: "var(--space-3)" }}>
-      <div style={{ position: "relative", width: SIZE, height: SIZE }}>
-        <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
+    <div className="stack center gap-3">
+      <div
+        className="ring"
+        role="img"
+        aria-label={`Skor ${score} dari 10`}
+        style={{ width: SIZE, height: SIZE }}
+      >
+        <svg
+          width={SIZE}
+          height={SIZE}
+          viewBox={`0 0 ${SIZE} ${SIZE}`}
+          aria-hidden="true"
+          focusable="false"
+        >
           <circle
             cx={SIZE / 2}
             cy={SIZE / 2}
@@ -60,25 +73,8 @@ export function ScoreRing({ score, previousScore = null }: Props) {
             transform={`rotate(-90 ${SIZE / 2} ${SIZE / 2})`}
           />
         </svg>
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "var(--text-5xl)",
-              fontWeight: "var(--weight-bold)",
-              fontVariantNumeric: "tabular-nums",
-              color,
-              lineHeight: 1,
-            }}
-          >
+        <div className="ring-center" aria-hidden="true">
+          <span className="score-value" style={{ color }}>
             {Math.round(display)}
           </span>
           <span className="text-muted">/ 10</span>
@@ -86,12 +82,17 @@ export function ScoreRing({ score, previousScore = null }: Props) {
       </div>
 
       {delta !== null && (
-        <span className="text-secondary text-sm">
+        <span className="score-delta text-secondary text-sm">
+          <Icon
+            icon={delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus}
+            size={16}
+            className={delta > 0 ? "text-success" : delta < 0 ? "text-error" : undefined}
+          />
           {delta > 0
-            ? `📈 +${delta} dari sebelumnya (${previousScore}/10)`
+            ? `+${delta} dari sebelumnya (${previousScore}/10)`
             : delta < 0
-              ? `📉 ${delta} dari sebelumnya (${previousScore}/10)`
-              : `→ sama seperti sebelumnya (${previousScore}/10)`}
+              ? `${delta} dari sebelumnya (${previousScore}/10)`
+              : `sama seperti sebelumnya (${previousScore}/10)`}
         </span>
       )}
     </div>

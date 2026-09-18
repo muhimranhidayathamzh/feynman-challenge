@@ -31,7 +31,9 @@ export default function GlobalError({
         }}
       >
         <div style={{ textAlign: "center", maxWidth: "28rem" }}>
-          <div style={{ fontSize: "2.5rem" }}>😵‍💫</div>
+          <div style={{ fontSize: "2.5rem" }} aria-hidden="true">
+            😵‍💫
+          </div>
           <h2 style={{ margin: "0.5rem 0" }}>Aplikasi bermasalah</h2>
           <p style={{ color: "#9aa3b2" }}>
             Terjadi kesalahan fatal. Muat ulang untuk mencoba lagi.

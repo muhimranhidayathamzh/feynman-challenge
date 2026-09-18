@@ -2,6 +2,14 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { Check, Sparkles, Timer } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Field, Input } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import {
   CreateChallengeResponseSchema,
@@ -78,7 +86,7 @@ export function CreateForm() {
   }
 
   return (
-    <div className="stack" style={{ gap: "var(--space-5)" }}>
+    <div className="stack gap-5">
       {error && (
         <div className="alert alert-error" role="alert">
           {error}
@@ -86,88 +94,66 @@ export function CreateForm() {
       )}
 
       {editing && (
-        <form
-          className="card stack"
-          onSubmit={handleGenerate}
-          style={{ gap: "var(--space-5)" }}
-        >
-          <div className="field">
-            <label className="label" htmlFor="topic">
-              Apa yang ingin kamu kuasai?
-            </label>
-            <input
-              id="topic"
-              className="input"
-              type="text"
-              placeholder="mis. Quantum Entanglement"
-              value={topic}
-              onChange={(event) => setTopic(event.target.value)}
-              disabled={busy}
-              minLength={3}
-              maxLength={200}
-              required
-              autoFocus
-            />
-          </div>
+        <Card as="section" className="stack gap-5">
+          <form className="stack gap-5" onSubmit={handleGenerate}>
+            <Field id="topic" label="Apa yang ingin kamu kuasai?">
+              <Input
+                type="text"
+                placeholder="mis. Quantum Entanglement"
+                value={topic}
+                onChange={(event) => setTopic(event.target.value)}
+                disabled={busy}
+                minLength={3}
+                maxLength={200}
+                required
+                autoFocus
+              />
+            </Field>
 
-          <div className="field">
-            <label className="label" htmlFor="deadline">
-              Deadline <span className="text-muted">(opsional)</span>
-            </label>
-            <input
-              id="deadline"
-              className="input"
-              type="date"
-              value={deadline}
-              min={today}
-              onChange={(event) => setDeadline(event.target.value)}
-              disabled={busy}
-            />
-          </div>
+            <Field id="deadline" label="Deadline" optional>
+              <Input
+                type="date"
+                value={deadline}
+                min={today}
+                onChange={(event) => setDeadline(event.target.value)}
+                disabled={busy}
+              />
+            </Field>
 
-          <button
-            type="submit"
-            className="btn btn-primary btn-lg btn-block"
-            disabled={busy || topic.trim().length < 3}
-          >
-            {status === "generating" ? (
-              <>
-                <span className="animate-spin" aria-hidden="true">
-                  ◌
-                </span>
-                AI sedang menyusun…
-              </>
-            ) : (
-              "🚀 Generate Learning Plan"
-            )}
-          </button>
-        </form>
+            <Button
+              type="submit"
+              size="lg"
+              block
+              icon={Sparkles}
+              loading={status === "generating"}
+              disabled={busy || topic.trim().length < 3}
+            >
+              {status === "generating" ? "AI sedang menyusun…" : "Generate Learning Plan"}
+            </Button>
+          </form>
+        </Card>
       )}
 
       {status === "generating" && <PreviewSkeleton />}
 
       {(status === "preview" || status === "creating") && plan && (
-        <div className="card stack animate-fade-in-up" style={{ gap: "var(--space-5)" }}>
+        <Card as="section" className="stack gap-5 animate-fade-in-up">
           <div className="row-between">
             <h3>Rencana Belajar</h3>
-            <span className="badge" title="Estimasi durasi rekaman">
-              ⏱️ {formatDuration(plan.estimated_duration_sec)}
-            </span>
+            <Badge icon={Timer} title="Estimasi durasi rekaman">
+              {formatDuration(plan.estimated_duration_sec)}
+            </Badge>
           </div>
 
-          <div className="stack" style={{ gap: "var(--space-3)" }}>
-            <h4 className="text-secondary text-sm">📋 Learning Outline</h4>
-            <ol className="stack" style={{ gap: "var(--space-3)" }}>
+          <div className="stack gap-3">
+            <h4 className="text-secondary text-sm">Learning Outline</h4>
+            <ol className="stack gap-3">
               {plan.outline.map((item, index) => (
-                <li
-                  key={`${index}-${item.title}`}
-                  className="row"
-                  style={{ alignItems: "flex-start", gap: "var(--space-3)" }}
-                >
+                <li key={`${index}-${item.title}`} className="row items-start gap-3">
                   <span className="badge" aria-hidden="true">
                     {index + 1}
                   </span>
-                  <div className="stack" style={{ gap: "var(--space-1)" }}>
+                  <div className="stack gap-1">
                     <span className="font-semibold">{item.title}</span>
                     {item.description && (
                       <span className="text-secondary text-sm">{item.description}</span>
@@ -179,16 +165,17 @@ export function CreateForm() {
           </div>
 
           {plan.sources.length > 0 && (
-            <div className="stack" style={{ gap: "var(--space-3)" }}>
-              <h4 className="text-secondary text-sm">📚 Sumber Belajar</h4>
-              <ul className="stack" style={{ gap: "var(--space-2)" }}>
+            <div className="stack gap-3">
+              <h4 className="text-secondary text-sm">Sumber Belajar</h4>
+              <ul className="stack gap-2">
                 {plan.sources.map((source, index) => (
-                  <li
-                    key={`${index}-${source.title}`}
-                    className="row"
-                    style={{ gap: "var(--space-2)" }}
-                  >
-                    <span aria-hidden="true">{SOURCE_TYPE_META[source.type].icon}</span>
+                  <li key={`${index}-${source.title}`} className="row gap-2">
+                    <Icon
+                      icon={SOURCE_TYPE_META[source.type].icon}
+                      size={16}
+                      label={SOURCE_TYPE_META[source.type].label}
+                      className="source-type-icon"
+                    />
                     {source.url ? (
                       <a
                         href={source.url}
@@ -197,6 +184,7 @@ export function CreateForm() {
                         className="link-accent text-sm"
                       >
                         {source.title}
+                        <span className="visually-hidden"> (membuka tab baru)</span>
                       </a>
                     ) : (
                       <span className="text-sm">{source.title}</span>
@@ -207,25 +195,24 @@ export function CreateForm() {
             </div>
           )}
 
-          <div className="row" style={{ gap: "var(--space-3)" }}>
-            <button
-              type="button"
-              className="btn btn-primary btn-lg"
+          <div className="row flex-wrap gap-3">
+            <Button
+              size="lg"
+              icon={Check}
               onClick={handleCreate}
-              disabled={status === "creating"}
+              loading={status === "creating"}
             >
-              {status === "creating" ? "Menyimpan…" : "✓ Buat Challenge"}
-            </button>
-            <button
-              type="button"
-              className="btn btn-ghost"
+              Buat Challenge
+            </Button>
+            <Button
+              variant="ghost"
               onClick={handleBackToEdit}
               disabled={status === "creating"}
             >
               Ganti topik
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );
@@ -233,12 +220,12 @@ export function CreateForm() {
 
 function PreviewSkeleton() {
   return (
-    <div className="card stack" style={{ gap: "var(--space-4)" }} aria-hidden="true">
-      <div className="skeleton" style={{ height: "1.5rem", width: "40%" }} />
-      <div className="skeleton" style={{ height: "1rem", width: "90%" }} />
-      <div className="skeleton" style={{ height: "1rem", width: "80%" }} />
-      <div className="skeleton" style={{ height: "1rem", width: "85%" }} />
-      <div className="skeleton" style={{ height: "1rem", width: "70%" }} />
-    </div>
+    <Card className="stack gap-4" aria-hidden="true">
+      <Skeleton width="40%" height="1.5rem" />
+      <Skeleton width="90%" />
+      <Skeleton width="80%" />
+      <Skeleton width="85%" />
+      <Skeleton width="70%" />
+    </Card>
   );
 }

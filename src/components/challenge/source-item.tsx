@@ -1,3 +1,7 @@
+import { Trash2 } from "lucide-react";
+
+import { IconButton } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { SOURCE_TYPE_META } from "@/lib/utils/labels";
 import type { SourceType } from "@/types";
 
@@ -19,10 +23,8 @@ export function SourceItem({ source, disabled, onRemove }: Props) {
 
   return (
     <li className="source-row">
-      <span aria-hidden="true" title={meta.label}>
-        {meta.icon}
-      </span>
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <Icon icon={meta.icon} size={16} label={meta.label} className="source-type-icon" />
+      <div className="flex-1">
         {source.url ? (
           <a
             href={source.url}
@@ -31,22 +33,19 @@ export function SourceItem({ source, disabled, onRemove }: Props) {
             className="link-accent text-sm"
           >
             {source.title}
+            <span className="visually-hidden"> (membuka tab baru)</span>
           </a>
         ) : (
           <span className="text-sm">{source.title}</span>
         )}
       </div>
-      <button
-        type="button"
-        className="icon-btn"
-        data-danger="true"
+      <IconButton
+        icon={Trash2}
+        label={`Hapus sumber "${source.title}"`}
+        danger
         onClick={() => onRemove(source.id)}
         disabled={disabled}
-        aria-label="Hapus sumber"
-        title="Hapus"
-      >
-        🗑️
-      </button>
+      />
     </li>
   );
 }
