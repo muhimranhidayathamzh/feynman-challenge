@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Plus, type LucideIcon } from "lucide-react";
+import { House, Plus, Settings, type LucideIcon } from "lucide-react";
 
 import { Icon } from "@/components/ui/icon";
 
@@ -15,6 +15,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Beranda", icon: House },
   { href: "/challenge/new", label: "Tantangan Baru", icon: Plus },
+  { href: "/pengaturan", label: "Pengaturan", icon: Settings },
 ];
 
 export function Sidebar() {

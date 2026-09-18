@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server";
 
+import { safeNext } from "@/lib/auth/redirect";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Supabase auth callback. Exchanges the `code` from an email-confirmation or
- * OAuth redirect for a session, then forwards the user on (default: dashboard).
+ * Supabase auth callback for email confirmation, password recovery, and
+ * OAuth. Exchanges the `code` for a session, then forwards to `next`
+ * (validated: same-origin paths only). Errors go back to /login as a CODE,
+ * never as free text.
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
+  const next = safeNext(searchParams.get("next"));
+  const providerError = searchParams.get("error");
 
   if (code) {
     const supabase = await createClient();
@@ -17,9 +21,9 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }
+    console.warn("[auth/callback] code exchange failed:", error.message);
   }
 
-  return NextResponse.redirect(
-    `${origin}/login?error=${encodeURIComponent("Tautan tidak valid atau sudah kedaluwarsa.")}`,
-  );
+  const reason = providerError ? "oauth_failed" : "link_invalid";
+  return NextResponse.redirect(`${origin}/login?error=${reason}`);
 }

@@ -1,138 +1,30 @@
-"use client";
+import type { Metadata } from "next";
 
-import { useState, type FormEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { LogIn, Mail } from "lucide-react";
+import { LoginForm } from "@/components/auth/login-form";
+import { safeNext } from "@/lib/auth/redirect";
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Field, Input } from "@/components/ui/field";
-import { authErrorCode, authErrorMessage } from "@/lib/auth/errors";
-import { createClient } from "@/lib/supabase/client";
+export const metadata: Metadata = { title: "Masuk" };
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [needsConfirmation, setNeedsConfirmation] = useState(false);
-  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
-  const [loading, setLoading] = useState(false);
+type PageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setNeedsConfirmation(false);
-    setLoading(true);
+/**
+ * Error CODES the auth callback may forward. Only known codes are shown, so a
+ * crafted /login?error=... link cannot put arbitrary text on this page.
+ */
+const CALLBACK_ERRORS: Record<string, string> = {
+  link_invalid: "Tautan tidak valid atau sudah kedaluwarsa. Coba minta tautan baru.",
+  oauth_failed: "Masuk dengan Google gagal. Coba lagi.",
+};
 
-    const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (signInError) {
-      setError(authErrorMessage(signInError));
-      setNeedsConfirmation(authErrorCode(signInError) === "email_not_confirmed");
-      setLoading(false);
-      return;
-    }
-
-    router.push("/");
-    router.refresh();
-  }
-
-  async function handleResendConfirmation() {
-    setResendState("sending");
-    const supabase = createClient();
-    const { error: resendError } = await supabase.auth.resend({
-      type: "signup",
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/api/auth/callback` },
-    });
-    if (resendError) {
-      setError(authErrorMessage(resendError));
-      setResendState("idle");
-      return;
-    }
-    setResendState("sent");
-  }
-
-  return (
-    <Card as="section" variant="glass" className="stack gap-5">
-      <div className="stack gap-1">
-        <h2 className="text-xl">Masuk</h2>
-        <p className="text-secondary text-sm">Lanjutkan tantangan belajarmu.</p>
-      </div>
-
-      {error && (
-        <div className="alert alert-error stack gap-2" role="alert">
-          <span>{error}</span>
-          {needsConfirmation && resendState !== "sent" && (
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={Mail}
-              className="self-start"
-              loading={resendState === "sending"}
-              onClick={() => void handleResendConfirmation()}
-            >
-              Kirim ulang email konfirmasi
-            </Button>
-          )}
-        </div>
-      )}
-      {resendState === "sent" && (
-        <div className="alert alert-success" role="status">
-          Email konfirmasi dikirim ulang ke <strong>{email}</strong>. Cek kotak masuk dan
-          folder spam.
-        </div>
-      )}
-
-      <form className="stack" onSubmit={handleSubmit}>
-        <Field id="email" label="Email">
-          <Input
-            type="email"
-            autoComplete="email"
-            required
-            placeholder="kamu@email.com"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            disabled={loading}
-          />
-        </Field>
-
-        <Field id="password" label="Kata sandi">
-          <Input
-            type="password"
-            autoComplete="current-password"
-            required
-            placeholder="••••••••"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            disabled={loading}
-          />
-        </Field>
-
-        <Button
-          type="submit"
-          size="lg"
-          block
-          className="mt-2"
-          icon={LogIn}
-          loading={loading}
-        >
-          Masuk
-        </Button>
-      </form>
-
-      <p className="text-secondary text-sm text-center">
-        Belum punya akun?{" "}
-        <Link href="/signup" className="link-accent">
-          Daftar
-        </Link>
-      </p>
-    </Card>
-  );
+/**
+ * Server wrapper: reads ?next= (validated here, so the client never sees an
+ * unsafe target) and ?error= forwarded by the auth callback.
+ */
+export default async function LoginPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const code = Array.isArray(params.error) ? params.error[0] : params.error;
+  const initialError = (code && CALLBACK_ERRORS[code]) || null;
+  return <LoginForm next={safeNext(params.next)} initialError={initialError} />;
 }

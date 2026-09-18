@@ -266,3 +266,20 @@
   height: 44px;
   color-scheme: dark;
 }
+
+/* --- "atau" divider between auth methods (Prompt 2.5) --- */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}

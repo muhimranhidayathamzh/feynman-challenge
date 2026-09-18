@@ -149,6 +149,22 @@ export const EvaluateResponseSchema = z.object({
 export type EvaluateResponse = z.infer<typeof EvaluateResponseSchema>;
 
 // ---------------------------------------------------------------------------
+// PATCH /api/profile
+// ---------------------------------------------------------------------------
+export const ProfilePatchRequestSchema = z
+  .object({
+    display_name: z.string().trim().min(1).max(60).nullable().optional(),
+    timezone: z.string().min(1).max(64).optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, { message: "Tidak ada perubahan." });
+export type ProfilePatchRequest = z.infer<typeof ProfilePatchRequestSchema>;
+
+export const ProfileResponseSchema = z.object({
+  profile: z.object({ display_name: z.string().nullable(), timezone: z.string() }),
+});
+export type ProfileResponse = z.infer<typeof ProfileResponseSchema>;
+
+// ---------------------------------------------------------------------------
 // POST /api/challenge/[id]/hints
 // ---------------------------------------------------------------------------
 export const HintsResponseSchema = z.object({ updated: z.number().int().nonnegative() });

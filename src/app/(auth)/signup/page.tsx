@@ -9,7 +9,9 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
+import { GoogleButton } from "@/components/auth/google-button";
 import { authErrorMessage } from "@/lib/auth/errors";
+import { MIN_PASSWORD_LENGTH, validateNewPassword } from "@/lib/auth/password";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
@@ -22,21 +24,11 @@ export default function SignupPage() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  function validate(): string | null {
-    if (password.length < 6) {
-      return "Kata sandi minimal 6 karakter.";
-    }
-    if (password !== confirm) {
-      return "Konfirmasi kata sandi tidak cocok.";
-    }
-    return null;
-  }
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
 
-    const validationError = validate();
+    const validationError = validateNewPassword(password, confirm);
     if (validationError) {
       setError(validationError);
       return;
@@ -108,6 +100,12 @@ export default function SignupPage() {
         </div>
       )}
 
+      <GoogleButton next="/" label="Daftar dengan Google" onError={setError} />
+
+      <div className="divider" role="separator">
+        <span>atau dengan email</span>
+      </div>
+
       <form className="stack" onSubmit={handleSubmit}>
         <Field id="displayName" label="Nama tampilan" optional>
           <Input
@@ -137,8 +135,8 @@ export default function SignupPage() {
             type="password"
             autoComplete="new-password"
             required
-            minLength={6}
-            placeholder="Minimal 6 karakter"
+            minLength={MIN_PASSWORD_LENGTH}
+            placeholder={`Minimal ${MIN_PASSWORD_LENGTH} karakter`}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             disabled={loading}

@@ -84,11 +84,23 @@ GEMINI_API_KEY=...                 # server-only
 ```
 
 ### 4. Database
-In the Supabase SQL Editor, run the migrations in order:
+In the Supabase SQL Editor, run the migrations in order (each is idempotent):
 1. `supabase/migrations/001_initial_schema.sql` — 6 tables, RLS policies, profile + updated_at triggers.
 2. `supabase/migrations/002_storage.sql` — private `recordings` bucket + storage policies.
+3. `supabase/migrations/003_pipeline.sql` — bucket limits, atomic evaluation claim/finalize, per-user AI quota.
+4. `supabase/migrations/004_time_and_state.sql` — user timezone, `deadline` as a date, `last_attempt_at`.
+5. `supabase/migrations/005_ai_quality.sql` — AI hints per outline point, jargon, unscorable-audio handling.
 
-### 5. Run
+### 5. Authentication (Supabase dashboard)
+- **Redirect URLs** (Authentication > URL Configuration): add `http://localhost:3000/api/auth/callback` and your production `https://<domain>/api/auth/callback`. Email confirmation, password recovery, and OAuth all land there.
+- **Minimum password length** (Authentication > Providers > Email): set it to **8** to match the client-side rule in `src/lib/auth/password.ts`.
+- **Login Google (optional):**
+  1. Google Cloud Console > APIs & Services > Credentials > *Create OAuth client ID* (type *Web application*).
+  2. Authorized redirect URI: `https://<your-project-ref>.supabase.co/auth/v1/callback`.
+  3. Supabase > Authentication > Providers > Google: enable it and paste the client ID and secret.
+  Without this, the "Masuk dengan Google" button shows a friendly "not enabled" message.
+
+### 6. Run
 ```bash
 npm run dev      # http://localhost:3000
 ```

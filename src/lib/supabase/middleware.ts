@@ -1,11 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+import { loginPathFor, safeNext } from "@/lib/auth/redirect";
 import { publicEnv } from "@/lib/env.public";
 import type { Database } from "@/types";
 
 /** Paths that an unauthenticated visitor is allowed to reach. */
-const PUBLIC_PATHS = ["/login", "/signup", "/api/auth/callback"];
+const PUBLIC_PATHS = ["/login", "/signup", "/lupa-password", "/api/auth/callback"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some(
@@ -51,22 +52,28 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   const { pathname } = request.nextUrl;
   const onPublicPath = isPublicPath(pathname);
 
+  // Any response other than supabaseResponse must carry the refreshed
+  // session cookies, or the browser keeps the stale ones.
+  const withSessionCookies = <T extends NextResponse>(response: T): T => {
+    supabaseResponse.cookies.getAll().forEach((cookie) => response.cookies.set(cookie));
+    return response;
+  };
+
   if (!user && !onPublicPath) {
     // API callers get a JSON 401, never an HTML redirect they cannot parse.
     if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+      return withSessionCookies(
+        NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 }),
+      );
     }
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/login";
-    redirectUrl.search = "";
-    return NextResponse.redirect(redirectUrl);
+    // Remember where they were going, so login can bring them back.
+    const target = loginPathFor(`${pathname}${request.nextUrl.search}`);
+    return withSessionCookies(NextResponse.redirect(new URL(target, request.url)));
   }
 
   if (user && (pathname === "/login" || pathname === "/signup")) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/";
-    redirectUrl.search = "";
-    return NextResponse.redirect(redirectUrl);
+    const next = safeNext(request.nextUrl.searchParams.get("next"));
+    return withSessionCookies(NextResponse.redirect(new URL(next, request.url)));
   }
 
   return supabaseResponse;

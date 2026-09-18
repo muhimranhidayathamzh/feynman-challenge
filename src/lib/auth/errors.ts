@@ -29,6 +29,9 @@ const MESSAGES: Record<string, string> = {
   session_not_found: "Sesi kamu berakhir. Silakan masuk lagi.",
   user_not_found: "Akun tidak ditemukan.",
   otp_expired: "Tautan sudah kedaluwarsa. Minta tautan baru.",
+  reauthentication_needed:
+    "Demi keamanan, keluar lalu masuk lagi sebelum mengganti kata sandi.",
+  oauth_provider_not_supported: "Masuk dengan Google belum diaktifkan di server.",
 };
 
 /** Older API versions return no code; recognise them by their message. */
@@ -38,6 +41,7 @@ const MESSAGE_FALLBACKS: [RegExp, string][] = [
   [/already registered|already exists/i, "user_already_exists"],
   [/password should be at least/i, "weak_password"],
   [/rate limit/i, "over_request_rate_limit"],
+  [/provider is not enabled|unsupported provider/i, "oauth_provider_not_supported"],
 ];
 
 export const GENERIC_AUTH_ERROR = "Terjadi kesalahan. Coba lagi sebentar.";
