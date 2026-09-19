@@ -1,7 +1,7 @@
 # DESIGN.md — Feynman Challenge
 
 > Sumber kebenaran untuk semua keputusan visual dan UX. Wajib dibaca sebelum menyentuh CSS, komponen, atau copy.
-> Status: **usulan arah A "Kertas & Kapur"**, menunggu keputusan DV1 di `prompts/improvement-plan.md` (Fase V).
+> Status: **arah A "Kertas & Kapur" dipilih** (DV1, 19 September 2026). Dijalankan lewat Fase V di `prompts/improvement-plan.md`.
 > Pembanding visual: buka `docs/design/arah-visual.html` di browser.
 
 ---

@@ -354,7 +354,7 @@ Setiap prompt Fase V, selain "Aturan Umum": baca DESIGN.md dulu, ambil screensho
 
 | # | Keputusan | Default | Dipakai di |
 |---|---|---|---|
-| DV1 | Arah visual | A. Kertas & Kapur (alternatif: B. Studio Suara, C. Tumbuh Ceria) | Semua |
+| DV1 | Arah visual | **Dipilih 19 Sep 2026: A. Kertas & Kapur** (alternatif: B. Studio Suara, C. Tumbuh Ceria) | Semua |
 | DV2 | Tema | Ikuti sistem, cadangan terang. Layar rekam selalu papan tulis | V.2 |
 | DV3 | Font | Newsreader (judul, angka, bacaan) + Plus Jakarta Sans (antarmuka) | V.2 |
 | DV4 | Warna aksen | Vermilion `#C8431B` (gelap `#EE7A52`) | V.2 |
@@ -549,7 +549,7 @@ E2E, Sentry, hapus akun, script maintenance, dan eval-golden sudah dijadwalkan d
 | 3.3 | Gap ke sumber & tren coverage | ✅ |
 | 3.4 | PWA yang benar | ✅ |
 | 3.5 | Mode demo & README | ✅ |
-| V.1 | Galeri komponen & audit visual | ⬜ |
+| V.1 | Galeri komponen & audit visual | ✅ |
 | V.2 | Fondasi: token, font, tema, logo | ⬜ |
 | V.3 | Komponen dasar | ⬜ |
 | V.4 | Layar hasil evaluasi | ⬜ |
