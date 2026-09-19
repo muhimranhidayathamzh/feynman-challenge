@@ -21,6 +21,7 @@ interface Props {
   deadline: string | null;
   deadlineInfo: DeadlineInfo;
   nextReview: string | null;
+  reviewBox: number;
   outline: OutlineItemData[];
   trend: Record<string, TrendPoint[]>;
   sources: SourceData[];
@@ -30,7 +31,7 @@ interface Props {
 /** Notebook markup. Data is loaded by the page (or the dev gallery). */
 export function NotebookView(props: Props) {
   return (
-    <section className="page">
+    <section className="page notebook-page">
       <NotebookHeader
         id={props.id}
         initialTitle={props.title}
@@ -39,10 +40,14 @@ export function NotebookView(props: Props) {
         deadline={props.deadline}
         deadlineInfo={props.deadlineInfo}
         nextReview={props.nextReview}
+        reviewBox={props.reviewBox}
       />
 
-      <Sheet className="stack gap-4">
-        <SheetTitle>Outline Materi</SheetTitle>
+      <Sheet
+        as="section"
+        className="stack gap-4"
+        aria-label="Poin yang perlu kamu jelaskan"
+      >
         <OutlineEditor
           challengeId={props.id}
           initialItems={props.outline}
@@ -50,19 +55,22 @@ export function NotebookView(props: Props) {
         />
       </Sheet>
 
-      <Sheet className="stack gap-4">
-        <SheetTitle>Sumber Belajar</SheetTitle>
+      <Sheet as="section" className="stack gap-4" aria-labelledby="sources-title">
+        <SheetTitle id="sources-title">Sumber belajar</SheetTitle>
         <SourceList challengeId={props.id} initialSources={props.sources} />
       </Sheet>
 
-      <Sheet className="stack gap-4">
-        <SheetTitle>Catatan</SheetTitle>
+      <Sheet as="section" className="stack gap-4" aria-labelledby="notes-heading">
+        <SheetTitle id="notes-heading">Catatanmu</SheetTitle>
         <NotesEditor challengeId={props.id} initialContent={props.notes} />
       </Sheet>
 
-      <ButtonLink href={`/challenge/${props.id}/record`} size="lg" block icon={Mic}>
-        Mulai Rekam
-      </ButtonLink>
+      {/* Always within reach: sticks above the bottom nav on phones (audit #13). */}
+      <div className="notebook-cta">
+        <ButtonLink href={`/challenge/${props.id}/record`} size="lg" block icon={Mic}>
+          Jelaskan sekarang
+        </ButtonLink>
+      </div>
     </section>
   );
 }

@@ -73,6 +73,13 @@ export const FRAMES: readonly FrameMeta[] = [
   },
   { id: "rekam-jeda", group: "Rekam", title: "Dijeda", shell: "bare", path: "/r" },
   {
+    id: "rekam-izin",
+    group: "Rekam",
+    title: "Izin mikrofon ditolak",
+    shell: "bare",
+    path: "/r",
+  },
+  {
     id: "rekam-dengarkan",
     group: "Rekam",
     title: "Dengarkan sebelum kirim",

@@ -17,7 +17,7 @@ export function HintChip({ label, cap, revealed, disabled = false, onReveal }: P
   const text = (
     <>
       <span className="font-semibold">{label}</span>
-      <span className="hint-chip-cap"> · maks {cap}</span>
+      <span className="hint-chip-cap">· maks {cap}</span>
     </>
   );
   if (revealed || !onReveal) {

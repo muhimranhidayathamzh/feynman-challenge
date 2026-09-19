@@ -125,6 +125,13 @@ function content(id: string): ReactNode {
       });
     case "rekam-jeda":
       return stage({ status: "paused", elapsedSec: 101 });
+    case "rekam-izin":
+      return stage({
+        recorderError: {
+          code: "permission-denied",
+          message: "Izin mikrofon ditolak. Aktifkan akses mikrofon untuk merekam.",
+        },
+      });
     case "rekam-dengarkan":
       return stage({
         status: "stopped",

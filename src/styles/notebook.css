@@ -1,12 +1,14 @@
 /* ---------------------------------------------------------------------------
-   Notebook editor (outline / sources / notes)
+   Notebook (Prompt V.5, DESIGN.md §11): a sheet of paper to study from.
    ------------------------------------------------------------------------- */
+
+/* --- Small toolbar buttons (outline, sources) --- */
 .icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   flex: 0 0 auto;
   border-radius: var(--radius-sm);
   color: var(--ink-2);
@@ -32,6 +34,10 @@
 }
 
 .drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
   cursor: grab;
   color: var(--ink-3);
   touch-action: none;
@@ -41,43 +47,123 @@
   cursor: grabbing;
 }
 
-.editor-row,
-.source-row {
+/* --- Header --- */
+.notebook-head {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.notebook-eyebrow {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-3);
+}
+
+.notebook-title {
+  font-size: var(--text-h1);
+}
+
+.notebook-meta {
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--sunken);
-  border: 1px solid var(--line);
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* --- Outline: numbered points with the number in the margin --- */
+.outline-list {
+  display: grid;
+}
+
+.outline-point {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px dashed var(--line);
+  /* Clear the sticky header when scrolled to via #outline-<id>. */
+  scroll-margin-top: calc(var(--header-h) + var(--space-4));
   transition:
-    border-color var(--transition-fast),
+    background var(--transition-fast),
     opacity var(--transition-fast);
 }
 
-.source-row {
-  align-items: center;
+.outline-point:last-child {
+  border-bottom: 0;
 }
 
-.editor-row {
-  /* Clear the sticky header when scrolled to via #outline-<id>. */
-  scroll-margin-top: calc(var(--header-h) + var(--space-4));
+.outline-number {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  line-height: 1.2;
+  color: var(--ink-3);
+  text-align: right;
+}
+
+.outline-body {
+  min-width: 0;
+}
+
+.outline-title {
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.outline-description {
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+/* Edit controls: their own row under the text on phones (audit #1). */
+.outline-controls {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+@media (min-width: 640px) {
+  .outline-point.is-editing {
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+  }
+
+  .outline-point.is-editing .outline-controls {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+  }
+}
+
+.outline-point.dragging {
+  opacity: 0.5;
+}
+
+.outline-point.drop-target {
+  border-bottom-color: var(--ink);
+  border-bottom-style: solid;
 }
 
 /* Arrived via "Pelajari lagi" on the results page (Prompt 3.3). */
-.editor-row.is-highlighted {
-  border-color: var(--ink-3);
-  box-shadow: 0 0 0 3px var(--highlight);
+.outline-point.is-highlighted {
+  background: color-mix(in srgb, var(--highlight) 55%, var(--surface));
+  border-radius: var(--radius-sm);
   animation: outlineHighlight 1.2s var(--ease-out) 2;
 }
 
 @keyframes outlineHighlight {
   50% {
-    box-shadow: 0 0 0 6px var(--highlight);
+    background: var(--highlight);
   }
 }
 
-/* --- Coverage trend dots (Prompt 3.3) --- */
+.textarea-compact {
+  min-height: 4rem;
+}
+
+/* --- Coverage trend (Prompt 3.3): the result page's marks, small --- */
 .coverage-trend {
   display: inline-flex;
   align-items: center;
@@ -88,38 +174,19 @@
 .trend-dots {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: 3px;
 }
 
 .trend-dot {
-  --dot-color: var(--ink-3);
+  display: inline-flex;
+}
+
+.trend-none {
   display: inline-block;
-  width: var(--space-3);
-  height: var(--space-3);
+  width: 13px;
+  height: 13px;
   border-radius: var(--radius-full);
-  border: 2px solid var(--dot-color);
-  flex-shrink: 0;
-}
-
-.trend-dot-covered {
-  --dot-color: var(--covered);
-  background: var(--dot-color);
-}
-
-.trend-dot-partial {
-  --dot-color: var(--partial);
-  /* design-check: allow-gradient (half-filled status mark, not decoration) */
-  background: linear-gradient(90deg, var(--dot-color) 50%, transparent 50%);
-}
-
-.trend-dot-missing {
-  --dot-color: var(--ink-3);
-  border-style: dashed;
-}
-
-.trend-dot-none {
-  border-style: dashed;
-  opacity: 0.6;
+  border: 1.5px dotted var(--line-strong);
 }
 
 .trend-legend {
@@ -135,13 +202,74 @@
   gap: var(--space-1);
 }
 
-.editor-row.dragging {
-  opacity: 0.5;
-  border-color: var(--accent);
+/* --- Sources: a short bibliography --- */
+.source-list {
+  display: grid;
 }
 
-.editor-row.drop-target {
-  border-color: var(--accent);
+.source-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.source-entry:last-child {
+  border-bottom: 0;
+}
+
+.source-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  line-height: var(--leading-snug);
+}
+
+.source-meta {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}
+
+/* Stacked fields: nothing gets squeezed on a phone (audit #2). */
+.source-form {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.source-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.source-form-row .select {
+  flex: 1 1 8rem;
+}
+
+/* Kept for the create form's source preview. */
+.source-type-icon {
+  color: var(--ink-3);
+  flex: 0 0 auto;
+}
+
+/* --- Notes: written and read in the teacher voice --- */
+.textarea-notes {
+  min-height: 14rem;
+  font-family: var(--font-serif);
+  font-size: var(--text-read);
+  line-height: var(--leading-normal);
+}
+
+.notes-empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+  text-align: center;
+}
+
+.notes-empty .illustration {
+  width: 8rem;
 }
 
 .save-status {
@@ -149,28 +277,17 @@
   color: var(--ink-3);
 }
 
-/* --- Primitives in the notebook (Prompt 2.1) --- */
-.textarea-compact {
-  min-height: 4rem;
+/* --- "Jelaskan sekarang", always within reach (audit #13) --- */
+.notebook-cta {
+  position: sticky;
+  bottom: calc(72px + var(--space-3));
+  z-index: var(--z-dropdown);
 }
 
-.textarea-notes {
-  min-height: 10rem;
-}
-
-.drag-handle {
-  display: inline-flex;
-  padding-top: 0.15rem;
-}
-
-.source-type-icon {
-  color: var(--ink-2);
-  flex: 0 0 auto;
-}
-
-.mastery-dot {
-  display: inline-block;
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: var(--radius-full);
+@media (min-width: 768px) {
+  .notebook-cta {
+    bottom: var(--space-4);
+    max-width: 22rem;
+    margin-inline-start: auto;
+  }
 }

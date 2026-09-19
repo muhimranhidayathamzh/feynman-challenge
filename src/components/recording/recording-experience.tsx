@@ -22,7 +22,7 @@ import { MIN_RECORDING_SEC } from "@/lib/utils/constants";
 import { effectiveHint } from "@/lib/utils/labels";
 import type { HintLevel } from "@/types";
 
-import type { OutlinePoint } from "./hint-panel";
+import type { OutlinePoint } from "./stage-hints";
 import { RecordingStage } from "./recording-stage";
 
 interface Props {
@@ -261,7 +261,7 @@ export function RecordingExperience({
       elapsedSec={duration}
       status={status}
       stream={recorder.stream}
-      recorderError={recorder.error?.message ?? null}
+      recorderError={recorder.error}
       submitError={submitError}
       preparingHints={preparingHints}
       hints={{ keywords, questions, outline, revealed, cap: hint.cap }}

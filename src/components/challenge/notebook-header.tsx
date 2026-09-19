@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Pencil, Repeat, Trash2 } from "lucide-react";
+import { Check, Pencil, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button, IconButton } from "@/components/ui/button";
@@ -17,7 +17,8 @@ import type { ChallengeStatus, MasteryState } from "@/types";
 
 import { ChallengeActions } from "./challenge-actions";
 import { DeadlineBadge } from "./deadline-badge";
-import { MasteryIndicator } from "./mastery-indicator";
+import { LeitnerStrip } from "./leitner-strip";
+import { MasteryMeter } from "./mastery-meter";
 
 interface Props {
   id: string;
@@ -30,6 +31,8 @@ interface Props {
   deadlineInfo: DeadlineInfo;
   /** e.g. "Review berikutnya: 22 Sep" (spaced repetition), or null. */
   nextReview: string | null;
+  /** challenges.review_box (0-based). */
+  reviewBox: number;
 }
 
 export function NotebookHeader({
@@ -40,6 +43,7 @@ export function NotebookHeader({
   deadline,
   deadlineInfo,
   nextReview,
+  reviewBox,
 }: Props) {
   const router = useRouter();
   const toast = useToast();
@@ -50,6 +54,10 @@ export function NotebookHeader({
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Only nag when the review is actually due; the strip shows the schedule.
+  const reviewDue =
+    nextReview !== null &&
+    (nextReview === "Review hari ini" || nextReview.startsWith("Review terlambat"));
 
   async function saveTitle() {
     const trimmed = draft.trim();
@@ -95,7 +103,7 @@ export function NotebookHeader({
   }
 
   return (
-    <div className="stack gap-3">
+    <header className="notebook-head">
       {error && (
         <div className="alert alert-error" role="alert">
           {error}
@@ -131,7 +139,10 @@ export function NotebookHeader({
             </div>
           </div>
         ) : (
-          <h1 className="flex-1">{title}</h1>
+          <div className="stack gap-1 flex-1">
+            <p className="notebook-eyebrow">Catatan belajar</p>
+            <h1 className="notebook-title">{title}</h1>
+          </div>
         )}
 
         <div className="row gap-0">
@@ -156,25 +167,21 @@ export function NotebookHeader({
         </div>
       </div>
 
-      <div className="row flex-wrap gap-2">
-        <MasteryIndicator state={masteryState} />
-        {status !== "active" ? (
-          <Badge tone={status === "completed" ? "success" : "neutral"}>
-            {STATUS_LABEL[status]}
-          </Badge>
-        ) : (
-          <DeadlineBadge info={deadlineInfo} />
-        )}
-        {nextReview && (
-          <Badge
-            icon={Repeat}
-            tone={nextReview.startsWith("Review terlambat") ? "warning" : "accent"}
-            title="Jadwal spaced repetition"
-          >
-            {nextReview}
-          </Badge>
-        )}
+      <div className="notebook-meta">
+        <MasteryMeter state={masteryState} />
+        <div className="row flex-wrap gap-2">
+          {status !== "active" ? (
+            <Badge tone={status === "completed" ? "success" : "neutral"}>
+              {STATUS_LABEL[status]}
+            </Badge>
+          ) : (
+            <DeadlineBadge info={deadlineInfo} />
+          )}
+          {reviewDue && <Badge tone="warning">{nextReview}</Badge>}
+        </div>
       </div>
+
+      {nextReview && <LeitnerStrip box={reviewBox} nextReview={nextReview} />}
 
       <ChallengeActions challengeId={id} status={status} deadline={deadline} />
 
@@ -188,6 +195,6 @@ export function NotebookHeader({
         onConfirm={() => void handleDelete()}
         onCancel={() => setConfirmingDelete(false)}
       />
-    </div>
+    </header>
   );
 }

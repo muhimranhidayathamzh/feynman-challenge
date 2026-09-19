@@ -1,3 +1,4 @@
+import { CoverageMark } from "@/components/evaluation/coverage-mark";
 import type { TrendPoint } from "@/lib/utils/coverage-progress";
 import { COVERAGE_STATUS_LABEL } from "@/lib/utils/labels";
 import type { CoverageStatus } from "@/types";
@@ -6,8 +7,17 @@ function statusText(status: CoverageStatus | null): string {
   return status ? COVERAGE_STATUS_LABEL[status].toLowerCase() : "tidak dinilai";
 }
 
+/** The same marks as the result page; a faint dot when the point was not assessed. */
 function TrendDot({ status, title }: { status: CoverageStatus | null; title?: string }) {
-  return <span className={`trend-dot trend-dot-${status ?? "none"}`} title={title} />;
+  return (
+    <span className="trend-dot" title={title}>
+      {status ? (
+        <CoverageMark status={status} size={13} decorative />
+      ) : (
+        <span className="trend-none" />
+      )}
+    </span>
+  );
 }
 
 /**

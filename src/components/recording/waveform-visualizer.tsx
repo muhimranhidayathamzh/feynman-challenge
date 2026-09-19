@@ -32,9 +32,8 @@ export function WaveformVisualizer({ stream, active }: Props) {
     const canvasCtx = canvas.getContext("2d");
 
     const styles = getComputedStyle(canvas);
-    // Chalk on the board: the line uses the stage ink, idle uses the faded ink.
-    const accent = styles.getPropertyValue("--ink").trim() || "#ece8df";
-    const muted = styles.getPropertyValue("--ink-3").trim() || "#949b92";
+    // Chalk on the board: the wave is drawn in the stage ink.
+    const chalk = styles.getPropertyValue("--ink").trim() || "#ece8df";
 
     let raf = 0;
 
@@ -51,19 +50,15 @@ export function WaveformVisualizer({ stream, active }: Props) {
       }
       canvasCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
       canvasCtx.clearRect(0, 0, cssW, cssH);
-      canvasCtx.lineWidth = 2;
+      // Idle: the dashed baseline drawn in CSS shows through.
+      if (!activeRef.current) return;
 
-      if (!activeRef.current) {
-        canvasCtx.strokeStyle = muted;
-        canvasCtx.beginPath();
-        canvasCtx.moveTo(0, cssH / 2);
-        canvasCtx.lineTo(cssW, cssH / 2);
-        canvasCtx.stroke();
-        return;
-      }
-
+      canvasCtx.lineWidth = 2.5;
+      canvasCtx.lineCap = "round";
+      canvasCtx.lineJoin = "round";
+      canvasCtx.globalAlpha = 0.9;
       analyser.getByteTimeDomainData(buffer);
-      canvasCtx.strokeStyle = accent;
+      canvasCtx.strokeStyle = chalk;
       canvasCtx.beginPath();
       const slice = cssW / buffer.length;
       let x = 0;
@@ -86,5 +81,9 @@ export function WaveformVisualizer({ stream, active }: Props) {
     };
   }, [stream]);
 
-  return <canvas ref={canvasRef} className="record-canvas" aria-hidden="true" />;
+  return (
+    <div className="record-wave" aria-hidden="true">
+      <canvas ref={canvasRef} className="record-canvas" />
+    </div>
+  );
 }

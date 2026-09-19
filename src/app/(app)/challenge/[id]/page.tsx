@@ -85,6 +85,7 @@ export default async function ChallengePage({ params }: PageProps) {
       deadline={challenge.deadline}
       deadlineInfo={getDeadlineInfo(challenge.deadline, clock.today)}
       nextReview={nextReviewLabel(review.nextReviewAt, clock.today)}
+      reviewBox={review.box}
       outline={outlineItems}
       trend={trend}
       sources={(sources ?? []).map((source) => ({

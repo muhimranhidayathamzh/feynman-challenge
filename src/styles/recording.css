@@ -1,17 +1,17 @@
 /* ---------------------------------------------------------------------------
-   Recording screen (immersive)
+   Recording stage (Prompt V.5, DESIGN.md §11): always "papan tulis".
    ------------------------------------------------------------------------- */
-/* The stage is always "papan tulis" (data-mood="board"). Its background
-   spans the full width; the content column stays 32rem wide. It sets its own
-   colour because text colour inherited from <body> was resolved in the page
-   theme. */
+
+/* The stage background spans the full width; the content column stays
+   34rem. It sets its own colour because text colour inherited from <body>
+   was resolved in the page theme. */
 .record-shell {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-6);
   min-height: 100dvh;
-  padding: var(--space-6) max(var(--space-4), calc((100% - 32rem) / 2)) var(--space-10);
+  padding: var(--space-4) max(var(--space-4), calc((100% - 34rem) / 2)) var(--space-12);
   background: var(--paper);
   color: var(--ink);
   text-align: center;
@@ -21,18 +21,21 @@ body:has(.record-shell) {
   background-color: var(--board);
 }
 
-.record-title {
-  font-size: var(--text-xl);
-  font-weight: var(--weight-semibold);
+.stage-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
 }
 
-.record-canvas {
-  display: block;
-  width: 100%;
-  height: 120px;
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  border: 1px solid var(--line);
+.stage-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-2);
 }
 
 .record-rec-dot {
@@ -44,78 +47,293 @@ body:has(.record-shell) {
   animation: pulse 1.4s ease-in-out infinite;
 }
 
-.hint-tier {
-  text-align: left;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--sunken);
-  border: 1px solid var(--line);
-}
-
-.hint-tier[data-revealed="true"] {
-  border-color: var(--line-strong);
-}
-
-.hint-warning {
-  font-size: var(--text-xs);
-  color: var(--partial);
-}
-
-.record-controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-3);
-  width: 100%;
-}
-
-/* --- Rings (countdown + score) and recording details (Prompt 2.1) --- */
-.ring {
-  position: relative;
-  flex: 0 0 auto;
-}
-
-.ring-center {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.countdown-value {
-  font-size: var(--text-4xl);
-  font-weight: var(--weight-bold);
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-}
-
-.countdown-progress {
-  stroke: var(--accent);
-  transition:
-    stroke-dashoffset 0.3s linear,
-    stroke 0.3s;
-}
-
-.countdown[data-almost-done="true"] .countdown-progress {
-  stroke: var(--partial);
-}
-
-.countdown[data-almost-done="true"] .countdown-value {
-  color: var(--partial);
-}
-
-.hint-warning {
-  display: inline-flex;
-  align-items: center;
+.stage-topic {
+  display: grid;
   gap: var(--space-1);
 }
 
-.hint-questions {
-  list-style: disc;
-  padding-left: var(--space-5);
+.stage-eyebrow {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+
+.stage-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-semibold);
+}
+
+.stage-alert {
+  width: 100%;
   text-align: left;
+  display: grid;
+  gap: var(--space-1);
+}
+
+/* --- Clock --- */
+.stage-timer {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  width: 100%;
+}
+
+.stage-timer-value {
+  font-family: var(--font-serif);
+  font-size: clamp(3.5rem, 2.5rem + 5vw, 5rem);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.stage-timer-caption {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+
+.stage-progress {
+  width: min(16rem, 80%);
+  height: 3px;
+  margin-top: var(--space-2);
+  border-radius: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.stage-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--ink-2);
+  transition: width 0.3s linear;
+}
+
+.stage-timer[data-almost-done] .stage-timer-value {
+  color: var(--partial);
+}
+
+.stage-timer[data-almost-done] .stage-progress > span {
+  background: var(--partial);
+}
+
+/* --- Voice as a chalk line over a dashed baseline --- */
+.record-wave {
+  position: relative;
+  width: 100%;
+  height: 96px;
+}
+
+.record-wave::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 2px dashed var(--line-strong);
+}
+
+.record-canvas {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* --- The one vermilion button --- */
+.stage-controls {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+}
+
+.stage-controls-row {
+  display: grid;
+  grid-template-columns: 5.5rem auto 5.5rem;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.rec-button {
+  display: grid;
+  place-items: center;
+  width: 5rem;
+  height: 5rem;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 4px 0 var(--accent-press);
+  cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.rec-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.rec-button:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--accent-press);
+}
+
+.rec-button:disabled {
+  background: var(--sunken);
+  color: var(--ink-3);
+  box-shadow: none;
+  cursor: progress;
+}
+
+.rec-button-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-2);
+}
+
+.stage-side-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+button.stage-side-button:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.stage-side-spacer {
+  visibility: hidden;
+}
+
+/* --- Before the first take --- */
+.stage-prep {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-5);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
+  text-align: left;
+}
+
+.stage-prep-lead {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+}
+
+.stage-prep-list {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: var(--space-5);
+  list-style: disc;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+}
+
+.stage-prep-list li::marker {
+  color: var(--ink-3);
+}
+
+.stage-prep-note {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}
+
+/* --- Hints: price on the chip, content only when opened --- */
+.stage-hints {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+}
+
+.stage-hints-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.stage-hints-title {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-2);
+}
+
+.stage-hint-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.stage-hint-body {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.stage-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+}
+
+.stage-questions,
+.stage-outline {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: var(--space-5);
+  font-size: var(--text-sm);
+}
+
+.stage-questions {
+  list-style: disc;
+}
+
+.stage-outline {
+  list-style: decimal;
+}
+
+/* --- Listen before sending --- */
+.stage-review {
+  display: grid;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.stage-review-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.stage-review-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
+}
+
+.stage-review-actions {
+  display: grid;
+  gap: var(--space-2);
 }
 
 .bar-fill-accent {

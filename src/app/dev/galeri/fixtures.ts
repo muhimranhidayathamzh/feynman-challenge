@@ -129,6 +129,7 @@ export const notebook = {
   deadline: "2026-09-20",
   deadlineInfo: getDeadlineInfo("2026-09-20", TODAY),
   nextReview: nextReviewLabel(TODAY, TODAY),
+  reviewBox: 1,
   outline: OUTLINE,
   trend: notebookTrend,
   sources: DEMO_SOURCES.map((source, index) => ({

@@ -1,22 +1,22 @@
 "use client";
 
-import { ArrowLeft, Mic, RotateCcw, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, RotateCcw, Send, Trash2 } from "lucide-react";
 
 import { AudioPlayer } from "@/components/ui/audio-player";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Sheet } from "@/components/ui/sheet";
-import { Icon } from "@/components/ui/icon";
 import type { RecorderStatus } from "@/hooks/use-audio-recorder";
+import type { RecorderError } from "@/lib/audio/recorder";
 import { MIN_RECORDING_SEC } from "@/lib/utils/constants";
 import { formatClock } from "@/lib/utils/timer";
 import type { HintLevel } from "@/types";
 
-import { CountdownTimer } from "./countdown-timer";
-import { HintPanel, type OutlinePoint } from "./hint-panel";
-import { RecorderControls } from "./recorder-controls";
+import { StageControls } from "./stage-controls";
+import { StageHints, type OutlinePoint } from "./stage-hints";
+import { StagePrep } from "./stage-prep";
+import { StageTimer } from "./stage-timer";
 import { WaveformVisualizer } from "./waveform-visualizer";
 
-export interface StageHints {
+export interface StageHintsData {
   keywords: string[];
   questions: string[];
   outline: OutlinePoint[];
@@ -42,10 +42,10 @@ export interface RecordingStageProps {
   elapsedSec: number;
   status: RecorderStatus;
   stream: MediaStream | null;
-  recorderError: string | null;
+  recorderError: RecorderError | null;
   submitError: string | null;
   preparingHints: boolean;
-  hints: StageHints;
+  hints: StageHintsData;
   /** Set while reviewing or sending a take; null while recording. */
   review: StageReview | null;
   onStart: () => void;
@@ -58,21 +58,27 @@ export interface RecordingStageProps {
   onDiscard: () => void;
 }
 
+/** What to do when the browser blocks the microphone. */
+const PERMISSION_HELP =
+  "Buka pengaturan situs di browser (ikon gembok di samping alamat), izinkan mikrofon, lalu muat ulang halaman ini.";
+
 /**
- * The recording screen's markup, driven entirely by props. RecordingExperience
- * owns the recorder, upload, and navigation; the dev gallery renders this with
- * fixed states.
+ * The recording stage (DESIGN.md §11): always the dark "papan tulis", one
+ * thing on screen at a time — the topic, the clock, your voice as a chalk
+ * line, one vermilion button. RecordingExperience owns the recorder, upload,
+ * and navigation; the dev gallery renders this with fixed states.
  */
 export function RecordingStage(props: RecordingStageProps) {
   const { status, review, hints } = props;
   const recording = status === "recording";
   const paused = status === "paused";
+  const live = recording || paused;
   const sending = review !== null && review.phase !== "review";
 
   return (
     // Always the dark "papan tulis": explaining is the moment on stage.
     <main className="record-shell" data-mood="board">
-      <div className="row-between w-full">
+      <div className="stage-bar">
         <ButtonLink
           href={`/challenge/${props.challengeId}`}
           variant="ghost"
@@ -81,31 +87,40 @@ export function RecordingStage(props: RecordingStageProps) {
         >
           Batal
         </ButtonLink>
-        {recording && (
-          <span className="row text-sm gap-2">
-            <span className="record-rec-dot" aria-hidden="true" />
-            Merekam…
-          </span>
-        )}
+        <span className="stage-status" aria-live="polite">
+          {recording && (
+            <>
+              <span className="record-rec-dot" aria-hidden="true" />
+              Merekam
+            </>
+          )}
+          {paused && "Dijeda"}
+        </span>
       </div>
 
-      <h1 className="record-title">{props.title}</h1>
+      <header className="stage-topic">
+        <p className="stage-eyebrow">Jelaskan</p>
+        <h1 className="stage-title">{props.title}</h1>
+      </header>
 
       {props.recorderError && (
-        <div className="alert alert-error w-full" role="alert">
-          {props.recorderError}
+        <div className="alert alert-error stage-alert" role="alert">
+          <p>{props.recorderError.message}</p>
+          {props.recorderError.code === "permission-denied" && (
+            <p className="text-sm">{PERMISSION_HELP}</p>
+          )}
         </div>
       )}
       {props.submitError && (
-        <div className="alert alert-error w-full" role="alert">
+        <div className="alert alert-error stage-alert" role="alert">
           {props.submitError}
         </div>
       )}
 
       {review ? (
-        <Sheet as="section" className="stack gap-4 w-full" aria-labelledby="review-title">
-          <div className="row-between">
-            <h2 id="review-title" className="text-xl">
+        <section className="stage-review" aria-labelledby="review-title">
+          <div className="stage-review-head">
+            <h2 id="review-title" className="stage-review-title">
               Dengarkan dulu
             </h2>
             <span className="badge tabular-nums">
@@ -115,19 +130,19 @@ export function RecordingStage(props: RecordingStageProps) {
           {review.previewUrl && (
             <AudioPlayer src={review.previewUrl} label="Rekaman yang baru dibuat" />
           )}
-          <p className="text-secondary text-sm text-left">
-            Sudah jelas dan lengkap? Kirim untuk dinilai AI, atau rekam ulang.
+          <p className="text-secondary">
+            Sudah jelas dan lengkap? Kirim untuk dinilai, atau rekam ulang.
             {hints.revealed.size > 0 &&
               ` Petunjuk yang sudah dibuka tetap membatasi skor maks ke ${hints.cap}.`}
           </p>
           {review.tooShort && (
-            <p className="text-warning text-sm text-left" role="status">
+            <p className="text-warning text-sm" role="status">
               Rekaman di bawah {MIN_RECORDING_SEC} detik terlalu pendek untuk dinilai.
             </p>
           )}
 
           {sending ? (
-            <div className="stack gap-2 w-full">
+            <div className="stack gap-2">
               <div
                 className="bar-track"
                 role="progressbar"
@@ -144,72 +159,70 @@ export function RecordingStage(props: RecordingStageProps) {
               <span className="text-secondary text-sm" aria-live="polite">
                 {review.phase === "uploading"
                   ? `Mengunggah rekaman… ${review.progressPct}%`
-                  : "Menyiapkan evaluasi…"}
+                  : "Menyiapkan penilaian…"}
               </span>
             </div>
           ) : (
-            <div className="record-controls">
+            <div className="stage-review-actions">
               <Button
                 size="lg"
+                block
                 icon={Send}
                 onClick={props.onSubmit}
                 disabled={review.tooShort}
               >
-                {props.submitError ? "Kirim ulang" : "Kirim"}
+                {props.submitError ? "Kirim ulang" : "Kirim untuk dinilai"}
               </Button>
               <Button
                 variant="secondary"
                 size="lg"
+                block
                 icon={RotateCcw}
                 onClick={props.onRerecord}
               >
                 Rekam ulang
               </Button>
-              <Button variant="ghost" size="lg" icon={Trash2} onClick={props.onDiscard}>
-                Buang
+              <Button variant="ghost" block icon={Trash2} onClick={props.onDiscard}>
+                Buang rekaman ini
               </Button>
             </div>
           )}
-        </Sheet>
+        </section>
       ) : (
         <>
-          <CountdownTimer
+          <StageTimer
             totalSeconds={props.durationSec}
             elapsedSeconds={props.elapsedSec}
+            started={live}
           />
 
           <WaveformVisualizer stream={props.stream} active={recording} />
 
-          <RecorderControls
+          <StageControls
             status={status}
-            submitting={false}
-            startDisabled={props.preparingHints}
-            startLabel={props.preparingHints ? "Menyiapkan petunjuk…" : undefined}
+            preparing={props.preparingHints}
             onStart={props.onStart}
             onPause={props.onPause}
             onResume={props.onResume}
             onFinish={props.onFinish}
           />
 
-          {(recording || paused) && (
-            <HintPanel
+          {live ? (
+            <StageHints
               keywords={hints.keywords}
               questions={hints.questions}
               outline={hints.outline}
               revealed={hints.revealed}
               currentCap={hints.cap}
-              disabled={false}
               onReveal={props.onReveal}
+            />
+          ) : (
+            <StagePrep
+              pointCount={hints.outline.length}
+              durationSec={props.durationSec}
             />
           )}
         </>
-      )}
-
-      {!review && !recording && !paused && (
-        <p className="row gap-2 text-muted text-sm">
-          <Icon icon={Mic} size={14} />
-          Rekaman bisa kamu dengarkan dulu sebelum dikirim.
-        </p>
       )}
     </main>
   );

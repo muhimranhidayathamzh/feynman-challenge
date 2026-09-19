@@ -1,7 +1,6 @@
 import { Trash2 } from "lucide-react";
 
 import { IconButton } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
 import { SOURCE_TYPE_META } from "@/lib/utils/labels";
 import type { SourceType } from "@/types";
 
@@ -18,26 +17,39 @@ interface Props {
   onRemove: (id: string) => void;
 }
 
+function hostname(url: string): string | null {
+  try {
+    return new URL(url).hostname.replace(/^www[.]/, "");
+  } catch {
+    return null;
+  }
+}
+
+/** One entry of the bibliography: title, then type and site in small print. */
 export function SourceItem({ source, disabled, onRemove }: Props) {
   const meta = SOURCE_TYPE_META[source.type];
+  const site = source.url ? hostname(source.url) : null;
 
   return (
-    <li className="source-row">
-      <Icon icon={meta.icon} size={16} label={meta.label} className="source-type-icon" />
-      <div className="flex-1">
+    <li className="source-entry">
+      <div className="stack gap-1 flex-1">
         {source.url ? (
           <a
             href={source.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="link-accent text-sm"
+            className="source-title link-accent"
           >
             {source.title}
             <span className="visually-hidden"> (membuka tab baru)</span>
           </a>
         ) : (
-          <span className="text-sm">{source.title}</span>
+          <span className="source-title">{source.title}</span>
         )}
+        <span className="source-meta">
+          {meta.label}
+          {site ? ` · ${site}` : ""}
+        </span>
       </div>
       <IconButton
         icon={Trash2}

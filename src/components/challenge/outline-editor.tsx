@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { Plus } from "lucide-react";
+import { Check, Pencil, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/field";
+import { SheetTitle } from "@/components/ui/sheet";
 import { OkResponseSchema, OutlineItemEnvelopeSchema } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
 import { outlineAnchorId, type TrendPoint } from "@/lib/utils/coverage-progress";
@@ -31,6 +32,8 @@ export function OutlineEditor({ challengeId, initialItems, trend }: Props) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
+  // Reading mode by default; an empty outline starts in edit mode.
+  const [editMode, setEditMode] = useState(initialItems.length === 0);
 
   // Arriving from "Pelajari lagi" (#outline-<id>): bring that point into view,
   // move focus to it, and highlight it for a moment.
@@ -161,25 +164,48 @@ export function OutlineEditor({ challengeId, initialItems, trend }: Props) {
   }
 
   return (
-    <div className="stack gap-3">
+    <div className="stack gap-4">
+      <div className="row-between items-start gap-3">
+        <div className="stack gap-1">
+          <SheetTitle>Poin yang perlu kamu jelaskan</SheetTitle>
+          <p className="text-secondary text-sm">
+            Setiap poin dinilai. Ini juga bahan belajarmu.
+          </p>
+        </div>
+        {items.length > 0 && (
+          <Button
+            variant={editMode ? "secondary" : "ghost"}
+            size="sm"
+            icon={editMode ? Check : Pencil}
+            onClick={() => setEditMode((value) => !value)}
+            aria-pressed={editMode}
+          >
+            {editMode ? "Selesai" : "Ubah"}
+          </Button>
+        )}
+      </div>
+
       {error && (
         <div className="alert alert-error" role="alert">
           {error}
         </div>
       )}
 
-      {hasTrend && <CoverageTrendLegend />}
+      {hasTrend && !editMode && <CoverageTrendLegend />}
 
       {items.length === 0 ? (
-        <p className="text-muted text-sm">Belum ada poin outline.</p>
+        <p className="text-muted text-sm">
+          Belum ada poin. Tambahkan poin pertama di bawah.
+        </p>
       ) : (
-        <ol className="stack gap-2">
+        <ol className="outline-list">
           {items.map((item, index) => (
             <OutlineItem
               key={item.id}
               item={item}
               index={index}
               total={items.length}
+              editMode={editMode}
               disabled={busy}
               dragging={dragIndex === index}
               dropTarget={overIndex === index && dragIndex !== index}
@@ -196,24 +222,26 @@ export function OutlineEditor({ challengeId, initialItems, trend }: Props) {
         </ol>
       )}
 
-      <form className="row gap-2" onSubmit={handleAdd}>
-        <Input
-          value={newTitle}
-          onChange={(event) => setNewTitle(event.target.value)}
-          placeholder="Tambah poin outline…"
-          maxLength={200}
-          disabled={busy}
-          aria-label="Poin outline baru"
-        />
-        <Button
-          type="submit"
-          variant="secondary"
-          icon={Plus}
-          disabled={busy || newTitle.trim().length === 0}
-        >
-          Tambah
-        </Button>
-      </form>
+      {editMode && (
+        <form className="row gap-2" onSubmit={handleAdd}>
+          <Input
+            value={newTitle}
+            onChange={(event) => setNewTitle(event.target.value)}
+            placeholder="Tambah poin outline…"
+            maxLength={200}
+            disabled={busy}
+            aria-label="Poin outline baru"
+          />
+          <Button
+            type="submit"
+            variant="secondary"
+            icon={Plus}
+            disabled={busy || newTitle.trim().length === 0}
+          >
+            Tambah
+          </Button>
+        </form>
+      )}
     </div>
   );
 }

@@ -11,8 +11,10 @@ import {
 } from "react";
 import { Eye, PenLine } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
+import { Illustration } from "@/components/ui/illustration";
 import { Markdown } from "@/components/ui/markdown";
 import { NoteEnvelopeSchema } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
@@ -39,7 +41,8 @@ interface Props {
 export function NotesEditor({ challengeId, initialContent }: Props) {
   const [content, setContent] = useState(initialContent);
   const [saveState, setSaveState] = useState<SaveState>("idle");
-  const [tab, setTab] = useState<Tab>("write");
+  // Reading first when there is something to read (audit #12).
+  const [tab, setTab] = useState<Tab>(initialContent.trim() ? "preview" : "write");
   const baseId = useId();
   const writeTabRef = useRef<HTMLButtonElement | null>(null);
   const previewTabRef = useRef<HTMLButtonElement | null>(null);
@@ -138,21 +141,6 @@ export function NotesEditor({ challengeId, initialContent }: Props) {
     <div className="stack gap-2">
       <div className="tabs tabs-compact" role="tablist" aria-label="Mode catatan">
         <button
-          ref={writeTabRef}
-          type="button"
-          role="tab"
-          id={`${baseId}-write-tab`}
-          aria-selected={tab === "write"}
-          aria-controls={`${baseId}-write-panel`}
-          tabIndex={tab === "write" ? 0 : -1}
-          className="tab"
-          onClick={() => setTab("write")}
-          onKeyDown={handleTabKey}
-        >
-          <Icon icon={PenLine} size={14} />
-          Tulis
-        </button>
-        <button
           ref={previewTabRef}
           type="button"
           role="tab"
@@ -168,7 +156,22 @@ export function NotesEditor({ challengeId, initialContent }: Props) {
           onKeyDown={handleTabKey}
         >
           <Icon icon={Eye} size={14} />
-          Pratinjau
+          Baca
+        </button>
+        <button
+          ref={writeTabRef}
+          type="button"
+          role="tab"
+          id={`${baseId}-write-tab`}
+          aria-selected={tab === "write"}
+          aria-controls={`${baseId}-write-panel`}
+          tabIndex={tab === "write" ? 0 : -1}
+          className="tab"
+          onClick={() => setTab("write")}
+          onKeyDown={handleTabKey}
+        >
+          <Icon icon={PenLine} size={14} />
+          Tulis
         </button>
       </div>
 
@@ -198,7 +201,21 @@ export function NotesEditor({ challengeId, initialContent }: Props) {
         {content.trim() ? (
           <Markdown>{content}</Markdown>
         ) : (
-          <p className="text-muted text-sm">Belum ada catatan.</p>
+          <div className="notes-empty">
+            <Illustration name="catatan-kosong" />
+            <p className="text-secondary">
+              Belum ada catatan. Tulis ringkasan dengan kata-katamu sendiri: itu latihan
+              menjelaskan yang paling murah.
+            </p>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={PenLine}
+              onClick={() => selectTab("write")}
+            >
+              Mulai menulis
+            </Button>
+          </div>
         )}
       </div>
 

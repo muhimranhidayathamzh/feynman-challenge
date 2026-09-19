@@ -7,6 +7,7 @@ import { Button, IconButton } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { outlineAnchorId, type TrendPoint } from "@/lib/utils/coverage-progress";
+import { cx } from "@/lib/utils/cx";
 
 import { CoverageTrend } from "./coverage-trend";
 
@@ -20,6 +21,8 @@ interface Props {
   item: OutlineItemData;
   index: number;
   total: number;
+  /** Edit mode shows the controls; reading mode shows only the content. */
+  editMode: boolean;
   disabled: boolean;
   dragging: boolean;
   dropTarget: boolean;
@@ -35,10 +38,16 @@ interface Props {
   onDragEnd: () => void;
 }
 
+/**
+ * One outline point (DESIGN.md §11): its number sits in the margin like a
+ * numbered note. Controls exist only in edit mode, on their own row on
+ * phones, so the text always gets the full width (audit #1, #14).
+ */
 export function OutlineItem({
   item,
   index,
   total,
+  editMode,
   disabled,
   dragging,
   dropTarget,
@@ -68,30 +77,31 @@ export function OutlineItem({
     setEditing(false);
   }
 
-  const className = `editor-row focus-target${dragging ? " dragging" : ""}${
-    dropTarget ? " drop-target" : ""
-  }${highlighted ? " is-highlighted" : ""}`;
+  const canDrag = editMode && !editing && !disabled;
 
   return (
     <li
       id={outlineAnchorId(item.id)}
       tabIndex={-1}
-      className={className}
-      draggable={!editing && !disabled}
-      onDragStart={() => onDragStart(index)}
-      onDragEnter={() => onDragEnter(index)}
-      onDragOver={(event) => event.preventDefault()}
-      onDragEnd={onDragEnd}
+      className={cx(
+        "outline-point focus-target",
+        editMode && "is-editing",
+        dragging && "dragging",
+        dropTarget && "drop-target",
+        highlighted && "is-highlighted",
+      )}
+      draggable={canDrag}
+      onDragStart={canDrag ? () => onDragStart(index) : undefined}
+      onDragEnter={canDrag ? () => onDragEnter(index) : undefined}
+      onDragOver={canDrag ? (event) => event.preventDefault() : undefined}
+      onDragEnd={canDrag ? onDragEnd : undefined}
     >
-      <span className="drag-handle" title="Seret untuk mengurutkan">
-        <Icon icon={GripVertical} size={16} />
-      </span>
-      <span className="badge" aria-hidden="true">
+      <span className="outline-number" aria-hidden="true">
         {index + 1}
       </span>
 
       {editing ? (
-        <div className="stack flex-1 gap-2">
+        <div className="stack gap-2 outline-body">
           <Input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
@@ -122,17 +132,24 @@ export function OutlineItem({
           </div>
         </div>
       ) : (
-        <div className="stack flex-1 gap-1">
-          <span className="font-semibold">{item.title}</span>
+        <div className="stack gap-1 outline-body">
+          <span className="outline-title">{item.title}</span>
           {item.description && (
-            <span className="text-secondary text-sm">{item.description}</span>
+            <span className="outline-description">{item.description}</span>
           )}
           {trend && <CoverageTrend points={trend} />}
         </div>
       )}
 
-      {!editing && (
-        <div className="row gap-0">
+      {editMode && !editing && (
+        <div className="outline-controls">
+          <span
+            className="drag-handle"
+            title="Seret untuk mengurutkan"
+            aria-hidden="true"
+          >
+            <Icon icon={GripVertical} size={16} />
+          </span>
           <IconButton
             icon={ArrowUp}
             label={`Pindahkan "${item.title}" ke atas`}
