@@ -550,7 +550,7 @@ E2E, Sentry, hapus akun, script maintenance, dan eval-golden sudah dijadwalkan d
 | 3.4 | PWA yang benar | ✅ |
 | 3.5 | Mode demo & README | ✅ |
 | V.1 | Galeri komponen & audit visual | ✅ |
-| V.2 | Fondasi: token, font, tema, logo | ⬜ |
+| V.2 | Fondasi: token, font, tema, logo | ✅ |
 | V.3 | Komponen dasar | ⬜ |
 | V.4 | Layar hasil evaluasi | ⬜ |
 | V.5 | Panggung rekam & catatan belajar | ⬜ |
