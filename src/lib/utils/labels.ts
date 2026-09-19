@@ -34,14 +34,6 @@ export function formatDuration(seconds: number): string {
   return `± ${minutes} menit`;
 }
 
-/** Color for a 0–10 score (red → orange → yellow → green), reusing mastery hues. */
-export function scoreColor(score: number): string {
-  if (score >= 8) return "var(--mastery-mastered)";
-  if (score >= 7) return "var(--mastery-proficient)";
-  if (score >= 5) return "var(--mastery-developing)";
-  return "var(--mastery-attempted)";
-}
-
 // --- Hint tiers (recording screen) ---
 // Ordered from least to most helpful; opening a tier caps the max score.
 export interface HintTier {

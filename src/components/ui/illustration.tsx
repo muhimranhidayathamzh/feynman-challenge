@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 
 import { cx } from "@/lib/utils/cx";
 
-export type IllustrationName = "meja-kosong" | "catatan-kosong" | "offline" | "error";
+export type IllustrationName =
+  "meja-kosong" | "catatan-kosong" | "offline" | "error" | "mendengarkan" | "hening";
 
 interface Props {
   name: IllustrationName;
@@ -85,6 +86,34 @@ const DRAWINGS: Record<IllustrationName, ReactNode> = {
       <path d="M80 56 q-5 -3 0 -6 q5 -3 0 -6" stroke={WAVE} strokeWidth="3" />
       <path d="M80 38 q-5 -3 0 -6" stroke={WAVE} strokeWidth="3" strokeDasharray="1 5" />
       <path d="M112 30 L120 38 M120 30 L112 38" strokeWidth="2" />
+    </>
+  ),
+  // A voice travelling into an open notebook: the AI is listening and noting.
+  mendengarkan: (
+    <>
+      <path d="M14 98 H146" strokeWidth="2" opacity="0.5" />
+      <path
+        d="M16 56 q4 -6 8 0 q4 6 8 0 q4 -6 8 0 q4 6 8 0"
+        stroke={WAVE}
+        strokeWidth="3"
+      />
+      <path d="M100 92 Q82 84 60 88 V48 Q82 42 100 50 Z" fill="var(--surface)" />
+      <path d="M100 92 Q118 84 140 88 V48 Q118 42 100 50 Z" fill="var(--surface)" />
+      <path
+        d="M70 60 H90 M70 70 H86 M110 62 H130 M110 72 H124"
+        strokeWidth="2"
+        strokeDasharray="2 5"
+        opacity="0.7"
+      />
+    </>
+  ),
+  // A voice that fades into a flat line: nothing to hear.
+  hening: (
+    <>
+      <path d="M14 98 H146" strokeWidth="2" opacity="0.5" />
+      <path d="M22 60 q5 -12 10 0 q5 12 10 0 q4 -6 8 0" stroke={WAVE} strokeWidth="3" />
+      <path d="M50 60 H138" strokeDasharray="1 7" />
+      <path d="M96 36 h4 M108 36 h4 M120 36 h4" strokeWidth="3" />
     </>
   ),
   // A line that got tangled on the way: something went wrong, not your fault.

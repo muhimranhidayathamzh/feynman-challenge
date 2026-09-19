@@ -12,7 +12,7 @@ import { fetchJson } from "@/lib/api/fetch-json";
 import type { CoverageComparison as Comparison } from "@/lib/utils/coverage-progress";
 import type { AudioIssue, EvaluationStatus } from "@/types";
 
-import type { CoverageRow } from "./coverage-checklist";
+import type { CoverageRow } from "./result-evidence";
 import {
   EvaluationCompletedView,
   EvaluationRejectedView,
@@ -25,7 +25,10 @@ interface Props {
   attemptId: string;
   challengeTitle: string;
   attemptNumber: number;
-  previousScore: number | null;
+  /** The last scored attempt before this one. */
+  previous: { score: number; attemptNumber: number } | null;
+  /** Cap from the hints used for this attempt. */
+  maxScore: number;
   history: { attemptNumber: number; score: number | null }[];
   status: EvaluationStatus;
   evaluationError: string | null;
@@ -180,7 +183,8 @@ export function EvaluationResults(props: Props) {
       challengeId={props.challengeId}
       challengeTitle={props.challengeTitle}
       attemptNumber={props.attemptNumber}
-      previousScore={props.previousScore}
+      previous={props.previous}
+      maxScore={props.maxScore}
       history={props.history}
       overallScore={props.overallScore}
       subScores={props.subScores}

@@ -11,7 +11,7 @@ import {
 } from "@/lib/utils/coverage-progress";
 import { COVERAGE_STATUS_LABEL } from "@/lib/utils/labels";
 
-import { COVERAGE_STATUS_META } from "./coverage-checklist";
+import { CoverageMark } from "./coverage-mark";
 
 interface Props {
   challengeId: string;
@@ -21,7 +21,8 @@ interface Props {
 
 function StatusText({ status }: { status: CoverageChange["from"] }) {
   return (
-    <span className={COVERAGE_STATUS_META[status].className}>
+    <span className="compare-state">
+      <CoverageMark status={status} size={14} decorative />
       {COVERAGE_STATUS_LABEL[status]}
     </span>
   );
@@ -41,7 +42,7 @@ function ChangeList({
   if (changes.length === 0) return null;
   return (
     <div className="stack gap-2">
-      <h4 className="text-sm font-semibold">{title}</h4>
+      <h3 className="notes-heading">{title}</h3>
       <ul className="stack gap-2">
         {changes.map((change) => (
           <li key={`${change.topic}-${change.outlineId ?? ""}`} className="compare-row">

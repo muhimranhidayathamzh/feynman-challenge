@@ -2,33 +2,24 @@
 
 import type { ReactNode, Ref } from "react";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  BookOpen,
-  CircleAlert,
-  Headphones,
-  Hourglass,
-  LoaderCircle,
-  Mic,
-  RefreshCw,
-  RotateCcw,
-} from "lucide-react";
+import { ArrowLeft, BookOpen, Mic, RefreshCw, RotateCcw } from "lucide-react";
 
 import { AudioPlayer } from "@/components/ui/audio-player";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Sheet, SheetTitle } from "@/components/ui/sheet";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
+import { Sheet } from "@/components/ui/sheet";
 import { AUDIO_ISSUE_MESSAGES } from "@/lib/api/contracts";
 import type { CoverageComparison as Comparison } from "@/lib/utils/coverage-progress";
+import { splitSummary } from "@/lib/utils/transcript";
 import type { AudioIssue } from "@/types";
 
-import { AttemptHistory } from "./attempt-history";
-import { CoverageChecklist, type CoverageRow } from "./coverage-checklist";
 import { CoverageComparison } from "./coverage-comparison";
-import { FeedbackCard } from "./feedback-card";
-import { ScoreRing } from "./score-ring";
-import { SubScores } from "./sub-scores";
-import { TranscriptView } from "./transcript-view";
+import { FeedbackNotes } from "./feedback-notes";
+import { ResultEvidence, type CoverageRow } from "./result-evidence";
+import { ScoreFigure } from "./score-figure";
+import { ScoreHistory } from "./score-history";
+import { SubScoreBars } from "./sub-score-bars";
 
 function hrefs(challengeId: string) {
   return {
@@ -52,28 +43,30 @@ export function EvaluationRejectedView(props: RejectedProps) {
   const links = hrefs(props.challengeId);
   return (
     <section className="state-screen">
-      <Sheet className="state-card">
-        <Icon icon={Headphones} size={40} className="state-icon" />
-        <h2 ref={props.headingRef} tabIndex={-1} className="focus-target">
-          Rekaman belum bisa dinilai
-        </h2>
-        <p className="text-secondary">{AUDIO_ISSUE_MESSAGES[props.audioIssue]}</p>
-        {props.feedback && <p className="text-secondary text-sm">{props.feedback}</p>}
-        <p className="text-muted text-sm">
-          Percobaan ini tidak memengaruhi skor, tingkat penguasaan, maupun streak-mu.
+      <EmptyState
+        illustration="hening"
+        title="Rekaman ini belum bisa dinilai"
+        headingRef={props.headingRef}
+        actions={
+          <>
+            <ButtonLink href={links.record} icon={Mic}>
+              Rekam ulang
+            </ButtonLink>
+            <ButtonLink href={links.notebook} variant="ghost">
+              Kembali ke catatan
+            </ButtonLink>
+          </>
+        }
+      >
+        <p>{AUDIO_ISSUE_MESSAGES[props.audioIssue]}</p>
+        {props.feedback && <p className="text-sm">{props.feedback}</p>}
+        <p className="text-sm">
+          Tenang, percobaan ini tidak memengaruhi skor, penguasaan, maupun streak-mu.
         </p>
         {props.audioUrl && (
           <AudioPlayer src={props.audioUrl} label="Rekaman percobaan ini" />
         )}
-        <div className="state-actions">
-          <ButtonLink href={links.record} icon={Mic}>
-            Rekam ulang
-          </ButtonLink>
-          <ButtonLink href={links.notebook} variant="ghost">
-            Kembali
-          </ButtonLink>
-        </div>
-      </Sheet>
+      </EmptyState>
     </section>
   );
 }
@@ -93,69 +86,77 @@ interface StatusProps {
 
 export function EvaluationStatusView(props: StatusProps) {
   const links = hrefs(props.challengeId);
-  return (
-    <section className="state-screen">
-      {props.view === "error" ? (
-        <Sheet className="state-card">
-          <Icon icon={CircleAlert} size={40} className="state-icon" />
-          <h2>Evaluasi gagal</h2>
-          <p className="text-secondary" role="alert">
-            {props.error}
-          </p>
-          <div className="state-actions">
-            <Button icon={RotateCcw} onClick={props.onRetry}>
-              Coba lagi
-            </Button>
-            <ButtonLink href={links.notebook} variant="ghost">
-              Kembali
-            </ButtonLink>
-          </div>
-        </Sheet>
-      ) : props.view === "stale" ? (
-        <Sheet className="state-card">
-          <Icon icon={Hourglass} size={40} className="state-icon" />
-          <h2>Masih diproses</h2>
-          <p className="text-secondary">
-            Evaluasi memakan waktu lebih lama dari biasanya. Muat ulang untuk melihat
-            status terbaru.
-          </p>
-          <div className="state-actions">
-            <Button icon={RefreshCw} onClick={props.onReload}>
-              Muat ulang
-            </Button>
-            <ButtonLink href={links.notebook} variant="ghost">
-              Kembali
-            </ButtonLink>
-          </div>
-        </Sheet>
-      ) : (
-        <Sheet
-          className="state-card evaluating-card animate-fade-in"
-          aria-live="polite"
-          aria-busy="true"
+  if (props.view === "error") {
+    return (
+      <section className="state-screen">
+        <EmptyState
+          illustration="error"
+          title="Penilaian gagal kali ini"
+          actions={
+            <>
+              <Button icon={RotateCcw} onClick={props.onRetry}>
+                Nilai ulang
+              </Button>
+              <ButtonLink href={links.notebook} variant="ghost">
+                Kembali ke catatan
+              </ButtonLink>
+            </>
+          }
         >
-          <Icon icon={LoaderCircle} size={36} className="state-icon animate-spin" />
-          <h2>Menganalisis penjelasanmu…</h2>
-          <p className="text-secondary">
-            AI sedang mendengarkan rekaman dan menilainya berdasarkan outline. Biasanya
-            butuh 10–30 detik.
+          <p role="alert">{props.error}</p>
+          <p className="text-sm">
+            Rekamanmu aman. Menilai ulang tidak perlu merekam lagi.
           </p>
-        </Sheet>
-      )}
+        </EmptyState>
+      </section>
+    );
+  }
+  if (props.view === "stale") {
+    return (
+      <section className="state-screen">
+        <EmptyState
+          illustration="mendengarkan"
+          title="Penilaian lebih lama dari biasanya"
+          actions={
+            <>
+              <Button icon={RefreshCw} onClick={props.onReload}>
+                Cek lagi
+              </Button>
+              <ButtonLink href={links.notebook} variant="ghost">
+                Kembali ke catatan
+              </ButtonLink>
+            </>
+          }
+        >
+          <p>Rekamanmu sudah diterima dan masih dinilai. Cek lagi sebentar.</p>
+        </EmptyState>
+      </section>
+    );
+  }
+  return (
+    <section className="state-screen" aria-live="polite" aria-busy="true">
+      <EmptyState illustration="mendengarkan" title="Sedang mendengarkan penjelasanmu">
+        <p>
+          AI mendengarkan rekamanmu dan mencocokkannya dengan setiap poin outline.
+          Biasanya 10 sampai 30 detik.
+        </p>
+      </EmptyState>
     </section>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Completed with a score
+// Completed with a score (DESIGN.md §11): summary, score, points beside the
+// annotated transcript, notes, follow-ups, comparison, next action.
 // ---------------------------------------------------------------------------
 export interface CompletedProps {
   challengeId: string;
   challengeTitle: string;
   attemptNumber: number;
-  previousScore: number | null;
+  previous: { score: number; attemptNumber: number } | null;
   history: { attemptNumber: number; score: number | null }[];
   overallScore: number;
+  maxScore: number;
   subScores: { comprehensiveness: number; accuracy: number; clarity: number };
   coverage: CoverageRow[];
   comparison: { previousAttemptNumber: number; result: Comparison } | null;
@@ -171,38 +172,67 @@ export interface CompletedProps {
 
 export function EvaluationCompletedView(props: CompletedProps) {
   const links = hrefs(props.challengeId);
+  const { summary, rest } = splitSummary(props.feedback);
+
   return (
-    <section className="page">
-      <div className="stack gap-1">
+    <section className="page result-page">
+      <header className="stack gap-2">
         <Link href={links.notebook} className="back-link text-secondary text-sm">
           <Icon icon={ArrowLeft} size={14} />
           {props.challengeTitle}
         </Link>
-        <h1 ref={props.headingRef} tabIndex={-1} className="focus-target">
-          Hasil Evaluasi{" "}
-          <span className="text-secondary">· Percobaan #{props.attemptNumber}</span>
+        <p className="result-eyebrow">Percobaan #{props.attemptNumber}</p>
+        <h1 ref={props.headingRef} tabIndex={-1} className="result-summary focus-target">
+          {summary ?? `Hasil percobaan #${props.attemptNumber}`}
         </h1>
-      </div>
+      </header>
 
-      <Sheet className="center animate-fade-in-up">
-        <ScoreRing score={props.overallScore} previousScore={props.previousScore} />
-      </Sheet>
-
-      <Sheet className="stack gap-4 animate-fade-in-up">
-        <SheetTitle>Rincian Skor</SheetTitle>
-        <SubScores
-          comprehensiveness={props.subScores.comprehensiveness}
-          accuracy={props.subScores.accuracy}
-          clarity={props.subScores.clarity}
-        />
+      <Sheet as="section" className="result-score" aria-label="Skor">
+        <div className="stack gap-3">
+          <ScoreFigure
+            score={props.overallScore}
+            max={props.maxScore}
+            previous={props.previous}
+            animate
+          />
+          <ScoreHistory
+            history={props.history}
+            currentAttemptNumber={props.attemptNumber}
+          />
+        </div>
+        <div className="stack gap-3">
+          <SubScoreBars
+            items={[
+              { label: "Kelengkapan", value: props.subScores.comprehensiveness },
+              { label: "Ketepatan", value: props.subScores.accuracy },
+              { label: "Kejelasan", value: props.subScores.clarity },
+            ]}
+          />
+          <p className="text-muted text-xs">
+            Skor akhir menimbang kelengkapan 40%, ketepatan 35%, dan kejelasan 25%.
+          </p>
+        </div>
       </Sheet>
 
       {props.coverage.length > 0 && (
-        <Sheet className="stack gap-3">
-          <SheetTitle>Cakupan Materi</SheetTitle>
-          <CoverageChecklist items={props.coverage} challengeId={props.challengeId} />
-        </Sheet>
+        <ResultEvidence
+          challengeId={props.challengeId}
+          attemptNumber={props.attemptNumber}
+          coverage={props.coverage}
+          transcript={props.transcript}
+          jargon={props.unexplainedJargon}
+          audioUrl={props.audioUrl}
+        />
       )}
+
+      <FeedbackNotes
+        rest={rest}
+        strengths={props.strengths}
+        improvements={props.improvements}
+        jargon={props.unexplainedJargon}
+      />
+
+      {props.followUp}
 
       {props.comparison && (
         <CoverageComparison
@@ -212,57 +242,12 @@ export function EvaluationCompletedView(props: CompletedProps) {
         />
       )}
 
-      <Sheet className="stack gap-3">
-        <SheetTitle>Umpan Balik AI</SheetTitle>
-        <FeedbackCard
-          feedback={props.feedback ?? ""}
-          strengths={props.strengths}
-          improvements={props.improvements}
-        />
-      </Sheet>
-
-      {props.unexplainedJargon.length > 0 && (
-        <Sheet className="stack gap-3">
-          <SheetTitle>Istilah yang belum kamu jelaskan</SheetTitle>
-          <p className="text-secondary text-sm">
-            Inti Feynman Technique: jelaskan istilah ini dengan kata-kata sederhana di
-            percobaan berikutnya.
-          </p>
-          <ul className="jargon-list">
-            {props.unexplainedJargon.map((term) => (
-              <li key={term} className="badge">
-                {term}
-              </li>
-            ))}
-          </ul>
-        </Sheet>
-      )}
-
-      {props.audioUrl && (
-        <Sheet className="stack gap-3">
-          <SheetTitle>Rekamanmu</SheetTitle>
-          <AudioPlayer
-            src={props.audioUrl}
-            label={`Rekaman percobaan #${props.attemptNumber}`}
-          />
-        </Sheet>
-      )}
-
-      {props.transcript && <TranscriptView transcript={props.transcript} />}
-
-      {props.followUp}
-
-      <AttemptHistory
-        history={props.history}
-        currentAttemptNumber={props.attemptNumber}
-      />
-
-      <div className="row flex-wrap gap-3">
+      <div className="result-actions">
         <ButtonLink href={links.record} size="lg" icon={RotateCcw}>
-          Coba Lagi
+          Jelaskan lagi
         </ButtonLink>
         <ButtonLink href={links.notebook} variant="secondary" size="lg" icon={BookOpen}>
-          Kembali ke Catatan Belajar
+          Buka catatan belajar
         </ButtonLink>
       </div>
     </section>

@@ -194,7 +194,7 @@ Kata untuk skor (ringkasan satu frasa, selalu bersama angka): 0–3 "Baru mulai"
 | `CoverageMark` | Tiga bentuk: penuh-centang, setengah, putus-putus. SVG sendiri, dengan label untuk screen reader. |
 | `ScoreFigure` | Angka Newsreader besar, "/10" kecil, frasa skor, dan chip perubahan dari percobaan sebelumnya. Menggantikan cincin gradient. |
 | `SubScoreBars` | Tiga bar tipis berwarna tinta, angka di kanan. |
-| `AnnotatedTranscript` | Transkrip Newsreader. Kutipan bukti diberi stabilo dan terhubung ke poin outline. Istilah yang belum dijelaskan digaris bawah titik-titik. |
+| `ResultEvidence` | Daftar poin (CoverageMark, catatan, "Pelajari lagi") berdampingan dengan transkrip Newsreader. Kutipan bukti diberi stabilo dan saling terhubung dengan poinnya (klik atau Enter). Istilah yang belum dijelaskan digaris bawah titik-titik. Logika di `src/lib/utils/transcript.ts`. |
 | `MasteryMeter` | Lima segmen tinta hijau + label level ("Cakap · level 3 dari 5"). |
 | `LeitnerStrip` | Enam kotak berlabel interval, kotak aktif terisi tinta. Menjelaskan kapan topik kembali. |
 | `WeekStrip` | Tujuh kotak hari untuk streak, menggantikan badge api. |

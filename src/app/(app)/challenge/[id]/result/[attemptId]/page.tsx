@@ -122,14 +122,13 @@ export default async function ResultPage({ params }: PageProps) {
     score: row.overall_score,
   }));
 
-  const priorScores = history
-    .filter(
-      (entry) => entry.attemptNumber < attempt.attempt_number && entry.score !== null,
-    )
-    .map((entry) => entry.score)
-    .filter((score): score is number => score !== null);
-  const previousScore =
-    priorScores.length > 0 ? (priorScores[priorScores.length - 1] ?? null) : null;
+  // The last scored attempt before this one (history is ordered by number).
+  let previous: { score: number; attemptNumber: number } | null = null;
+  for (const entry of history) {
+    if (entry.attemptNumber < attempt.attempt_number && entry.score !== null) {
+      previous = { score: entry.score, attemptNumber: entry.attemptNumber };
+    }
+  }
 
   const subScores =
     attempt.comprehensiveness_score !== null &&
@@ -148,7 +147,8 @@ export default async function ResultPage({ params }: PageProps) {
       attemptId={attemptId}
       challengeTitle={challenge.title}
       attemptNumber={attempt.attempt_number}
-      previousScore={previousScore}
+      previous={previous}
+      maxScore={attempt.max_possible_score ?? 10}
       history={history}
       status={attempt.evaluation_status}
       evaluationError={attempt.evaluation_error}

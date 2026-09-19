@@ -6,7 +6,6 @@ import {
   MAX_SCORE_NO_HINT,
   effectiveHint,
   formatDuration,
-  scoreColor,
   scorePhrase,
 } from "./labels";
 import type { HintLevel } from "@/types";
@@ -63,13 +62,6 @@ describe("formatting helpers", () => {
     expect(formatDuration(180)).toBe("± 3 menit");
     expect(formatDuration(150)).toBe("± 3 menit");
     expect(formatDuration(20)).toBe("± 1 menit");
-  });
-
-  it("scoreColor thresholds follow the mastery ladder", () => {
-    expect(scoreColor(8)).toBe("var(--mastery-mastered)");
-    expect(scoreColor(7)).toBe("var(--mastery-proficient)");
-    expect(scoreColor(5)).toBe("var(--mastery-developing)");
-    expect(scoreColor(4)).toBe("var(--mastery-attempted)");
   });
 });
 

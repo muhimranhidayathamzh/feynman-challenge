@@ -171,7 +171,8 @@ export const result = {
   challengeId: CHALLENGE_ID,
   challengeTitle: "Fotosintesis",
   attemptNumber: 2,
-  previousScore: 6,
+  previous: { score: 6, attemptNumber: 1 },
+  maxScore: 10,
   history: [
     { attemptNumber: 1, score: 6 },
     { attemptNumber: 2, score: 7 },
