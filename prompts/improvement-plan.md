@@ -1,4 +1,4 @@
-# Feynman Challenge — Improvement Plan (3 Fase)
+# Feynman Challenge — Improvement Plan (3 Fase + Fase 4)
 
 > Rencana perbaikan hasil audit 18 September 2026, dipadatkan menjadi **3 fase, 16 prompt**.
 > Kondisi awal: Phase 1–6 dari `prompts/execution-plan.md` selesai, `tsc`, lint, dan build lolos, belum ada test.
@@ -13,8 +13,9 @@
 | 1 | Stabilisasi | Semua bug inti hilang. Pipeline rekam–evaluasi atomik, tanggal akurat, AI bisa dipercaya. | 6 | 003, 004, 005 |
 | 2 | Kelengkapan | Menutup gap terhadap spec: sistem UI, satu bahasa, lifecycle tantangan, playback, auth lengkap. | 5 | — |
 | 3 | Pembeda & Showcase | Loop Feynman lengkap, PWA yang benar, mode demo, README portfolio. | 5 | 006 |
+| 4 | Matang (setelah v1.0) | Riwayat percobaan, hapus akun dan pembersihan storage, E2E + Sentry, konsistensi skor AI. | 4 | — |
 
-Setelah Fase 1 aplikasi sudah aman dipakai harian. Setelah Fase 2 sudah sesuai spec. Setelah Fase 3 layak dipamerkan.
+Setelah Fase 1 aplikasi sudah aman dipakai harian. Setelah Fase 2 sudah sesuai spec. Setelah Fase 3 layak dipamerkan (v1.0.0). Setelah Fase 4 terbukti andal dan datanya terjaga.
 
 Yang **dipindah ke backlog** supaya rencana ini ringkas: E2E Playwright, Sentry, hapus akun, script sweep storage, eval-golden, rekam offline, push notification.
 
@@ -340,13 +341,88 @@ Prompt 3.5 — Siap dipamerkan. Ikuti "Aturan Umum" di prompts/improvement-plan.
 
 ---
 
-## Backlog (setelah v1.0)
+## FASE 4 — Matang (setelah v1.0)
 
-- **E2E Playwright**: fake media stream, mode AI_MOCK, project Supabase khusus test.
-- **Sentry**: latensi Gemini dan kode error, tanpa transkrip, audio, atau notes.
-- **Hapus akun** dengan service role (hapus prefix storage, lalu auth.admin.deleteUser).
-- **Script maintenance**: sweep rekaman yatim, bersihkan user anonim lebih dari 7 hari. Default dry-run.
-- **eval-golden**: uji konsistensi skor 3x per fixture audio, target selisih maksimal 1 poin.
+Tujuan: menutup celah yang ditemukan saat v1.0 selesai, menjaga data dan storage tetap bersih, lalu membuktikan aplikasi dan penilaian AI bisa dipercaya dengan test otomatis.
+
+Mulai fase ini setelah migrasi 003–006 dijalankan dan alur utama v1.0 sudah dicoba di perangkat nyata. Fase ini **tidak butuh migrasi baru** kecuali disebut di prompt.
+
+**Keputusan tambahan (semua punya default):**
+
+| # | Keputusan | Default | Dipakai di |
+|---|---|---|---|
+| D10 | Konfirmasi hapus akun | Ketik `HAPUS`. Akun email juga memasukkan kata sandi | 4.2 |
+| D11 | Jadwal pembersihan | Script manual (default dry-run). Vercel Cron opsional | 4.2 |
+| D12 | Database untuk E2E | Project Supabase kedua khusus test (free tier boleh 2 project) | 4.3 |
+| D13 | Monitoring error | Sentry free tier, aktif hanya bila `SENTRY_DSN` diisi | 4.3 |
+| D14 | Audio fixture eval | 5 rekaman asli dari kamu. Cadangan: suara sintetis (TTS) | 4.4 |
+
+### Prompt 4.1 — Riwayat Percobaan
+
+```
+Prompt 4.1 — Hasil lama bisa dibuka kapan saja. Ikuti "Aturan Umum" di prompts/improvement-plan.md.
+
+1. Catatan belajar: kartu "Riwayat Percobaan" berisi nomor, tanggal (zona waktu user), skor atau status (diproses, gagal, tidak bisa dinilai), dan hint yang dipakai. Setiap baris membuka halaman hasil percobaan itu. Tampilkan 10 terakhir dengan tombol "Tampilkan semua".
+2. Titik tren coverage dari Prompt 3.3 menjadi tautan ke hasil percobaan yang diwakilinya, dengan label yang bisa dibaca screen reader.
+3. Halaman hasil: navigasi "Percobaan sebelumnya" dan "Percobaan berikutnya".
+4. Percobaan yang masih pending atau error tetap bisa dibuka, dan halaman hasilnya melanjutkan evaluasi seperti biasa.
+5. Logika pengelompokan dan label status di src/lib/utils dengan unit test.
+```
+
+### Prompt 4.2 — Hapus Akun & Pembersihan Storage
+
+```
+Prompt 4.2 — Data user bisa dihapus tuntas, storage tidak menumpuk. Ikuti "Aturan Umum" di prompts/improvement-plan.md.
+
+1. src/lib/supabase/admin.ts (import "server-only"): client service role dari serverEnv(). Dipakai HANYA di route hapus akun dan script maintenance.
+2. DELETE /api/account: user yang login mengonfirmasi (D10). Hapus seluruh objek storage di prefix {user_id}/ secara rekursif (termasuk followups/), lalu auth.admin.deleteUser. Data di tabel ikut terhapus lewat cascade. Pastikan urutannya aman: kalau storage gagal, akun jangan dihapus.
+3. Pengaturan: bagian "Zona berbahaya" dengan dialog konfirmasi. Setelah berhasil, keluar dan hapus cache (clearAppCaches), lalu ke /login dengan pesan sukses berupa kode.
+4. scripts/maintenance.mjs (npm run maintenance), default dry-run, --apply untuk benar-benar menghapus:
+   a. Rekaman yatim: objek di bucket recordings yang tidak dirujuk attempts.audio_storage_path maupun attempt_followups.audio_storage_path dan berumur lebih dari 24 jam.
+   b. Akun demo anonim yang tidak aktif lebih dari 7 hari: hapus storage lalu user-nya.
+   Cetak ringkasan jumlah dan ukuran sebelum menghapus.
+5. Opsional (D11): route /api/cron/maintenance yang dilindungi CRON_SECRET + vercel.json cron harian. Tanpa secret, route menolak.
+6. README: cara menjalankan maintenance dan peringatan bahwa script ini memakai service role.
+```
+
+### Prompt 4.3 — Test E2E & Monitoring Error
+
+```
+Prompt 4.3 — Alur utama dijaga test otomatis, error produksi terlihat. Ikuti "Aturan Umum" di prompts/improvement-plan.md.
+
+1. Mode AI_MOCK=1: lapisan Gemini mengembalikan fixture yang lolos schema Zod (generate, hints, evaluate, followup), tanpa panggilan jaringan. Menolak berjalan bila VERCEL_ENV=production. Unit test untuk penjaganya.
+2. Playwright (@playwright/test) dengan Chromium flag --use-fake-ui-for-media-stream, --use-fake-device-for-media-stream, dan --use-file-for-fake-audio-capture=e2e/fixtures/explain.wav. Global setup membuat user test lewat service role di project test (D12) dan menghapusnya setelah selesai.
+3. Skenario: login; buat tantangan; edit outline; rekam 20 detik, dengarkan, kirim; halaman hasil tampil dengan coverage; "Pelajari lagi" menyorot poin yang tepat; riwayat percobaan (4.1); jawab pertanyaan lanjutan; offline menampilkan /offline setelah build produksi.
+4. npm run test:e2e. Job CI terpisah yang berjalan hanya bila secret project test tersedia.
+5. Sentry (D13) dengan @sentry/nextjs: server dan client, tanpa request body, transkrip, audio, catatan, atau email. Tag kode error Gemini dan latensi evaluasi. Mati sepenuhnya bila SENTRY_DSN kosong. Tambahkan variabel ke env.ts dan .env.local.example.
+6. Periksa dampak ukuran bundle middleware dan halaman. Catat di ringkasan.
+```
+
+### Prompt 4.4 — Konsistensi Penilaian AI (eval-golden)
+
+```
+Prompt 4.4 — Buktikan skor AI stabil dan adil. Ikuti "Aturan Umum" di prompts/improvement-plan.md.
+
+1. Refactor tanpa ubah perilaku: pindahkan inti evaluasi dari /api/evaluate ke src/lib/ai/evaluate.ts (prompt, panggilan Gemini, normalisasi coverage, skor server). Route tetap memakai fungsi yang sama.
+2. Fixture di eval/fixtures/<nama>/: audio, outline.json, expected.json (rentang skor dan status per poin). Minimal 5 kasus (D14): penjelasan bagus, sebagian, buruk, hening, dan topik lain.
+3. npm run eval:golden menjalankan setiap fixture 3 kali lewat Gemini asli (TIDAK di CI, memakai kuota). Laporan markdown di eval/reports/<tanggal>.md: skor per run, selisih maks-min, kecocokan status per poin, dan audio_issue.
+4. Target lulus: selisih skor overall maksimal 1 poin, kecocokan status coverage minimal 80%, audio hening dan topik lain selalu ditolak.
+5. Kalau gagal target, sesuaikan temperature, thinking budget, atau anchor rubrik di prompt. Ulangi eval dan catat perbandingannya.
+6. README: bagian "Seberapa konsisten penilaiannya?" dengan hasil laporan terakhir.
+```
+
+### ✅ Checkpoint Fase 4
+- Semua percobaan lama bisa dibuka dari catatan belajar.
+- Hapus akun menghapus data dan rekaman sampai tuntas. Dry-run maintenance menunjukkan angka yang masuk akal sebelum --apply.
+- npm run test:e2e hijau di lokal. Error sengaja di preview muncul di Sentry tanpa data pribadi.
+- Laporan eval-golden memenuhi target, dan hasilnya tercantum di README.
+
+---
+
+## Backlog (setelah Fase 4)
+
+E2E, Sentry, hapus akun, script maintenance, dan eval-golden sudah dijadwalkan di Fase 4.
+
 - **Rekam offline** (IndexedDB + Background Sync, fallback untuk Safari), **push notification** (Web Push + Vercel Cron), **halaman analitik**, **rekaman video**, **ekspor progres**, **banyak notebook**.
 
 ---
@@ -371,3 +447,7 @@ Prompt 3.5 — Siap dipamerkan. Ikuti "Aturan Umum" di prompts/improvement-plan.
 | 3.3 | Gap ke sumber & tren coverage | ✅ |
 | 3.4 | PWA yang benar | ✅ |
 | 3.5 | Mode demo & README | ✅ |
+| 4.1 | Riwayat percobaan | ⬜ |
+| 4.2 | Hapus akun & pembersihan storage | ⬜ |
+| 4.3 | Test E2E & monitoring error | ⬜ |
+| 4.4 | Konsistensi penilaian AI (eval-golden) | ⬜ |
