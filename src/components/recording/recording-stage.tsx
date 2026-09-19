@@ -4,7 +4,7 @@ import { ArrowLeft, Mic, RotateCcw, Send, Trash2 } from "lucide-react";
 
 import { AudioPlayer } from "@/components/ui/audio-player";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Sheet } from "@/components/ui/sheet";
 import { Icon } from "@/components/ui/icon";
 import type { RecorderStatus } from "@/hooks/use-audio-recorder";
 import { MIN_RECORDING_SEC } from "@/lib/utils/constants";
@@ -103,7 +103,7 @@ export function RecordingStage(props: RecordingStageProps) {
       )}
 
       {review ? (
-        <Card as="section" className="stack gap-4 w-full" aria-labelledby="review-title">
+        <Sheet as="section" className="stack gap-4 w-full" aria-labelledby="review-title">
           <div className="row-between">
             <h2 id="review-title" className="text-xl">
               Dengarkan dulu
@@ -170,7 +170,7 @@ export function RecordingStage(props: RecordingStageProps) {
               </Button>
             </div>
           )}
-        </Card>
+        </Sheet>
       ) : (
         <>
           <CountdownTimer

@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { House, RotateCcw, TriangleAlert } from "lucide-react";
+import { House, RotateCcw } from "lucide-react";
 
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Icon } from "@/components/ui/icon";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function Error({
   error,
@@ -20,21 +19,22 @@ export default function Error({
 
   return (
     <main className="state-screen">
-      <Card className="state-card">
-        <Icon icon={TriangleAlert} size={40} className="state-icon" />
-        <h2>Ada yang tidak beres</h2>
-        <p className="text-secondary">
-          Terjadi kesalahan tak terduga. Coba lagi atau kembali ke beranda.
-        </p>
-        <div className="state-actions">
-          <Button icon={RotateCcw} onClick={reset}>
-            Coba lagi
-          </Button>
-          <ButtonLink href="/" variant="ghost" icon={House}>
-            Ke Beranda
-          </ButtonLink>
-        </div>
-      </Card>
+      <EmptyState
+        illustration="error"
+        title="Ada yang tidak beres"
+        actions={
+          <>
+            <Button icon={RotateCcw} onClick={reset}>
+              Coba lagi
+            </Button>
+            <ButtonLink href="/" variant="ghost" icon={House}>
+              Ke beranda
+            </ButtonLink>
+          </>
+        }
+      >
+        <p>Kesalahannya ada di pihak kami, bukan kamu. Coba lagi sebentar.</p>
+      </EmptyState>
     </main>
   );
 }

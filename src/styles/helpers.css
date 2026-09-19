@@ -96,10 +96,10 @@
   color: var(--error-text);
 }
 .text-warning {
-  color: var(--warning);
+  color: var(--partial);
 }
 .text-success {
-  color: var(--success);
+  color: var(--covered);
 }
 .text-accent {
   color: var(--accent-text);
@@ -150,7 +150,7 @@
 }
 
 .state-icon {
-  color: var(--accent-text);
+  color: var(--ink-2);
 }
 
 .state-actions {
@@ -160,14 +160,9 @@
   gap: var(--space-3);
 }
 
-/** Dashboard / page section heading with a decorative icon. */
+/** Page section heading (no decorative icon: DESIGN.md §12). */
 .section-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-xl);
-}
-
-.section-title svg {
-  color: var(--accent-text);
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
 }

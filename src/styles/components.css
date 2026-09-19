@@ -1,64 +1,59 @@
 /* ---------------------------------------------------------------------------
-   4. Cards (no glass: DESIGN.md §6)
+   4. Sheets (DESIGN.md §6, §10): paper, hairline edge, no shadow, no blur.
    ------------------------------------------------------------------------- */
-.card {
+.sheet {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  padding: var(--space-6);
+  padding: var(--space-5);
 }
 
-.glass {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
+@media (min-width: 768px) {
+  .sheet {
+    padding: var(--space-6);
+  }
 }
 
-.card-hover {
-  transition:
-    transform var(--transition-base),
-    border-color var(--transition-base),
-    box-shadow var(--transition-base);
+.sheet-interactive {
+  transition: border-color var(--transition-fast);
 }
 
-.card-hover:hover {
-  transform: translateY(-2px);
+.sheet-interactive:hover {
   border-color: var(--line-strong);
-  box-shadow: var(--shadow-md);
 }
 
 /* ---------------------------------------------------------------------------
    5. Buttons
+   primary   vermilion with a tactile edge, one per screen
+   secondary ink outline
+   ghost     text only
+   danger    solid error colour, for destructive confirmations only
    ------------------------------------------------------------------------- */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-5);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-5);
+  border: 1.5px solid transparent;
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
-  line-height: 1;
+  line-height: 1.2;
   white-space: nowrap;
   user-select: none;
+  cursor: pointer;
   transition:
     transform var(--transition-fast),
     background-color var(--transition-fast),
     box-shadow var(--transition-fast),
     border-color var(--transition-fast),
-    opacity var(--transition-fast);
+    color var(--transition-fast);
 }
 
-.btn:active {
-  transform: scale(0.97);
-}
-
-.btn:disabled,
-.btn[aria-disabled="true"] {
-  opacity: 0.5;
-  pointer-events: none;
+.btn[aria-busy="true"] {
+  cursor: progress;
 }
 
 /* Tactile: a solid edge under the button that disappears when pressed. */
@@ -70,6 +65,7 @@
 
 .btn-primary:hover {
   background: var(--accent-hover);
+  color: var(--accent-ink);
 }
 
 .btn-primary:active {
@@ -78,49 +74,66 @@
 }
 
 .btn-secondary {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--ink);
 }
 
 .btn-secondary:hover {
-  border-color: var(--accent-primary);
-  background: var(--bg-secondary);
+  background: var(--sunken);
+  color: var(--ink);
 }
 
 .btn-ghost {
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--ink-2);
 }
 
 .btn-ghost:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--sunken);
+  color: var(--ink);
 }
 
 .btn-danger {
-  background: var(--error-bg);
-  color: var(--error-fg);
-  border: 1px solid var(--error-border);
+  background: var(--error);
+  color: var(--error-ink);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--error) 70%, var(--ink));
 }
 
 .btn-danger:hover {
-  background: var(--error);
-  color: var(--text-on-accent);
+  color: var(--error-ink);
 }
 
-.btn[aria-busy="true"] {
+.btn-danger:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+/* Disabled: quiet and flat, never a washed-out version of the colour. */
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  background: var(--sunken);
+  color: var(--ink-3);
+  border-color: transparent;
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.btn[aria-busy="true"]:disabled {
   cursor: progress;
 }
 
 .btn-sm {
-  padding: var(--space-2) var(--space-3);
+  min-height: 36px;
+  padding: var(--space-1) var(--space-3);
   font-size: var(--text-xs);
   border-radius: var(--radius-sm);
 }
 
 .btn-lg {
-  padding: var(--space-4) var(--space-8);
+  min-height: 52px;
+  padding: var(--space-3) var(--space-6);
   font-size: var(--text-base);
 }
 
@@ -129,16 +142,17 @@
 }
 
 /* ---------------------------------------------------------------------------
-   6. Form primitives
+   6. Form primitives: paper fields with an ink focus.
    ------------------------------------------------------------------------- */
 .input,
 .textarea {
   width: 100%;
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
+  min-height: 44px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
   font-size: var(--text-base);
   transition:
     border-color var(--transition-fast),
@@ -147,14 +161,26 @@
 
 .input::placeholder,
 .textarea::placeholder {
-  color: var(--text-muted);
+  color: var(--ink-3);
+}
+
+.input:hover,
+.textarea:hover {
+  border-color: var(--ink-3);
 }
 
 .input:focus,
 .textarea:focus {
   outline: none;
-  border-color: var(--accent-primary);
+  border-color: var(--ink);
   box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.input:disabled,
+.textarea:disabled {
+  background: var(--sunken);
+  color: var(--ink-3);
+  cursor: not-allowed;
 }
 
 .textarea {
@@ -165,10 +191,10 @@
 
 .label {
   display: block;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
   font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--text-secondary);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
 }
 
 .field {
@@ -178,13 +204,13 @@
 }
 
 .field-error {
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   color: var(--error-text);
 }
 
 .field-hint {
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  color: var(--ink-3);
 }
 
 .input[aria-invalid="true"],
@@ -195,16 +221,19 @@
 .link-accent {
   color: var(--accent-text);
   font-weight: var(--weight-semibold);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 .link-accent:hover {
   color: var(--accent-hover);
 }
 
-/* --- Inline alerts / feedback --- */
+/* --- Inline alerts --- */
 .alert {
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
   font-size: var(--text-sm);
   line-height: var(--leading-snug);
@@ -213,43 +242,49 @@
 .alert-error {
   background: var(--error-bg);
   border-color: var(--error-border);
-  color: var(--error-fg);
+  color: var(--ink);
 }
 
 .alert-success {
   background: var(--success-bg);
   border-color: var(--success-border);
-  color: var(--success-fg);
+  color: var(--ink);
 }
 
 /* ---------------------------------------------------------------------------
-   7. Badges
+   7. Badges: small labels. Colour only where it carries meaning; learning
+   results are never red (DESIGN.md §3).
    ------------------------------------------------------------------------- */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
+  min-height: 24px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
+  background: var(--sunken);
+  color: var(--ink-2);
 }
 
 .badge-success {
-  color: var(--success);
+  background: var(--success-bg);
+  color: var(--covered);
 }
 
 .badge-warning {
-  color: var(--warning);
+  background: color-mix(in srgb, var(--partial) 14%, var(--surface));
+  color: var(--partial);
 }
 
 .badge-error {
+  background: var(--error-bg);
   color: var(--error-text);
 }
 
 .badge-accent {
+  background: var(--accent-soft);
   color: var(--accent-text);
 }
 

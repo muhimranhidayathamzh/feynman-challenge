@@ -38,7 +38,7 @@ export function CountdownTimer({ totalSeconds, elapsedSeconds }: Props) {
             cy={SIZE / 2}
             r={RADIUS}
             fill="none"
-            stroke="var(--bg-tertiary)"
+            stroke="var(--sunken)"
             strokeWidth={STROKE}
           />
           <circle

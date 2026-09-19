@@ -117,7 +117,8 @@
 
   --covered: #2b7148;
   --partial: #8f5e05;
-  --error: #b42318;
+  --error: #b01f45;
+  --error-ink: #ffffff;
   --highlight: #fbe38e;
 
   --mastery-not-started: #cfc8b8;
@@ -157,7 +158,8 @@
 
   --covered: #6cc291;
   --partial: #e6b552;
-  --error: #f08a7c;
+  --error: #f2849a;
+  --error-ink: #1a120e;
   --highlight: #4e482d;
 
   --mastery-not-started: #3a4541;
@@ -197,7 +199,8 @@
 
     --covered: #6cc291;
     --partial: #e6b552;
-    --error: #f08a7c;
+    --error: #f2849a;
+    --error-ink: #1a120e;
     --highlight: #4e482d;
 
     --mastery-not-started: #3a4541;
@@ -219,7 +222,7 @@
    uses var() is resolved on the element that declares it. */
 :root,
 [data-mood="board"] {
-  --focus-ring: color-mix(in srgb, var(--accent) 45%, transparent);
+  --focus-ring: color-mix(in srgb, var(--ink) 22%, transparent);
   --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--surface));
   --accent-soft-border: color-mix(in srgb, var(--accent) 30%, var(--surface));
 
@@ -230,18 +233,4 @@
   --error-border: color-mix(in srgb, var(--error) 35%, var(--surface));
   --error-fg: var(--error);
   --error-text: var(--error);
-
-  /* Legacy names (pre Fase V). Components move to the names above in V.3,
-     then these aliases are deleted. */
-  --bg-primary: var(--paper);
-  --bg-secondary: var(--surface);
-  --bg-tertiary: var(--sunken);
-  --text-primary: var(--ink);
-  --text-secondary: var(--ink-2);
-  --text-muted: var(--ink-3);
-  --text-on-accent: var(--accent-ink);
-  --accent-primary: var(--accent);
-  --border-subtle: var(--line);
-  --success: var(--covered);
-  --warning: var(--partial);
 }

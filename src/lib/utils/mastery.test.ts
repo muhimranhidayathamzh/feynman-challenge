@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  MASTERY_LEVELS,
   SOLIDIFIED_BOX,
   computeMasteryAfterAttempt,
   effectiveMasteryState,
+  masteryLevel,
   type MasteryInput,
 } from "./mastery";
 
@@ -112,5 +114,14 @@ describe("effectiveMasteryState — slipping when reviews lapse", () => {
     );
     expect(current).toBe("proficient");
     expect(run({ current, score: 9, previousScore: 5, reviewBox: 4 })).toBe("proficient");
+  });
+});
+
+describe("masteryLevel", () => {
+  it("maps the six states to 0..5 filled segments", () => {
+    expect(masteryLevel("not_started")).toBe(0);
+    expect(masteryLevel("attempted")).toBe(1);
+    expect(masteryLevel("proficient")).toBe(3);
+    expect(masteryLevel("solidified")).toBe(MASTERY_LEVELS);
   });
 });

@@ -64,9 +64,9 @@ export function parseStoredFollowUps(value: Json | null): FollowUpQuestion[] {
 
 export const VERDICT_META: Record<
   FollowUpVerdict,
-  { label: string; tone: "success" | "warning" | "error" }
+  { label: string; tone: "success" | "warning" }
 > = {
   tepat: { label: "Tepat", tone: "success" },
   sebagian: { label: "Sebagian tepat", tone: "warning" },
-  keliru: { label: "Masih keliru", tone: "error" },
+  keliru: { label: "Belum tepat", tone: "warning" },
 };

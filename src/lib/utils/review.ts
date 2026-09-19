@@ -90,3 +90,17 @@ export function nextReviewLabel(
   if (days === 1) return "Review besok";
   return `Review berikutnya: ${formatDay(nextReviewAt)}`;
 }
+
+export interface LeitnerSlot {
+  /** 0-based box, as stored in challenges.review_box. */
+  box: number;
+  /** Review interval of this box, in days. */
+  days: number;
+  current: boolean;
+}
+
+/** The six Leitner boxes with their intervals, marking the current one. */
+export function leitnerSlots(currentBox: number): LeitnerSlot[] {
+  const clamped = Math.max(0, Math.min(MAX_BOX, Math.round(currentBox)));
+  return REVIEW_INTERVALS.map((days, box) => ({ box, days, current: box === clamped }));
+}

@@ -1,17 +1,12 @@
 /* ---------------------------------------------------------------------------
    9. Utility classes
    ------------------------------------------------------------------------- */
-/* Legacy name: this was gradient text. Plain now; usages go in V.3. */
-.gradient-text {
-  color: inherit;
-}
-
 .text-secondary {
-  color: var(--text-secondary);
+  color: var(--ink-2);
 }
 
 .text-muted {
-  color: var(--text-muted);
+  color: var(--ink-3);
 }
 
 .text-center {

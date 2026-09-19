@@ -5,7 +5,7 @@ import Link from "next/link";
 import { KeyRound, MailCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Sheet } from "@/components/ui/sheet";
 import { Field, Input } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { authErrorMessage } from "@/lib/auth/errors";
@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <Card as="section" variant="glass" className="stack gap-4 text-center items-center">
+      <Sheet as="section" className="stack gap-4 text-center items-center">
         <Icon icon={MailCheck} size={36} className="state-icon" />
         <h2 className="text-xl">Cek email kamu</h2>
         <p className="text-secondary text-sm">
@@ -46,12 +46,12 @@ export default function ForgotPasswordPage() {
         <Link href="/login" className="link-accent text-sm">
           Kembali ke halaman masuk
         </Link>
-      </Card>
+      </Sheet>
     );
   }
 
   return (
-    <Card as="section" variant="glass" className="stack gap-5">
+    <Sheet as="section" className="stack gap-5">
       <div className="stack gap-1">
         <h2 className="text-xl">Lupa kata sandi</h2>
         <p className="text-secondary text-sm">
@@ -88,6 +88,6 @@ export default function ForgotPasswordPage() {
           Masuk
         </Link>
       </p>
-    </Card>
+    </Sheet>
   );
 }

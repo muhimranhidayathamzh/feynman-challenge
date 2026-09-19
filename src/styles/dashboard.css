@@ -9,7 +9,6 @@
 
 .challenge-card {
   display: block;
-  border-left: 3px solid var(--accent-primary);
 }
 
 .challenge-card:hover {
@@ -22,19 +21,27 @@
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-full);
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
+  background: var(--sunken);
+  border: 1px solid var(--line);
 }
 
+/* A row that lets its status wrap below the title on narrow screens, so a
+   long title never collapses to one word per line (audit #10). */
 .alert-row {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3);
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.alert-row > .row-between {
+  flex-wrap: wrap;
+  row-gap: var(--space-1);
 }
 
 /* --- Card + streak (Prompt 2.1) --- */
@@ -43,19 +50,20 @@
 }
 
 .challenge-card-score {
+  font-family: var(--font-serif);
   font-size: var(--text-2xl);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-medium);
   font-variant-numeric: tabular-nums;
 }
 
 .challenge-card-score-max {
-  color: var(--text-muted);
+  color: var(--ink-3);
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
 }
 
 .streak-icon {
-  color: var(--warning);
+  color: var(--partial);
   flex: 0 0 auto;
 }
 

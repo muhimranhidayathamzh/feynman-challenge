@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Lightbulb, MessageCircleQuestion, Mic } from "lucide-react";
+import { Lightbulb, Mic } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetTitle } from "@/components/ui/sheet";
 import { Icon } from "@/components/ui/icon";
 import type { FollowupAnswer } from "@/lib/api/contracts";
 import { VERDICT_META, type FollowUpQuestion } from "@/lib/utils/followups";
@@ -42,11 +42,11 @@ export function FollowUpSection({
   if (questions.length === 0) return null;
 
   return (
-    <Card as="section" className="stack gap-4" aria-labelledby="followup-title">
+    <Sheet as="section" className="stack gap-4" aria-labelledby="followup-title">
       <div className="stack gap-1">
-        <CardTitle icon={MessageCircleQuestion}>
+        <SheetTitle>
           <span id="followup-title">Uji Pemahamanmu</span>
-        </CardTitle>
+        </SheetTitle>
         <p className="text-secondary text-sm">
           Jawab singkat secara lisan. Ini untuk belajar, tidak mengubah skormu.
         </p>
@@ -123,6 +123,6 @@ export function FollowUpSection({
           );
         })}
       </ol>
-    </Card>
+    </Sheet>
   );
 }

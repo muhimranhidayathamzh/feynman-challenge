@@ -1,7 +1,5 @@
 import Link from "next/link";
-import { Repeat } from "lucide-react";
 
-import { Icon } from "@/components/ui/icon";
 import type { ReviewItem } from "@/lib/utils/dashboard";
 
 export type { ReviewItem };
@@ -19,7 +17,6 @@ export function ReviewTodaySection({ items }: { items: ReviewItem[] }) {
   return (
     <section className="stack gap-3" aria-labelledby="review-today-title">
       <h2 id="review-today-title" className="section-title">
-        <Icon icon={Repeat} size={20} />
         Review Hari Ini
       </h2>
       <p className="text-secondary text-sm">
@@ -31,11 +28,7 @@ export function ReviewTodaySection({ items }: { items: ReviewItem[] }) {
           <li key={item.id}>
             <Link href={`/challenge/${item.id}/record`} className="alert-row">
               <span className="font-medium">{item.title}</span>
-              <span
-                className={`text-sm nowrap ${item.lapsed ? "text-error" : "text-warning"}`}
-              >
-                {describe(item)}
-              </span>
+              <span className="text-sm text-warning">{describe(item)}</span>
             </Link>
           </li>
         ))}

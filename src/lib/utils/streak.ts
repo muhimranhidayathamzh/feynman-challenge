@@ -7,7 +7,7 @@
 //   otherwise (gap > 1 day / null) -> reset to 1
 //   best_streak = max(best_streak, streak_count)
 // ============================================================================
-import { dayDiff, type CalendarDay } from "./date";
+import { addDays, dayDiff, type CalendarDay } from "./date";
 
 export interface StreakUpdate {
   streakCount: number;
@@ -59,4 +59,58 @@ export function displayStreak(
 ): number {
   if (!lastActiveDate) return 0;
   return dayDiff(lastActiveDate, today) <= 1 ? streakCount : 0;
+}
+
+export interface WeekDay {
+  day: CalendarDay;
+  /** One-letter label, Monday first: S S R K J S M. */
+  short: string;
+  /** Full name for screen readers. */
+  name: string;
+  /** Part of the current streak (a completed evaluation that day). */
+  active: boolean;
+  isToday: boolean;
+  isFuture: boolean;
+}
+
+const WEEKDAYS = [
+  { short: "S", name: "Senin" },
+  { short: "S", name: "Selasa" },
+  { short: "R", name: "Rabu" },
+  { short: "K", name: "Kamis" },
+  { short: "J", name: "Jumat" },
+  { short: "S", name: "Sabtu" },
+  { short: "M", name: "Minggu" },
+] as const;
+
+/** 0 = Monday ... 6 = Sunday, for a calendar day. */
+function mondayIndex(day: CalendarDay): number {
+  const sundayFirst = new Date(`${day}T00:00:00Z`).getUTCDay();
+  return (sundayFirst + 6) % 7;
+}
+
+/**
+ * The current week (Monday to Sunday) for the streak strip. Only the streak
+ * length and its last day are stored, so the active days are the last
+ * `streakCount` days ending on `lastActiveDate` (a broken streak shows none).
+ */
+export function weekStrip(
+  today: CalendarDay,
+  lastActiveDate: CalendarDay | null,
+  streakCount: number,
+): WeekDay[] {
+  const live = displayStreak(streakCount, lastActiveDate, today);
+  const monday = addDays(today, -mondayIndex(today));
+  return WEEKDAYS.map((meta, index) => {
+    const day = addDays(monday, index);
+    const back = lastActiveDate ? dayDiff(day, lastActiveDate) : -1;
+    return {
+      day,
+      short: meta.short,
+      name: meta.name,
+      active: live > 0 && back >= 0 && back < live,
+      isToday: day === today,
+      isFuture: dayDiff(today, day) > 0,
+    };
+  });
 }

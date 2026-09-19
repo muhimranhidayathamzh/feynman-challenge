@@ -112,7 +112,29 @@ for (const file of files) {
 }
 
 // ---------------------------------------------------------------------------
-// 2. Palette: contrast and dark/system parity
+// 2. Every var(--token) must be declared somewhere (a typo silently drops the
+//    colour). next/font injects its own variables at runtime.
+// ---------------------------------------------------------------------------
+const RUNTIME_VARS = new Set(["--font-jakarta", "--font-newsreader"]);
+const declared = new Set(RUNTIME_VARS);
+const referenced = [];
+for (const file of files) {
+  const text = (await readFile(file, "utf8")).replace(/\r\n/g, "\n");
+  for (const m of text.matchAll(/(--[a-z0-9-]+)\s*:/g)) declared.add(m[1]);
+  // JSX style objects declare custom properties as quoted keys: { "--dot": x }
+  for (const m of text.matchAll(/["'](--[a-z0-9-]+)["']\s*:/g)) declared.add(m[1]);
+  text.split("\n").forEach((line, index) => {
+    for (const m of line.matchAll(/var[(](--[a-z0-9-]+)/g)) {
+      referenced.push({ file, line: index + 1, name: m[1] });
+    }
+  });
+}
+for (const ref of referenced) {
+  if (!declared.has(ref.name)) report(ref.file, ref.line, `undefined token ${ref.name}`);
+}
+
+// ---------------------------------------------------------------------------
+// 3. Palette: contrast and dark/system parity
 // ---------------------------------------------------------------------------
 const tokensFile = path.join(root, "src", "styles", "tokens.css");
 const tokensText = (await readFile(tokensFile, "utf8")).replace(/\r\n/g, "\n");
@@ -170,6 +192,7 @@ const PAIRS = [
   ["--ink-3", "--sunken"],
   ["--accent-ink", "--accent"],
   ["--accent-ink", "--accent-hover"],
+  ["--error-ink", "--error"],
   ["--ink", "--highlight"],
 ];
 

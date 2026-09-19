@@ -1,7 +1,7 @@
 /* ============================================================================
    Feynman Challenge — Design System
-   Vanilla CSS custom properties. Dark mode default. No Tailwind, no CSS-in-JS.
-   Reference: docs/feynman_challenge_master.md §9
+   "Kertas & Kapur": vanilla CSS custom properties, no Tailwind, no CSS-in-JS.
+   Reference: docs/design/DESIGN.md
    ========================================================================== */
 
 /* Order is the cascade order:
@@ -12,6 +12,7 @@
 @import "../styles/layout.css";
 @import "../styles/components.css";
 @import "../styles/ui.css";
+@import "../styles/learning.css";
 @import "../styles/animations.css";
 @import "../styles/utilities.css";
 @import "../styles/shell.css";

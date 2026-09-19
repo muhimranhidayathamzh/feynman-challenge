@@ -57,7 +57,7 @@ export function ScoreRing({ score, previousScore = null }: Props) {
             cy={SIZE / 2}
             r={RADIUS}
             fill="none"
-            stroke="var(--bg-tertiary)"
+            stroke="var(--sunken)"
             strokeWidth={STROKE}
           />
           <circle
@@ -84,7 +84,7 @@ export function ScoreRing({ score, previousScore = null }: Props) {
           <Icon
             icon={delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus}
             size={16}
-            className={delta > 0 ? "text-success" : delta < 0 ? "text-error" : undefined}
+            className={delta > 0 ? "text-success" : undefined}
           />
           {delta > 0
             ? `+${delta} dari sebelumnya (${previousScore}/10)`

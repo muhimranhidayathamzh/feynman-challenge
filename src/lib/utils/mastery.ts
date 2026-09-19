@@ -103,3 +103,20 @@ export function effectiveMasteryState(
   if (!CAN_SLIP.has(stored) || !isLapsed(review, today)) return stored;
   return ORDER[rank(stored) - 1] ?? stored;
 }
+
+/** Number of segments in the mastery meter (attempted .. solidified). */
+export const MASTERY_LEVELS = 5;
+
+const LEVEL: Record<MasteryState, number> = {
+  not_started: 0,
+  attempted: 1,
+  developing: 2,
+  proficient: 3,
+  mastered: 4,
+  solidified: 5,
+};
+
+/** 0 (not started) to 5 (solidified): how many meter segments are filled. */
+export function masteryLevel(state: MasteryState): number {
+  return LEVEL[state];
+}

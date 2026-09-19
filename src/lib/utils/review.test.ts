@@ -7,6 +7,7 @@ import {
   intervalForBox,
   isLapsed,
   isReviewDue,
+  leitnerSlots,
   nextReviewLabel,
 } from "./review";
 
@@ -129,5 +130,18 @@ describe("nextReviewLabel", () => {
     expect(nextReviewLabel("2026-09-20", TODAY)).toBe("Review besok");
     expect(nextReviewLabel("2026-09-16", TODAY)).toBe("Review terlambat 3 hari");
     expect(nextReviewLabel("2026-09-29", TODAY)).toMatch(/^Review berikutnya: 29 Sep/);
+  });
+});
+
+describe("leitnerSlots", () => {
+  it("lists the six boxes with their intervals and marks the current one", () => {
+    const slots = leitnerSlots(2);
+    expect(slots.map((slot) => slot.days)).toEqual([1, 3, 7, 14, 30, 60]);
+    expect(slots.filter((slot) => slot.current).map((slot) => slot.box)).toEqual([2]);
+  });
+
+  it("clamps out-of-range boxes", () => {
+    expect(leitnerSlots(-3).findIndex((slot) => slot.current)).toBe(0);
+    expect(leitnerSlots(99).findIndex((slot) => slot.current)).toBe(5);
   });
 });

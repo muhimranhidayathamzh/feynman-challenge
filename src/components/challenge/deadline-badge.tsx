@@ -11,7 +11,7 @@ import type { DeadlineInfo } from "@/lib/utils/deadline";
 function describe(info: DeadlineInfo): { text: string; tone: BadgeTone } | null {
   if (info.status === "none" || info.daysUntil === null) return null;
   const days = info.daysUntil;
-  if (days < 0) return { text: "Terlewat", tone: "error" };
+  if (days < 0) return { text: "Terlewat", tone: "warning" };
   if (days === 0) return { text: "Hari ini", tone: "warning" };
   if (days === 1) return { text: "Besok", tone: "warning" };
   return { text: `${days} hari lagi`, tone: "neutral" };

@@ -1,7 +1,7 @@
-import { ArrowRight, BookOpen, TrendingUp } from "lucide-react";
+import { ArrowRight, BookOpen } from "lucide-react";
 import Link from "next/link";
 
-import { Card, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetTitle } from "@/components/ui/sheet";
 import { Icon } from "@/components/ui/icon";
 import {
   isEmptyComparison,
@@ -87,11 +87,11 @@ export function CoverageComparison({
     .join(" · ");
 
   return (
-    <Card as="section" className="stack gap-4" aria-labelledby="compare-title">
+    <Sheet as="section" className="stack gap-4" aria-labelledby="compare-title">
       <div className="stack gap-1">
-        <CardTitle icon={TrendingUp}>
+        <SheetTitle>
           <span id="compare-title">Dibanding Percobaan #{previousAttemptNumber}</span>
-        </CardTitle>
+        </SheetTitle>
         <p className="text-secondary text-sm">{summary}</p>
       </div>
 
@@ -117,6 +117,6 @@ export function CoverageComparison({
       {improved.length === 0 && declined.length === 0 && stillWeak.length === 0 && (
         <p className="text-sm">Semua poin tetap tercakup. Pertahankan!</p>
       )}
-    </Card>
+    </Sheet>
   );
 }

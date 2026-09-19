@@ -100,3 +100,15 @@ export function effectiveHint(revealed: ReadonlySet<HintLevel>): {
   }
   return result;
 }
+
+/**
+ * One phrase that says what a score means (DESIGN.md §9). Always shown next
+ * to the number, never instead of it.
+ */
+export function scorePhrase(score: number): string {
+  if (score >= 10) return "Bisa mengajarkannya";
+  if (score >= 8) return "Paham betul";
+  if (score >= 6) return "Sudah paham intinya";
+  if (score >= 4) return "Mulai paham";
+  return "Baru mulai";
+}

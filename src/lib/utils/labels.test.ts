@@ -7,6 +7,7 @@ import {
   effectiveHint,
   formatDuration,
   scoreColor,
+  scorePhrase,
 } from "./labels";
 import type { HintLevel } from "@/types";
 
@@ -69,5 +70,19 @@ describe("formatting helpers", () => {
     expect(scoreColor(7)).toBe("var(--mastery-proficient)");
     expect(scoreColor(5)).toBe("var(--mastery-developing)");
     expect(scoreColor(4)).toBe("var(--mastery-attempted)");
+  });
+});
+
+describe("scorePhrase", () => {
+  it("names each score band (DESIGN.md §9)", () => {
+    expect(scorePhrase(0)).toBe("Baru mulai");
+    expect(scorePhrase(3)).toBe("Baru mulai");
+    expect(scorePhrase(4)).toBe("Mulai paham");
+    expect(scorePhrase(5)).toBe("Mulai paham");
+    expect(scorePhrase(6)).toBe("Sudah paham intinya");
+    expect(scorePhrase(7)).toBe("Sudah paham intinya");
+    expect(scorePhrase(8)).toBe("Paham betul");
+    expect(scorePhrase(9)).toBe("Paham betul");
+    expect(scorePhrase(10)).toBe("Bisa mengajarkannya");
   });
 });

@@ -16,8 +16,8 @@ html {
 
 body {
   min-height: 100dvh;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  background-color: var(--paper);
+  color: var(--ink);
   font-family: var(--font-sans);
   font-size: var(--text-base);
   line-height: var(--leading-normal);
@@ -96,7 +96,7 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent-primary);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 

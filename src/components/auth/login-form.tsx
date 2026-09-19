@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { LogIn, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Sheet } from "@/components/ui/sheet";
 import { Field, Input } from "@/components/ui/field";
 import { authErrorCode, authErrorMessage } from "@/lib/auth/errors";
 import { createClient } from "@/lib/supabase/client";
@@ -74,7 +74,7 @@ export function LoginForm({ next, initialError, features }: Props) {
   }
 
   return (
-    <Card as="section" variant="glass" className="stack gap-5">
+    <Sheet as="section" className="stack gap-5">
       <div className="stack gap-1">
         <h2 className="text-xl">Masuk</h2>
         <p className="text-secondary text-sm">Lanjutkan tantangan belajarmu.</p>
@@ -181,6 +181,6 @@ export function LoginForm({ next, initialError, features }: Props) {
           </div>
         </>
       )}
-    </Card>
+    </Sheet>
   );
 }

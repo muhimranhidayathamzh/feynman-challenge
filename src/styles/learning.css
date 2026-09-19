@@ -1,0 +1,297 @@
+/* ---------------------------------------------------------------------------
+   Learning components (Prompt V.3, DESIGN.md §10): coverage mark, score
+   figure, sub-score bars, mastery meter, Leitner strip, week strip, hint
+   chip, empty state, illustrations.
+   ------------------------------------------------------------------------- */
+
+/* --- Coverage mark: shape + colour per status --- */
+.coverage-mark {
+  flex: 0 0 auto;
+}
+
+.coverage-mark-covered {
+  color: var(--covered);
+}
+
+.coverage-mark-partial {
+  color: var(--partial);
+}
+
+.coverage-mark-missing {
+  color: var(--ink-3);
+}
+
+/* --- Score figure --- */
+.score-figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-4);
+}
+
+.score-figure-number {
+  font-family: var(--font-serif);
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+.score-figure-value {
+  font-size: var(--text-display);
+  font-weight: var(--weight-medium);
+  letter-spacing: -0.02em;
+}
+
+.score-figure-max {
+  font-size: var(--text-xl);
+  color: var(--ink-3);
+}
+
+.score-figure-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding-bottom: var(--space-1);
+}
+
+.score-figure-phrase {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  font-style: italic;
+}
+
+/* --- Sub-score bars --- */
+.subscore-bars {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.subscore-row {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, auto) 1fr 1.5rem;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.subscore-label {
+  color: var(--ink-2);
+}
+
+.subscore-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--sunken);
+  overflow: hidden;
+}
+
+.subscore-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--ink);
+}
+
+.subscore-value {
+  text-align: right;
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Mastery meter --- */
+.mastery-meter {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.mastery-meter-track {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3px;
+  width: 11rem;
+  max-width: 100%;
+}
+
+.mastery-meter-segment {
+  height: 8px;
+  border-radius: 2px;
+  border: 1px solid var(--line-strong);
+}
+
+.mastery-meter-segment[data-filled] {
+  border-color: transparent;
+}
+
+.mastery-meter-compact {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.mastery-meter-compact .mastery-meter-track {
+  width: 3.25rem;
+  gap: 2px;
+}
+
+.mastery-meter-compact .mastery-meter-segment {
+  height: 6px;
+}
+
+/* --- Leitner strip --- */
+.leitner {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.leitner-slots {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-1);
+  max-width: 24rem;
+}
+
+.leitner-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-2) var(--space-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  line-height: 1.2;
+}
+
+.leitner-number {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  color: var(--ink);
+}
+
+.leitner-slot[data-current] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.leitner-slot[data-current] .leitner-number {
+  color: var(--paper);
+}
+
+/* --- Week strip (streak) --- */
+.week-strip {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.week-days {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.week-day {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--ink-2);
+}
+
+.week-day[data-future] {
+  border-style: dashed;
+  color: var(--ink-3);
+}
+
+.week-day[data-today] {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.week-day[data-active] {
+  background: var(--covered);
+  border-color: var(--covered);
+  color: var(--surface);
+}
+
+/* --- Hint chip: the price is on the label --- */
+.hint-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: var(--space-1) var(--space-3);
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.hint-chip:hover:not(:disabled) {
+  border-color: var(--ink-2);
+}
+
+.hint-chip:disabled {
+  cursor: not-allowed;
+  color: var(--ink-3);
+}
+
+span.hint-chip {
+  cursor: default;
+}
+
+.hint-chip-open {
+  border-style: solid;
+  border-color: var(--ink);
+}
+
+.hint-chip-cap {
+  color: var(--ink-2);
+}
+
+/* --- Empty state and illustrations --- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 26rem;
+  margin-inline: auto;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+}
+
+.empty-state-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
+}
+
+.empty-state-body {
+  color: var(--ink-2);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.empty-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.illustration {
+  color: var(--ink-2);
+  width: 10rem;
+  height: auto;
+}

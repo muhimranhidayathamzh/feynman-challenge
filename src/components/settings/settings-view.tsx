@@ -1,6 +1,4 @@
-import { KeyRound, Mail, Palette, Save, UserRound } from "lucide-react";
-
-import { Card, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetTitle } from "@/components/ui/sheet";
 import type { ThemePreference } from "@/lib/theme";
 
 import { ConvertAccount } from "./convert-account";
@@ -34,43 +32,43 @@ export function SettingsView(props: Props) {
         </div>
       )}
 
-      <Card className="stack gap-4">
-        <CardTitle icon={UserRound}>Profil</CardTitle>
+      <Sheet className="stack gap-4">
+        <SheetTitle>Profil</SheetTitle>
         <ProfileForm
           initialDisplayName={props.displayName}
           initialTimezone={props.timezone}
           timezones={props.timezones}
         />
-      </Card>
+      </Sheet>
 
-      <Card className="stack gap-4">
-        <CardTitle icon={Palette}>Tampilan</CardTitle>
+      <Sheet className="stack gap-4">
+        <SheetTitle>Tampilan</SheetTitle>
         <ThemeForm initial={props.theme} />
-      </Card>
+      </Sheet>
 
       {props.isDemo ? (
-        <Card className="stack gap-4" id="simpan-akun">
-          <CardTitle icon={Save}>Simpan progres jadi akun</CardTitle>
+        <Sheet className="stack gap-4" id="simpan-akun">
+          <SheetTitle>Simpan progres jadi akun</SheetTitle>
           <p className="text-secondary text-sm">
             Kamu sedang memakai mode demo tanpa email. Hubungkan email agar tantangan dan
             hasilmu tidak hilang saat keluar.
           </p>
           <ConvertAccount pendingEmail={props.pendingEmail} />
-        </Card>
+        </Sheet>
       ) : (
-        <Card className="stack gap-3">
-          <CardTitle icon={Mail}>Akun</CardTitle>
+        <Sheet className="stack gap-3">
+          <SheetTitle>Akun</SheetTitle>
           <p className="text-secondary text-sm">
             Masuk sebagai <strong>{props.email}</strong>
           </p>
-        </Card>
+        </Sheet>
       )}
 
       {props.hasPassword && (
-        <Card className="stack gap-4" id="kata-sandi">
-          <CardTitle icon={KeyRound}>Kata sandi</CardTitle>
+        <Sheet className="stack gap-4" id="kata-sandi">
+          <SheetTitle>Kata sandi</SheetTitle>
           <PasswordSection firstTime={props.justConverted} />
-        </Card>
+        </Sheet>
       )}
     </section>
   );

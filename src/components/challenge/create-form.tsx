@@ -6,7 +6,7 @@ import { Check, Sparkles, Timer } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Sheet } from "@/components/ui/sheet";
 import { Field, Input } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -94,7 +94,7 @@ export function CreateForm() {
       )}
 
       {editing && (
-        <Card as="section" className="stack gap-5">
+        <Sheet as="section" className="stack gap-5">
           <form className="stack gap-5" onSubmit={handleGenerate}>
             <Field id="topic" label="Apa yang ingin kamu kuasai?">
               <Input
@@ -131,13 +131,13 @@ export function CreateForm() {
               {status === "generating" ? "AI sedang menyusun…" : "Susun Rencana Belajar"}
             </Button>
           </form>
-        </Card>
+        </Sheet>
       )}
 
       {status === "generating" && <PreviewSkeleton />}
 
       {(status === "preview" || status === "creating") && plan && (
-        <Card as="section" className="stack gap-5 animate-fade-in-up">
+        <Sheet as="section" className="stack gap-5 animate-fade-in-up">
           <div className="row-between">
             <h3>Rencana Belajar</h3>
             <Badge icon={Timer} title="Estimasi durasi rekaman">
@@ -212,7 +212,7 @@ export function CreateForm() {
               Ganti topik
             </Button>
           </div>
-        </Card>
+        </Sheet>
       )}
     </div>
   );
@@ -220,12 +220,12 @@ export function CreateForm() {
 
 function PreviewSkeleton() {
   return (
-    <Card className="stack gap-4" aria-hidden="true">
+    <Sheet className="stack gap-4" aria-hidden="true">
       <Skeleton width="40%" height="1.5rem" />
       <Skeleton width="90%" />
       <Skeleton width="80%" />
       <Skeleton width="85%" />
       <Skeleton width="70%" />
-    </Card>
+    </Sheet>
   );
 }

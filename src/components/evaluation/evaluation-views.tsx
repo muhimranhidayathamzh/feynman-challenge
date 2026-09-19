@@ -5,22 +5,18 @@ import Link from "next/link";
 import {
   ArrowLeft,
   BookOpen,
-  ChartColumn,
   CircleAlert,
   Headphones,
   Hourglass,
-  ListChecks,
   LoaderCircle,
-  MessageSquareText,
   Mic,
-  Puzzle,
   RefreshCw,
   RotateCcw,
 } from "lucide-react";
 
 import { AudioPlayer } from "@/components/ui/audio-player";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetTitle } from "@/components/ui/sheet";
 import { Icon } from "@/components/ui/icon";
 import { AUDIO_ISSUE_MESSAGES } from "@/lib/api/contracts";
 import type { CoverageComparison as Comparison } from "@/lib/utils/coverage-progress";
@@ -56,7 +52,7 @@ export function EvaluationRejectedView(props: RejectedProps) {
   const links = hrefs(props.challengeId);
   return (
     <section className="state-screen">
-      <Card className="state-card">
+      <Sheet className="state-card">
         <Icon icon={Headphones} size={40} className="state-icon" />
         <h2 ref={props.headingRef} tabIndex={-1} className="focus-target">
           Rekaman belum bisa dinilai
@@ -77,7 +73,7 @@ export function EvaluationRejectedView(props: RejectedProps) {
             Kembali
           </ButtonLink>
         </div>
-      </Card>
+      </Sheet>
     </section>
   );
 }
@@ -100,7 +96,7 @@ export function EvaluationStatusView(props: StatusProps) {
   return (
     <section className="state-screen">
       {props.view === "error" ? (
-        <Card className="state-card">
+        <Sheet className="state-card">
           <Icon icon={CircleAlert} size={40} className="state-icon" />
           <h2>Evaluasi gagal</h2>
           <p className="text-secondary" role="alert">
@@ -114,9 +110,9 @@ export function EvaluationStatusView(props: StatusProps) {
               Kembali
             </ButtonLink>
           </div>
-        </Card>
+        </Sheet>
       ) : props.view === "stale" ? (
-        <Card className="state-card">
+        <Sheet className="state-card">
           <Icon icon={Hourglass} size={40} className="state-icon" />
           <h2>Masih diproses</h2>
           <p className="text-secondary">
@@ -131,10 +127,9 @@ export function EvaluationStatusView(props: StatusProps) {
               Kembali
             </ButtonLink>
           </div>
-        </Card>
+        </Sheet>
       ) : (
-        <Card
-          variant="glass"
+        <Sheet
           className="state-card evaluating-card animate-fade-in"
           aria-live="polite"
           aria-busy="true"
@@ -145,7 +140,7 @@ export function EvaluationStatusView(props: StatusProps) {
             AI sedang mendengarkan rekaman dan menilainya berdasarkan outline. Biasanya
             butuh 10–30 detik.
           </p>
-        </Card>
+        </Sheet>
       )}
     </section>
   );
@@ -189,24 +184,24 @@ export function EvaluationCompletedView(props: CompletedProps) {
         </h1>
       </div>
 
-      <Card className="center animate-fade-in-up">
+      <Sheet className="center animate-fade-in-up">
         <ScoreRing score={props.overallScore} previousScore={props.previousScore} />
-      </Card>
+      </Sheet>
 
-      <Card className="stack gap-4 animate-fade-in-up">
-        <CardTitle icon={ChartColumn}>Rincian Skor</CardTitle>
+      <Sheet className="stack gap-4 animate-fade-in-up">
+        <SheetTitle>Rincian Skor</SheetTitle>
         <SubScores
           comprehensiveness={props.subScores.comprehensiveness}
           accuracy={props.subScores.accuracy}
           clarity={props.subScores.clarity}
         />
-      </Card>
+      </Sheet>
 
       {props.coverage.length > 0 && (
-        <Card className="stack gap-3">
-          <CardTitle icon={ListChecks}>Cakupan Materi</CardTitle>
+        <Sheet className="stack gap-3">
+          <SheetTitle>Cakupan Materi</SheetTitle>
           <CoverageChecklist items={props.coverage} challengeId={props.challengeId} />
-        </Card>
+        </Sheet>
       )}
 
       {props.comparison && (
@@ -217,18 +212,18 @@ export function EvaluationCompletedView(props: CompletedProps) {
         />
       )}
 
-      <Card className="stack gap-3">
-        <CardTitle icon={MessageSquareText}>Umpan Balik AI</CardTitle>
+      <Sheet className="stack gap-3">
+        <SheetTitle>Umpan Balik AI</SheetTitle>
         <FeedbackCard
           feedback={props.feedback ?? ""}
           strengths={props.strengths}
           improvements={props.improvements}
         />
-      </Card>
+      </Sheet>
 
       {props.unexplainedJargon.length > 0 && (
-        <Card className="stack gap-3">
-          <CardTitle icon={Puzzle}>Istilah yang belum kamu jelaskan</CardTitle>
+        <Sheet className="stack gap-3">
+          <SheetTitle>Istilah yang belum kamu jelaskan</SheetTitle>
           <p className="text-secondary text-sm">
             Inti Feynman Technique: jelaskan istilah ini dengan kata-kata sederhana di
             percobaan berikutnya.
@@ -240,17 +235,17 @@ export function EvaluationCompletedView(props: CompletedProps) {
               </li>
             ))}
           </ul>
-        </Card>
+        </Sheet>
       )}
 
       {props.audioUrl && (
-        <Card className="stack gap-3">
-          <CardTitle icon={Headphones}>Rekamanmu</CardTitle>
+        <Sheet className="stack gap-3">
+          <SheetTitle>Rekamanmu</SheetTitle>
           <AudioPlayer
             src={props.audioUrl}
             label={`Rekaman percobaan #${props.attemptNumber}`}
           />
-        </Card>
+        </Sheet>
       )}
 
       {props.transcript && <TranscriptView transcript={props.transcript} />}

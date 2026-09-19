@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { computeStreakOnActivity, displayStreak } from "./streak";
+import { computeStreakOnActivity, displayStreak, weekStrip } from "./streak";
 
 const TODAY = "2026-09-18";
 
@@ -75,5 +75,36 @@ describe("displayStreak", () => {
   it("shows 0 once the streak is broken, even before the next activity", () => {
     expect(displayStreak(7, "2026-09-16", TODAY)).toBe(0);
     expect(displayStreak(7, null, TODAY)).toBe(0);
+  });
+});
+
+describe("weekStrip", () => {
+  // 2026-09-17 is a Thursday.
+  const THURSDAY = "2026-09-17";
+
+  it("runs Monday to Sunday around today", () => {
+    const week = weekStrip(THURSDAY, null, 0);
+    expect(week.map((d) => d.short).join("")).toBe("SSRKJSM");
+    expect(week[0]?.day).toBe("2026-09-14");
+    expect(week[3]?.isToday).toBe(true);
+    expect(week.filter((d) => d.isFuture).map((d) => d.name)).toEqual([
+      "Jumat",
+      "Sabtu",
+      "Minggu",
+    ]);
+  });
+
+  it("marks the last streakCount days ending on the last active day", () => {
+    const week = weekStrip(THURSDAY, THURSDAY, 3);
+    expect(week.filter((d) => d.active).map((d) => d.name)).toEqual([
+      "Selasa",
+      "Rabu",
+      "Kamis",
+    ]);
+  });
+
+  it("keeps yesterday's streak alive but shows nothing once it is broken", () => {
+    expect(weekStrip(THURSDAY, "2026-09-16", 2).filter((d) => d.active)).toHaveLength(2);
+    expect(weekStrip(THURSDAY, "2026-09-14", 5).filter((d) => d.active)).toHaveLength(0);
   });
 });

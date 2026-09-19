@@ -88,20 +88,22 @@
   border-radius: var(--radius-md);
   font-size: var(--text-xs);
   font-weight: var(--weight-medium);
-  color: var(--text-secondary);
+  color: var(--ink-2);
   transition:
     color var(--transition-fast),
     background var(--transition-fast);
 }
 
 .app-nav-link:hover {
-  color: var(--text-primary);
-  background: var(--bg-tertiary);
+  color: var(--ink);
+  background: var(--sunken);
 }
 
+/* Active place: ink on a sunken tab. Vermilion is reserved for actions. */
 .app-nav-link[data-active="true"] {
-  color: var(--accent-text);
-  background: var(--accent-soft);
+  color: var(--ink);
+  background: var(--sunken);
+  font-weight: var(--weight-semibold);
 }
 
 .app-nav-icon {

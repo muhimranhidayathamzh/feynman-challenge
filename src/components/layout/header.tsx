@@ -44,7 +44,7 @@ export function Header({ displayName, streakCount, isAnonymous }: Props) {
       <div className="row gap-3">
         <Link
           href="/"
-          className="badge badge-warning"
+          className="badge"
           title="Streak harian"
           aria-label={`Streak harian: ${streakCount} hari`}
         >

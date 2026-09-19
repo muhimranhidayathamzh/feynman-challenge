@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Mail, UserPlus } from "lucide-react";
 
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Sheet } from "@/components/ui/sheet";
 import { Field, Input } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { GoogleButton } from "@/components/auth/google-button";
@@ -76,7 +76,7 @@ export function SignupForm({ googleEnabled }: Props) {
 
   if (success) {
     return (
-      <Card as="section" variant="glass" className="stack gap-4 text-center items-center">
+      <Sheet as="section" className="stack gap-4 text-center items-center">
         <Icon icon={Mail} size={36} className="state-icon" />
         <h2 className="text-xl">Cek email kamu</h2>
         <p className="text-secondary text-sm">
@@ -86,12 +86,12 @@ export function SignupForm({ googleEnabled }: Props) {
         <ButtonLink href="/login" variant="secondary" block>
           Kembali ke halaman masuk
         </ButtonLink>
-      </Card>
+      </Sheet>
     );
   }
 
   return (
-    <Card as="section" variant="glass" className="stack gap-5">
+    <Sheet as="section" className="stack gap-5">
       <div className="stack gap-1">
         <h2 className="text-xl">Buat akun</h2>
         <p className="text-secondary text-sm">
@@ -182,6 +182,6 @@ export function SignupForm({ googleEnabled }: Props) {
           Masuk
         </Link>
       </p>
-    </Card>
+    </Sheet>
   );
 }

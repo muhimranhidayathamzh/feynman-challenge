@@ -1,7 +1,7 @@
-import { ClipboardList, Library, Mic, NotebookPen } from "lucide-react";
+import { Mic } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetTitle } from "@/components/ui/sheet";
 import type { TrendPoint } from "@/lib/utils/coverage-progress";
 import type { DeadlineInfo } from "@/lib/utils/deadline";
 import type { ChallengeStatus, MasteryState } from "@/types";
@@ -41,24 +41,24 @@ export function NotebookView(props: Props) {
         nextReview={props.nextReview}
       />
 
-      <Card className="stack gap-4">
-        <CardTitle icon={ClipboardList}>Outline Materi</CardTitle>
+      <Sheet className="stack gap-4">
+        <SheetTitle>Outline Materi</SheetTitle>
         <OutlineEditor
           challengeId={props.id}
           initialItems={props.outline}
           trend={props.trend}
         />
-      </Card>
+      </Sheet>
 
-      <Card className="stack gap-4">
-        <CardTitle icon={Library}>Sumber Belajar</CardTitle>
+      <Sheet className="stack gap-4">
+        <SheetTitle>Sumber Belajar</SheetTitle>
         <SourceList challengeId={props.id} initialSources={props.sources} />
-      </Card>
+      </Sheet>
 
-      <Card className="stack gap-4">
-        <CardTitle icon={NotebookPen}>Catatan</CardTitle>
+      <Sheet className="stack gap-4">
+        <SheetTitle>Catatan</SheetTitle>
         <NotesEditor challengeId={props.id} initialContent={props.notes} />
-      </Card>
+      </Sheet>
 
       <ButtonLink href={`/challenge/${props.id}/record`} size="lg" block icon={Mic}>
         Mulai Rekam

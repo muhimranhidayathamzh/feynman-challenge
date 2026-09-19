@@ -31,8 +31,8 @@ body:has(.record-shell) {
   width: 100%;
   height: 120px;
   border-radius: var(--radius-lg);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  border: 1px solid var(--line);
 }
 
 .record-rec-dot {
@@ -40,7 +40,7 @@ body:has(.record-shell) {
   width: 0.6rem;
   height: 0.6rem;
   border-radius: var(--radius-full);
-  background: var(--error);
+  background: var(--accent);
   animation: pulse 1.4s ease-in-out infinite;
 }
 
@@ -48,8 +48,8 @@ body:has(.record-shell) {
   text-align: left;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
+  background: var(--sunken);
+  border: 1px solid var(--line);
 }
 
 .hint-tier[data-revealed="true"] {
@@ -58,7 +58,7 @@ body:has(.record-shell) {
 
 .hint-warning {
   font-size: var(--text-xs);
-  color: var(--warning);
+  color: var(--partial);
 }
 
 .record-controls {
@@ -88,22 +88,22 @@ body:has(.record-shell) {
   font-size: var(--text-4xl);
   font-weight: var(--weight-bold);
   font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
+  color: var(--ink);
 }
 
 .countdown-progress {
-  stroke: var(--accent-primary);
+  stroke: var(--accent);
   transition:
     stroke-dashoffset 0.3s linear,
     stroke 0.3s;
 }
 
 .countdown[data-almost-done="true"] .countdown-progress {
-  stroke: var(--warning);
+  stroke: var(--partial);
 }
 
 .countdown[data-almost-done="true"] .countdown-value {
-  color: var(--warning);
+  color: var(--partial);
 }
 
 .hint-warning {
@@ -119,5 +119,5 @@ body:has(.record-shell) {
 }
 
 .bar-fill-accent {
-  background: var(--accent-primary);
+  background: var(--accent);
 }

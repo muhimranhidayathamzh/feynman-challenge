@@ -27,6 +27,7 @@ import { DASHBOARD_TABS } from "@/lib/utils/challenge-status";
 import type { HintLevel } from "@/types";
 import NotFound from "@/app/not-found";
 
+import { ComponentSheet } from "./component-sheet";
 import * as fx from "./fixtures";
 import { findFrame } from "./frame-list";
 
@@ -89,6 +90,8 @@ function ToastDemo() {
 
 function content(id: string): ReactNode {
   switch (id) {
+    case "komponen":
+      return <ComponentSheet />;
     case "login":
       return (
         <LoginForm

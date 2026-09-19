@@ -58,7 +58,7 @@ Semua warna lewat token di `src/styles/tokens.css`. Rasio kontras dihitung terha
 | `--ink` | `#1E2230` | Teks utama | 13,8 : 1 di kertas |
 | `--ink-2` | `#4E5566` | Teks sekunder | 6,5 : 1 |
 | `--ink-3` | `#5F6474` | Teks pudar, label kecil | 5,1 : 1 kertas, 4,6 : 1 cekung |
-| `--accent` | `#C8431B` | Vermilion: tombol utama, tombol rekam, fokus | teks putih 4,9 : 1 |
+| `--accent` | `#C8431B` | Vermilion: tombol utama, tombol rekam | teks putih 4,9 : 1 |
 | `--accent-hover` | `#B23A16` | Tombol utama saat hover | teks putih 6,0 : 1 |
 | `--accent-press` | `#9F3413` | Sisi bawah tombol utama (efek tekan) | |
 | `--accent-text` | `#A93814` | Tautan dan teks aksen | 5,6 : 1 |
@@ -66,7 +66,8 @@ Semua warna lewat token di `src/styles/tokens.css`. Rasio kontras dihitung terha
 | `--covered` | `#2B7148` | Poin tercakup, perubahan membaik | 5,8 : 1 di surface |
 | `--partial` | `#8F5E05` | Poin sebagian | 5,4 : 1 |
 | `--missing` | pakai `--ink-3` | Poin belum dibahas (lingkaran putus-putus) | |
-| `--error` | `#B42318` | HANYA error sistem dan aksi berbahaya | 6,4 : 1 |
+| `--error` | `#B01F45` | HANYA error sistem dan aksi berbahaya. Rona mawar, sengaja jauh dari vermilion | 6,6 : 1 |
+| `--error-ink` | `#FFFFFF` | Teks di atas tombol bahaya | 6,7 : 1 |
 | `--highlight` | `#FBE38E` | Stabilo di belakang kutipan bukti | tinta di atasnya 12,4 : 1 |
 
 ### Suasana Papan Tulis (gelap dan layar rekam)
@@ -83,7 +84,8 @@ Semua warna lewat token di `src/styles/tokens.css`. Rasio kontras dihitung terha
 | `--ink-3` | `#949B92` | 6,1 : 1 |
 | `--accent` | `#EE7A52`, teks di atasnya (`--accent-ink`) `#1A120E` | 6,6 : 1 |
 | `--accent-hover` / `--accent-press` | `#F28D69` / `#B85A38` | |
-| `--covered` / `--partial` / `--error` | `#6CC291` / `#E6B552` / `#F08A7C` | 7,4 / 8,4 / 6,5 : 1 |
+| `--covered` / `--partial` / `--error` | `#6CC291` / `#E6B552` / `#F2849A` | 7,4 / 8,4 / 6,5 : 1 |
+| `--error-ink` | `#1A120E` | 7,5 : 1 |
 | `--highlight` | `#4E482D` (amber 25% di atas surface) | kapur di atasnya 7,5 : 1 |
 
 ### Aturan warna
@@ -231,7 +233,7 @@ Ditolak di review, tanpa pengecualian:
 ## 13. Aksesibilitas
 
 - Semua pasangan teks lolos WCAG AA di kedua suasana. Cek ulang setiap menambah warna.
-- Cincin fokus: 2 px `--accent` dengan jarak 2 px, terlihat di kertas maupun papan tulis.
+- Cincin fokus: 2 px `--ink` dengan jarak 2 px, terlihat di kertas maupun papan tulis. Sengaja bukan vermilion, supaya tombol yang sedang difokus tidak tampak seperti aksi utama.
 - Target sentuh minimal 44 × 44 px.
 - Warna tidak pernah satu-satunya penanda.
 - Tema mengikuti sistem secara default, bisa dipilih manual di Pengaturan (Terang, Gelap, Ikuti sistem).

@@ -1,6 +1,4 @@
-import { TrendingUp } from "lucide-react";
-
-import { Card, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetTitle } from "@/components/ui/sheet";
 import { cx } from "@/lib/utils/cx";
 import { scoreColor } from "@/lib/utils/labels";
 
@@ -19,8 +17,8 @@ export function AttemptHistory({ history, currentAttemptNumber }: Props) {
   if (history.length <= 1) return null;
 
   return (
-    <Card className="stack gap-4">
-      <CardTitle icon={TrendingUp}>Perkembangan</CardTitle>
+    <Sheet className="stack gap-4">
+      <SheetTitle>Perkembangan</SheetTitle>
       <div className="hist-bars">
         {history.map((entry) => {
           const score = entry.score ?? 0;
@@ -44,6 +42,6 @@ export function AttemptHistory({ history, currentAttemptNumber }: Props) {
           );
         })}
       </div>
-    </Card>
+    </Sheet>
   );
 }

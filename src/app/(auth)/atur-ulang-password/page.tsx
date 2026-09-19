@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 
 import { NewPasswordForm } from "@/components/auth/new-password-form";
-import { Card } from "@/components/ui/card";
+import { Sheet } from "@/components/ui/sheet";
 import { useToast } from "@/components/ui/toast";
 
 /**
@@ -17,7 +17,7 @@ export default function ResetPasswordPage() {
   const toast = useToast();
 
   return (
-    <Card as="section" variant="glass" className="stack gap-5">
+    <Sheet as="section" className="stack gap-5">
       <div className="stack gap-1">
         <h2 className="text-xl">Buat kata sandi baru</h2>
         <p className="text-secondary text-sm">
@@ -32,6 +32,6 @@ export default function ResetPasswordPage() {
           router.refresh();
         }}
       />
-    </Card>
+    </Sheet>
   );
 }

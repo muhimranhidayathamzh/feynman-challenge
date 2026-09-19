@@ -1,7 +1,4 @@
 import Link from "next/link";
-import { Zap } from "lucide-react";
-
-import { Icon } from "@/components/ui/icon";
 import type { DueSoonItem } from "@/lib/utils/dashboard";
 import type { DeadlineStatus } from "@/lib/utils/deadline";
 
@@ -14,8 +11,8 @@ const STATUS_CLASS: Record<DeadlineStatus, string> = {
   upcoming: "text-secondary",
   due_soon: "text-warning",
   due_today: "text-warning",
-  overdue: "text-error",
-  extended_overdue: "text-error",
+  overdue: "text-warning",
+  extended_overdue: "text-warning",
 };
 
 export function DueSoonSection({ items }: { items: DueSoonItem[] }) {
@@ -24,7 +21,6 @@ export function DueSoonSection({ items }: { items: DueSoonItem[] }) {
   return (
     <section className="stack gap-3" aria-labelledby="due-soon-title">
       <h2 id="due-soon-title" className="section-title">
-        <Icon icon={Zap} size={20} />
         Segera Jatuh Tempo
       </h2>
       <ul className="stack gap-2">
@@ -35,7 +31,7 @@ export function DueSoonSection({ items }: { items: DueSoonItem[] }) {
                 {item.title}
               </Link>
               {item.nudge && (
-                <span className={`text-sm nowrap ${STATUS_CLASS[item.status]}`}>
+                <span className={`text-sm ${STATUS_CLASS[item.status]}`}>
                   {item.nudge}
                 </span>
               )}
