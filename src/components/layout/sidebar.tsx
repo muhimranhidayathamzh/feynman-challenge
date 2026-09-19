@@ -18,8 +18,14 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/pengaturan", label: "Pengaturan", icon: Settings },
 ];
 
-export function Sidebar() {
-  const pathname = usePathname();
+interface Props {
+  /** Defaults to the current URL. */
+  currentPath?: string | undefined;
+}
+
+export function Sidebar({ currentPath }: Props) {
+  const routerPath = usePathname();
+  const pathname = currentPath ?? routerPath;
 
   return (
     <nav className="app-nav" aria-label="Navigasi utama">

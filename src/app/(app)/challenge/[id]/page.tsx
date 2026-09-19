@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ClipboardList, Library, Mic, NotebookPen } from "lucide-react";
-
-import { NotebookHeader } from "@/components/challenge/notebook-header";
-import { NotesEditor } from "@/components/challenge/notes-editor";
-import { OutlineEditor } from "@/components/challenge/outline-editor";
-import { SourceList } from "@/components/challenge/source-list";
-import { ButtonLink } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { NotebookView } from "@/components/challenge/notebook-view";
 import { createClient } from "@/lib/supabase/server";
 import { parseStoredCoverage } from "@/lib/utils/coverage";
 import { TREND_LENGTH, buildCoverageTrend } from "@/lib/utils/coverage-progress";
@@ -84,47 +77,23 @@ export default async function ChallengePage({ params }: PageProps) {
   );
 
   return (
-    <section className="page">
-      <NotebookHeader
-        id={challenge.id}
-        initialTitle={challenge.title}
-        masteryState={effectiveMasteryState(challenge.mastery_state, review, clock.today)}
-        status={challenge.status}
-        deadline={challenge.deadline}
-        deadlineInfo={getDeadlineInfo(challenge.deadline, clock.today)}
-        nextReview={nextReviewLabel(review.nextReviewAt, clock.today)}
-      />
-
-      <Card className="stack gap-4">
-        <CardTitle icon={ClipboardList}>Outline Materi</CardTitle>
-        <OutlineEditor
-          challengeId={challenge.id}
-          initialItems={outlineItems}
-          trend={trend}
-        />
-      </Card>
-
-      <Card className="stack gap-4">
-        <CardTitle icon={Library}>Sumber Belajar</CardTitle>
-        <SourceList
-          challengeId={challenge.id}
-          initialSources={(sources ?? []).map((source) => ({
-            id: source.id,
-            title: source.title,
-            url: source.url,
-            type: source.source_type,
-          }))}
-        />
-      </Card>
-
-      <Card className="stack gap-4">
-        <CardTitle icon={NotebookPen}>Catatan</CardTitle>
-        <NotesEditor challengeId={challenge.id} initialContent={note?.content ?? ""} />
-      </Card>
-
-      <ButtonLink href={`/challenge/${challenge.id}/record`} size="lg" block icon={Mic}>
-        Mulai Rekam
-      </ButtonLink>
-    </section>
+    <NotebookView
+      id={challenge.id}
+      title={challenge.title}
+      masteryState={effectiveMasteryState(challenge.mastery_state, review, clock.today)}
+      status={challenge.status}
+      deadline={challenge.deadline}
+      deadlineInfo={getDeadlineInfo(challenge.deadline, clock.today)}
+      nextReview={nextReviewLabel(review.nextReviewAt, clock.today)}
+      outline={outlineItems}
+      trend={trend}
+      sources={(sources ?? []).map((source) => ({
+        id: source.id,
+        title: source.title,
+        url: source.url,
+        type: source.source_type,
+      }))}
+      notes={note?.content ?? ""}
+    />
   );
 }

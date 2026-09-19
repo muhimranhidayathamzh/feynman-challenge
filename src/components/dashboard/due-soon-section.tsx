@@ -2,18 +2,12 @@ import Link from "next/link";
 import { Zap } from "lucide-react";
 
 import { Icon } from "@/components/ui/icon";
+import type { DueSoonItem } from "@/lib/utils/dashboard";
 import type { DeadlineStatus } from "@/lib/utils/deadline";
 
 import { OverdueActions } from "./overdue-actions";
 
-export interface DueSoonItem {
-  id: string;
-  title: string;
-  status: DeadlineStatus;
-  nudge: string | null;
-  /** Stored deadline "YYYY-MM-DD" (for the reschedule dialog). */
-  deadline: string | null;
-}
+export type { DueSoonItem };
 
 const STATUS_CLASS: Record<DeadlineStatus, string> = {
   none: "text-secondary",

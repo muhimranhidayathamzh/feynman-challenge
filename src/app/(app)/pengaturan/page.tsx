@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { KeyRound, Mail, Save, UserRound } from "lucide-react";
 
-import { ConvertAccount } from "@/components/settings/convert-account";
-import { PasswordSection } from "@/components/settings/password-section";
-import { ProfileForm } from "@/components/settings/profile-form";
-import { Card, CardTitle } from "@/components/ui/card";
+import { SettingsView } from "@/components/settings/settings-view";
 import { DEFAULT_TIMEZONE } from "@/lib/utils/date";
 import { createClient } from "@/lib/supabase/server";
 
@@ -46,49 +42,15 @@ export default async function SettingsPage({ searchParams }: PageProps) {
   const justConverted = !isDemo && akun === "tersimpan";
 
   return (
-    <section className="page page-narrow">
-      <h1>Pengaturan</h1>
-
-      {justConverted && (
-        <div className="alert alert-success" role="status">
-          Email terverifikasi, akunmu sudah permanen. Buat kata sandi di bawah supaya bisa
-          masuk lagi dari perangkat lain.
-        </div>
-      )}
-
-      <Card className="stack gap-4">
-        <CardTitle icon={UserRound}>Profil</CardTitle>
-        <ProfileForm
-          initialDisplayName={profile?.display_name ?? ""}
-          initialTimezone={profile?.timezone ?? DEFAULT_TIMEZONE}
-          timezones={supportedTimezones()}
-        />
-      </Card>
-
-      {isDemo ? (
-        <Card className="stack gap-4" id="simpan-akun">
-          <CardTitle icon={Save}>Simpan progres jadi akun</CardTitle>
-          <p className="text-secondary text-sm">
-            Kamu sedang memakai mode demo tanpa email. Hubungkan email agar tantangan dan
-            hasilmu tidak hilang saat keluar.
-          </p>
-          <ConvertAccount pendingEmail={user.new_email ?? null} />
-        </Card>
-      ) : (
-        <Card className="stack gap-3">
-          <CardTitle icon={Mail}>Akun</CardTitle>
-          <p className="text-secondary text-sm">
-            Masuk sebagai <strong>{user.email}</strong>
-          </p>
-        </Card>
-      )}
-
-      {hasPassword && (
-        <Card className="stack gap-4" id="kata-sandi">
-          <CardTitle icon={KeyRound}>Kata sandi</CardTitle>
-          <PasswordSection firstTime={justConverted} />
-        </Card>
-      )}
-    </section>
+    <SettingsView
+      displayName={profile?.display_name ?? ""}
+      timezone={profile?.timezone ?? DEFAULT_TIMEZONE}
+      timezones={supportedTimezones()}
+      email={user.email ?? null}
+      isDemo={isDemo}
+      pendingEmail={user.new_email ?? null}
+      hasPassword={hasPassword}
+      justConverted={justConverted}
+    />
   );
 }

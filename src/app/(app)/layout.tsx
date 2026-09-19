@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 
-import { DemoBanner } from "@/components/layout/demo-banner";
-import { Header } from "@/components/layout/header";
-import { Sidebar } from "@/components/layout/sidebar";
+import { AppShell } from "@/components/layout/app-shell";
 import { createClient } from "@/lib/supabase/server";
 import { calendarDay } from "@/lib/utils/date";
 import { displayStreak } from "@/lib/utils/streak";
@@ -35,22 +33,12 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="app-shell">
-      <a href="#main-content" className="skip-link">
-        Lewati ke konten utama
-      </a>
-      <Header
-        displayName={displayName}
-        streakCount={streakCount}
-        isAnonymous={user?.is_anonymous ?? false}
-      />
-      <div className="app-body">
-        <Sidebar />
-        <main id="main-content" className="app-main" tabIndex={-1}>
-          {user?.is_anonymous && <DemoBanner />}
-          {children}
-        </main>
-      </div>
-    </div>
+    <AppShell
+      displayName={displayName}
+      streakCount={streakCount}
+      isAnonymous={user?.is_anonymous ?? false}
+    >
+      {children}
+    </AppShell>
   );
 }

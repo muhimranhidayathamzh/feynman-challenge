@@ -2,18 +2,10 @@ import Link from "next/link";
 
 import { DeadlineBadge } from "@/components/challenge/deadline-badge";
 import { MasteryIndicator } from "@/components/challenge/mastery-indicator";
-import type { DeadlineInfo } from "@/lib/utils/deadline";
+import type { ChallengeCardData } from "@/lib/utils/dashboard";
 import { MASTERY_META, scoreColor } from "@/lib/utils/labels";
-import type { MasteryState } from "@/types";
 
-export interface ChallengeCardData {
-  id: string;
-  title: string;
-  /** Effective (decay-applied) mastery state. */
-  masteryState: MasteryState;
-  latestScore: number | null;
-  deadline: DeadlineInfo;
-}
+export type { ChallengeCardData };
 
 export function ChallengeCard({ challenge }: { challenge: ChallengeCardData }) {
   return (

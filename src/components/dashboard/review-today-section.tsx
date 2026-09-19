@@ -2,15 +2,9 @@ import Link from "next/link";
 import { Repeat } from "lucide-react";
 
 import { Icon } from "@/components/ui/icon";
+import type { ReviewItem } from "@/lib/utils/dashboard";
 
-export interface ReviewItem {
-  id: string;
-  title: string;
-  /** 0 = due today, >0 = days late. */
-  daysOverdue: number;
-  /** More than one interval late: mastery is visibly slipping. */
-  lapsed: boolean;
-}
+export type { ReviewItem };
 
 function describe(item: ReviewItem): string {
   if (item.daysOverdue <= 0) return "Jadwal hari ini";

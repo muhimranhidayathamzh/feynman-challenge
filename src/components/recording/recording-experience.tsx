@@ -2,12 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Mic, RotateCcw, Send, Trash2 } from "lucide-react";
 
-import { AudioPlayer } from "@/components/ui/audio-player";
-import { Button, ButtonLink } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Icon } from "@/components/ui/icon";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import {
   AttemptCreateResponseSchema,
@@ -25,13 +20,10 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { MIN_RECORDING_SEC } from "@/lib/utils/constants";
 import { effectiveHint } from "@/lib/utils/labels";
-import { formatClock } from "@/lib/utils/timer";
 import type { HintLevel } from "@/types";
 
-import { CountdownTimer } from "./countdown-timer";
-import { HintPanel, type OutlinePoint } from "./hint-panel";
-import { RecorderControls } from "./recorder-controls";
-import { WaveformVisualizer } from "./waveform-visualizer";
+import type { OutlinePoint } from "./hint-panel";
+import { RecordingStage } from "./recording-stage";
 
 interface Props {
   challengeId: string;
@@ -259,143 +251,41 @@ export function RecordingExperience({
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [mustWarn]);
 
-  const progressPct = Math.round(uploadProgress * 100);
   const reviewing = pending !== null && (phase === "review" || sending);
-  const tooShort = (pending?.durationSeconds ?? 0) < MIN_RECORDING_SEC;
 
   return (
-    <main className="record-shell">
-      <div className="row-between w-full">
-        <ButtonLink
-          href={`/challenge/${challengeId}`}
-          variant="ghost"
-          size="sm"
-          icon={ArrowLeft}
-        >
-          Batal
-        </ButtonLink>
-        {recording && (
-          <span className="row text-sm gap-2">
-            <span className="record-rec-dot" aria-hidden="true" />
-            Merekam…
-          </span>
-        )}
-      </div>
-
-      <h1 className="record-title">{title}</h1>
-
-      {recorder.error && (
-        <div className="alert alert-error w-full" role="alert">
-          {recorder.error.message}
-        </div>
-      )}
-      {submitError && (
-        <div className="alert alert-error w-full" role="alert">
-          {submitError}
-        </div>
-      )}
-
-      {reviewing && pending ? (
-        <Card as="section" className="stack gap-4 w-full" aria-labelledby="review-title">
-          <div className="row-between">
-            <h2 id="review-title" className="text-xl">
-              Dengarkan dulu
-            </h2>
-            <span className="badge tabular-nums">
-              {formatClock(pending.durationSeconds)}
-            </span>
-          </div>
-          {previewUrl && (
-            <AudioPlayer src={previewUrl} label="Rekaman yang baru dibuat" />
-          )}
-          <p className="text-secondary text-sm text-left">
-            Sudah jelas dan lengkap? Kirim untuk dinilai AI, atau rekam ulang.
-            {revealed.size > 0 &&
-              ` Petunjuk yang sudah dibuka tetap membatasi skor maks ke ${hint.cap}.`}
-          </p>
-          {tooShort && (
-            <p className="text-warning text-sm text-left" role="status">
-              Rekaman di bawah {MIN_RECORDING_SEC} detik terlalu pendek untuk dinilai.
-            </p>
-          )}
-
-          {sending ? (
-            <div className="stack gap-2 w-full">
-              <div
-                className="bar-track"
-                role="progressbar"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={progressPct}
-                aria-label="Progres unggah"
-              >
-                <div
-                  className="bar-fill bar-fill-accent"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-              <span className="text-secondary text-sm" aria-live="polite">
-                {phase === "uploading"
-                  ? `Mengunggah rekaman… ${progressPct}%`
-                  : "Menyiapkan evaluasi…"}
-              </span>
-            </div>
-          ) : (
-            <div className="record-controls">
-              <Button
-                size="lg"
-                icon={Send}
-                onClick={() => void submit(pending)}
-                disabled={tooShort}
-              >
-                {submitError ? "Kirim ulang" : "Kirim"}
-              </Button>
-              <Button variant="secondary" size="lg" icon={RotateCcw} onClick={rerecord}>
-                Rekam ulang
-              </Button>
-              <Button variant="ghost" size="lg" icon={Trash2} onClick={discard}>
-                Buang
-              </Button>
-            </div>
-          )}
-        </Card>
-      ) : (
-        <>
-          <CountdownTimer totalSeconds={durationSec} elapsedSeconds={duration} />
-
-          <WaveformVisualizer stream={recorder.stream} active={recording} />
-
-          <RecorderControls
-            status={status}
-            submitting={false}
-            startDisabled={preparingHints}
-            startLabel={preparingHints ? "Menyiapkan petunjuk…" : undefined}
-            onStart={() => void recorder.start()}
-            onPause={recorder.pause}
-            onResume={recorder.resume}
-            onFinish={() => void handleFinish()}
-          />
-
-          {(recording || paused) && (
-            <HintPanel
-              keywords={keywords}
-              questions={questions}
-              outline={outline}
-              revealed={revealed}
-              currentCap={hint.cap}
-              disabled={false}
-              onReveal={handleReveal}
-            />
-          )}
-        </>
-      )}
-
-      {!reviewing && !recording && !paused && (
-        <p className="row gap-2 text-muted text-sm">
-          <Icon icon={Mic} size={14} />
-          Rekaman bisa kamu dengarkan dulu sebelum dikirim.
-        </p>
-      )}
-    </main>
+    <RecordingStage
+      challengeId={challengeId}
+      title={title}
+      durationSec={durationSec}
+      elapsedSec={duration}
+      status={status}
+      stream={recorder.stream}
+      recorderError={recorder.error?.message ?? null}
+      submitError={submitError}
+      preparingHints={preparingHints}
+      hints={{ keywords, questions, outline, revealed, cap: hint.cap }}
+      review={
+        reviewing && pending
+          ? {
+              durationSeconds: pending.durationSeconds,
+              previewUrl,
+              phase,
+              progressPct: Math.round(uploadProgress * 100),
+              tooShort: pending.durationSeconds < MIN_RECORDING_SEC,
+            }
+          : null
+      }
+      onStart={() => void recorder.start()}
+      onPause={recorder.pause}
+      onResume={recorder.resume}
+      onFinish={() => void handleFinish()}
+      onReveal={handleReveal}
+      onSubmit={() => {
+        if (pending) void submit(pending);
+      }}
+      onRerecord={rerecord}
+      onDiscard={discard}
+    />
   );
 }
