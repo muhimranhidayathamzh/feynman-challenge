@@ -1,0 +1,48 @@
+# Changelog
+
+All notable changes to Feynman Challenge. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
+
+## [1.0.0] - 2026-09-19
+
+The first release after the 3-phase improvement plan in `prompts/improvement-plan.md`. Run migrations **003 to 006** on an existing database before deploying (see README, "Database").
+
+### Phase 1: Stabilise
+
+- **Safety net**: Vitest unit tests for all pure logic, validated environment variables, ESLint CLI, Prettier, and GitHub Actions CI.
+- **Direct upload**: recordings go from the browser straight to a private Storage bucket. Deleting a challenge also deletes its audio.
+- **Reliable evaluation**: atomic claim and finalize RPCs, overall score computed on the server, Gemini calls with timeouts and retry, and a per-user AI quota enforced in SQL.
+- **Resilient client**: shared API contracts, polling for in-progress evaluations, JSON 401s, and notes that flush before leaving the page.
+- **Time done right**: every "today" is computed in the user's timezone. Deadlines are calendar days, and auto-extension, mastery slip, and streak display are derived at read time.
+- **AI quality**: hints generated per outline point, one coverage verdict per point with a quote as evidence, unexplained jargon, and rejection of audio that cannot be judged.
+
+### Phase 2: Complete
+
+- **Design system**: reusable UI primitives, tokens split into feature stylesheets, and contrast-checked colours.
+- **Language and accessibility**: consistent Indonesian copy, focus management, skip link, live regions, and reduced-motion support.
+- **Challenge lifecycle**: park, reactivate, complete, reschedule, and markdown notes with preview.
+- **Recording**: listen before sending, and replay the recording on the result page.
+- **Auth**: password reset, Google sign-in, safe `?next=` redirects, and a settings page (name, timezone, password).
+
+### Phase 3: Differentiate
+
+- **Spaced repetition**: Leitner boxes replace the 30-day decay, with a "Review Hari Ini" section on the dashboard.
+- **Socratic coach**: 1–2 follow-up questions per evaluation, answered by voice and graded without touching the score.
+- **Gap to source**: "Pelajari lagi" jumps from a weak point to the notebook, each outline point shows a 5-attempt coverage trend, and results compare every point with the previous attempt.
+- **PWA**: PNG and maskable icons, shortcuts, screenshots, an offline page, and a rewritten service worker that never caches authenticated pages, versions its caches per build, clears them on logout, and offers "Versi baru tersedia".
+- **Demo mode**: "Coba tanpa akun" with a seeded example challenge (no Gemini call), stricter anonymous quota, a demo banner, and conversion to a permanent account.
+- **Docs**: README with architecture diagram, technical decisions, full setup, and Lighthouse results. Master spec updated to match the schema and quotas.
+
+### Changed
+
+- Gemini model is `gemini-2.5-flash` through `@google/genai`.
+- `challenges.deadline` is a `date` and `extended_deadline` is gone (migration 004).
+
+### Security
+
+- Service-role and Gemini keys are server-only. Prompt input from users is fenced against injection.
+- Login errors from the auth callback are fixed codes, never free text from the URL.
+- The old service worker cached authenticated HTML. The new one removes those caches on activation.
+
+## [0.1.0] - initial build
+
+- Next.js 15 scaffold, design system, Supabase schema, notebook, recording, Gemini evaluation, dashboard, and a basic PWA.

@@ -330,6 +330,23 @@ Karena ini project yang akan di-publish, ini standar arsitektur yang diterapkan:
 
 ---
 
+### Kuota AI per User (implementasi)
+
+Free tier Gemini dipakai bersama oleh semua user, jadi setiap panggilan AI lewat kuota per user yang dicek secara atomik di database (`consume_ai_quota`, migrasi 003; batas di `src/lib/ai/quota.ts`). Panggilan yang ditolak tidak pernah sampai ke Gemini.
+
+| Jenis panggilan | Akun biasa (per hari / per menit) | Mode demo anonim (per hari / per menit) |
+|---|---|---|
+| `generate` (rencana belajar) | 20 / 3 | 3 / 2 |
+| `evaluate` (evaluasi rekaman) | 30 / 3 | 3 / 2 |
+| `hints` (hint per poin outline) | 30 / 3 | 5 / 2 |
+| `followup` (jawaban pertanyaan lanjutan) | 40 / 5 | 5 / 2 |
+
+- Status anonim dibaca dari user yang diverifikasi server (`is_anonymous`), bukan dari input client.
+- Tantangan contoh mode demo dibuat dari fixture tanpa memanggil Gemini, jadi mencoba aplikasi tidak memakan kuota.
+- Model yang dipakai sekarang `gemini-2.5-flash` lewat `@google/genai`, dengan structured JSON output, timeout, dan retry dengan backoff.
+
+---
+
 ### Breakdown Detail per Service
 
 #### 1. Vercel (Hosting) — ✅ Aman
@@ -716,7 +733,9 @@ Core entity — represents one learning challenge.
 | `user_id` | `uuid` FK → profiles | |
 | `title` | `text` | Topic the user wants to learn |
 | `deadline` | `date` | A calendar day in the user's timezone. Auto-extension (+2 days) is derived at read time, never stored |
-| `last_attempt_at` | `timestamptz` | When the latest evaluation completed. Drives mastery decay and "needs review" |
+| `last_attempt_at` | `timestamptz` | When the latest evaluation completed |
+| `review_box` | `integer` | Leitner box 0–5 (check constraint). See §6.6 |
+| `next_review_at` | `date` | Next scheduled review day in the user's timezone (nullable before the first attempt) |
 | `mastery_state` | `text` | `not_started` \| `attempted` \| `developing` \| `proficient` \| `mastered` \| `solidified` |
 | `mastery_updated_at` | `timestamptz` | When mastery state last changed |
 | `latest_score` | `integer` | Most recent attempt score (nullable) |
@@ -740,6 +759,8 @@ AI-generated (and user-editable) outline items — this IS the evaluation rubric
 | `order_index` | `integer` | Display order |
 | `title` | `text` | Outline point title |
 | `description` | `text` | Brief description (nullable) |
+| `keywords` | `text[]` | AI hint tier 1 for this point (empty until generated) |
+| `guiding_question` | `text` | AI hint tier 2 for this point (nullable) |
 | `is_user_added` | `boolean` | Distinguishes AI vs user-added items |
 | `created_at` | `timestamptz` | |
 
@@ -792,9 +813,50 @@ Each recording + evaluation result.
 | `feedback` | `text` | AI feedback text (nullable) |
 | `strengths` | `jsonb` | Array of strings (nullable) |
 | `improvements` | `jsonb` | Array of strings (nullable) |
-| `coverage` | `jsonb` | Array of `{topic, status, note}` (nullable) |
+| `coverage` | `jsonb` | One entry per outline point: `{outline_index, topic, status, note, evidence}`. Older rows may lack `outline_index`/`evidence` |
+| `unexplained_jargon` | `jsonb` | Terms used without a plain explanation (array of strings) |
+| `follow_up_questions` | `jsonb` | 1–2 Socratic questions `{question, outline_index}` |
+| `audio_issue` | `text` | `none` or why the audio could not be judged (then no score, no mastery change) |
 | `evaluation_status` | `text` | `pending` \| `processing` \| `completed` \| `error` |
+| `evaluation_started_at` | `timestamptz` | Set by the atomic claim; a stale claim can be retaken |
+| `evaluation_error` | `text` | Error code of the last failed evaluation (nullable) |
 | `created_at` | `timestamptz` | |
+
+Unique `(challenge_id, attempt_number)`. Scores are computed on the server and written only through `finalize_attempt_evaluation`.
+
+---
+
+#### `attempt_followups`
+Spoken answers to the follow-up questions (migration 006). Never affect scores or mastery.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` PK | |
+| `attempt_id` | `uuid` FK → attempts | Unique with `question_index` (answering again replaces) |
+| `question_index` | `integer` | Position in `attempts.follow_up_questions` |
+| `question` / `outline_index` | `text` / `integer` | Copied from the question |
+| `audio_storage_path` | `text` | Answer audio in the `recordings` bucket |
+| `transcript`, `feedback`, `hint` | `text` | From Gemini |
+| `verdict` | `text` | `tepat` \| `sebagian` \| `keliru` (null when the audio was unusable) |
+
+RLS: owner of the parent challenge only.
+
+---
+
+#### `ai_usage`
+One row per AI call (user, kind, time), behind the AI quota (migration 003). Written only by `consume_ai_quota`; readable by the owner.
+
+---
+
+#### SQL functions
+
+| Function | Purpose |
+|---|---|
+| `claim_attempt_evaluation` | Atomically moves an attempt to `processing` so two requests never evaluate it twice |
+| `finalize_attempt_evaluation` | One transaction: attempt result, challenge mastery and review schedule, profile streak |
+| `finalize_attempt_rejected` | Completes an attempt whose audio could not be judged, without touching scores |
+| `consume_ai_quota(kind, per_day, per_minute)` | Atomic per-user AI rate limit |
+| `handle_new_user` (trigger) | Creates the profile, with display name and validated timezone from sign-up metadata. Works for anonymous demo users (no email) |
 
 ---
 
@@ -807,6 +869,8 @@ erDiagram
     challenges ||--o{ challenge_sources : "has many"
     challenges ||--o| challenge_notes : "has one"
     challenges ||--o{ attempts : "has many"
+    attempts ||--o{ attempt_followups : "has many"
+    profiles ||--o{ ai_usage : "has many"
 
     profiles {
         uuid id PK
@@ -820,8 +884,10 @@ erDiagram
         uuid id PK
         uuid user_id FK
         text title
-        timestamptz deadline
+        date deadline
         text mastery_state
+        int review_box
+        date next_review_at
         int latest_score
         int recording_duration_sec
         text status
@@ -859,7 +925,20 @@ erDiagram
         int overall_score
         text transcript
         jsonb coverage
+        jsonb follow_up_questions
         text evaluation_status
+    }
+
+    attempt_followups {
+        uuid id PK
+        uuid attempt_id FK
+        int question_index
+        text verdict
+    }
+
+    ai_usage {
+        uuid user_id FK
+        text kind
     }
 ```
 
