@@ -552,7 +552,7 @@ E2E, Sentry, hapus akun, script maintenance, dan eval-golden sudah dijadwalkan d
 | V.1 | Galeri komponen & audit visual | ✅ |
 | V.2 | Fondasi: token, font, tema, logo | ✅ |
 | V.3 | Komponen dasar | ✅ |
-| V.4 | Layar hasil evaluasi | ⬜ |
+| V.4 | Layar hasil evaluasi | ✅ |
 | V.5 | Panggung rekam & catatan belajar | ⬜ |
 | V.6 | Meja Belajar, onboarding, landing & polish | ⬜ |
 | 4.1 | Riwayat percobaan | ⬜ |
