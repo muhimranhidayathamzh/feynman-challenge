@@ -1,4 +1,4 @@
-# Feynman Challenge — Improvement Plan (3 Fase + Fase 4)
+# Feynman Challenge — Improvement Plan (3 Fase + Fase V + Fase 4)
 
 > Rencana perbaikan hasil audit 18 September 2026, dipadatkan menjadi **3 fase, 16 prompt**.
 > Kondisi awal: Phase 1–6 dari `prompts/execution-plan.md` selesai, `tsc`, lint, dan build lolos, belum ada test.
@@ -13,6 +13,7 @@
 | 1 | Stabilisasi | Semua bug inti hilang. Pipeline rekam–evaluasi atomik, tanggal akurat, AI bisa dipercaya. | 6 | 003, 004, 005 |
 | 2 | Kelengkapan | Menutup gap terhadap spec: sistem UI, satu bahasa, lifecycle tantangan, playback, auth lengkap. | 5 | — |
 | 3 | Pembeda & Showcase | Loop Feynman lengkap, PWA yang benar, mode demo, README portfolio. | 5 | 006 |
+| V | Visual: Kertas & Kapur | Identitas visual sendiri menggantikan gaya generik AI, siap untuk khalayak umum. Dikerjakan sebelum Fase 4. | 6 | — |
 | 4 | Matang (setelah v1.0) | Riwayat percobaan, hapus akun dan pembersihan storage, E2E + Sentry, konsistensi skor AI. | 4 | — |
 
 Setelah Fase 1 aplikasi sudah aman dipakai harian. Setelah Fase 2 sudah sesuai spec. Setelah Fase 3 layak dipamerkan (v1.0.0). Setelah Fase 4 terbukti andal dan datanya terjaga.
@@ -341,6 +342,107 @@ Prompt 3.5 — Siap dipamerkan. Ikuti "Aturan Umum" di prompts/improvement-plan.
 
 ---
 
+## FASE V — Visual: Kertas & Kapur
+
+Tujuan: mengganti tampilan generik (gradient ungu, glassmorphism, glow, Inter, dark mode permanen) dengan identitas yang punya alasan dan siap untuk khalayak umum. Semua keputusan desain ada di **`docs/design/DESIGN.md`**. Pembanding visual tiga arah ada di `docs/design/arah-visual.html` (buka di browser).
+
+**Kerjakan Fase V sebelum Fase 4.** Riwayat percobaan (4.1) langsung dibangun dengan komponen baru, dan test E2E (4.3) tidak perlu ditulis ulang setelah redesign. Fase ini tanpa migrasi database.
+
+Setiap prompt Fase V, selain "Aturan Umum": baca DESIGN.md dulu, ambil screenshot sebelum dan sesudah dari galeri (V.1) di lebar 390 dan 1280 untuk kedua tema, dan jalankan `npm run design:check` (V.2).
+
+**Keputusan desain (semua punya default):**
+
+| # | Keputusan | Default | Dipakai di |
+|---|---|---|---|
+| DV1 | Arah visual | A. Kertas & Kapur (alternatif: B. Studio Suara, C. Tumbuh Ceria) | Semua |
+| DV2 | Tema | Ikuti sistem, cadangan terang. Layar rekam selalu papan tulis | V.2 |
+| DV3 | Font | Newsreader (judul, angka, bacaan) + Plus Jakarta Sans (antarmuka) | V.2 |
+| DV4 | Warna aksen | Vermilion `#C8431B` (gelap `#EE7A52`) | V.2 |
+| DV5 | Logo | Diagram Feynman tegak, digambar ulang dari konsep. Ganti dengan karya desainer bila ada | V.2 |
+| DV6 | Landing publik | Ya. Pengunjung yang belum login ke `/` melihat landing, bukan form login | V.6 |
+| DV7 | Ilustrasi | 4–6 ilustrasi garis SVG buatan sendiri. Ganti dengan karya ilustrator bila ada | V.3, V.6 |
+
+### Prompt V.1 — Galeri Komponen & Audit Visual
+
+```
+Prompt V.1 — Siapkan alat kerja desain. Ikuti "Aturan Umum" dan bagian Fase V di prompts/improvement-plan.md.
+
+1. Pisahkan komposisi layar dari pengambilan data bila perlu: halaman server mengambil data, komponen presentasi menerima props. Jangan ubah perilaku.
+2. Route /dev/galeri yang hanya ada di development (notFound di production): menampilkan setiap layar kunci dan statusnya dengan data fixture (pakai src/lib/demo/fixture.ts). Minimal: dashboard (kosong, ada review, tenggat lewat), catatan belajar, rekam (siap, merekam, jeda, dengarkan ulang), hasil (selesai, audio ditolak, gagal, diproses), pengaturan, login, dialog, toast, offline, 404.
+3. npm run shots: puppeteer-core atau Playwright memotret setiap bagian galeri di 390 dan 1280 ke docs/design/shots/<label>/. Jalankan dengan label "before".
+4. docs/design/audit.md: masalah per layar dibanding DESIGN.md (hierarki, tipografi, warna, jarak, copy, status kosong dan error). Urutkan dari dampak terbesar.
+```
+
+### Prompt V.2 — Fondasi: Token, Font, Tema, Logo
+
+```
+Prompt V.2 — Ganti fondasi visual. Ikuti "Aturan Umum" dan bagian Fase V di prompts/improvement-plan.md.
+
+1. Tulis ulang src/styles/tokens.css sesuai DESIGN.md §4, §6, §8: suasana Kertas dan Papan Tulis lewat [data-theme], skala penguasaan, token gerak. Hapus token gradient, glow, glass, dan warna ungu.
+2. Font lewat next/font/google: Newsreader dan Plus Jakarta Sans dengan variabel CSS. Hapus Inter. Skala tipografi DESIGN.md §5.
+3. Tema (DV2): pilihan Terang, Gelap, Ikuti sistem di Pengaturan, disimpan di cookie supaya server merender tema yang benar tanpa kedip. viewport.themeColor per tema.
+4. Logo (DV5): gambar ulang diagram Feynman tegak di grid, komponen <BrandMark/>, uji di 16, 32, dan 192 px. Perbarui scripts/generate-icons.mjs, favicon, dan warna manifest.
+5. scripts/check-design.mjs (npm run design:check, masuk CI): gagal bila ada linear-gradient atau radial-gradient di luar token stabilo, backdrop-filter, box-shadow berwarna aksen, font Inter, emoji di JSX, atau pasangan token teks yang kontrasnya di bawah AA di salah satu tema.
+6. Perbarui aturan Styling di CLAUDE.md agar merujuk ke DESIGN.md (hapus glassmorphism, ungu, Inter, dark default).
+7. Pada tahap ini halaman boleh belum rapi; yang penting tidak ada yang rusak dan kontras lolos.
+```
+
+### Prompt V.3 — Komponen Dasar
+
+```
+Prompt V.3 — Bangun ulang komponen sesuai DESIGN.md §6, §7, §10. Ikuti "Aturan Umum" dan bagian Fase V di prompts/improvement-plan.md.
+
+1. Restyle primitives: Button (utama taktil, sekunder garis, ghost), Sheet menggantikan Card, Badge, Chip, Field, Input, Select, Textarea, Tabs, Dialog, Toast, Skeleton.
+2. Header dan navigasi: BrandMark, navigasi bawah di ponsel dan samping di desktop, tanpa blur.
+3. Komponen baru: CoverageMark, ScoreFigure (frasa skor DESIGN.md §9), SubScoreBars, MasteryMeter, LeitnerStrip, WeekStrip, HintChip, EmptyState.
+4. Ilustrasi garis (DV7) untuk: dashboard kosong, catatan kosong, offline, error. SVG inline, warna dari token.
+5. Logika murni (frasa skor, segmen penguasaan, label kotak Leitner, hari WeekStrip) di src/lib/utils dengan unit test.
+6. Semua komponen tampil di /dev/galeri dalam kedua tema.
+```
+
+### Prompt V.4 — Layar Hasil Evaluasi
+
+```
+Prompt V.4 — Layar terpenting: dari angka ke pemahaman. Ikuti "Aturan Umum" dan bagian Fase V di prompts/improvement-plan.md.
+
+1. Urutan baru (DESIGN.md §11): kalimat ringkasan serif paling atas (kalimat pertama feedback lewat fungsi murni, tanpa ubah prompt AI), ScoreFigure dengan perubahan dari percobaan sebelumnya, SubScoreBars, poin yang dijelaskan dengan CoverageMark dan "Pelajari lagi", transkrip beranotasi, Uji Pemahamanmu, perbandingan dengan percobaan sebelumnya, lalu aksi "Jelaskan lagi".
+2. AnnotatedTranscript: fungsi murni annotateTranscript(transcript, coverage, jargon) memecah transkrip jadi segmen biasa, bukti per poin (stabilo), dan istilah belum dijelaskan (garis titik-titik). Toleran terhadap spasi dan tanda baca yang berbeda. Unit test untuk kutipan yang tidak ditemukan, tumpang tindih, dan transkrip kosong.
+3. Mengetuk sebuah poin coverage menyorot buktinya di transkrip, dan sebaliknya.
+4. Status audio ditolak, gagal, dan diproses memakai EmptyState dan copy DESIGN.md §9.
+5. Momen gerak DESIGN.md §8: goresan tinta pada tanda coverage, sapuan stabilo, skor naik sekali. Mati saat reduced motion.
+```
+
+### Prompt V.5 — Panggung Rekam & Catatan Belajar
+
+```
+Prompt V.5 — Tempat menjelaskan dan tempat belajar. Ikuti "Aturan Umum" dan bagian Fase V di prompts/improvement-plan.md.
+
+1. Panggung rekam: selalu suasana Papan Tulis. Judul topik, timer Newsreader besar, gelombang suara digambar sebagai goresan kapur, HintChip dengan harga skor, hitung mundur yang tenang, tombol rekam vermilion. Tanpa navigasi lain. Fase dengarkan ulang memakai gaya yang sama.
+2. Copy rekam sesuai DESIGN.md §9, termasuk ajakan sebelum mulai dan pesan izin mikrofon.
+3. Catatan belajar: lembar kertas. Kepala dengan MasteryMeter, LeitnerStrip, dan tenggat. Outline bernomor di margin dengan tren coverage memakai CoverageMark kecil. Sumber seperti daftar pustaka. Catatan dan pratinjau markdown dalam Newsreader.
+4. Tombol "Jelaskan sekarang" menempel di bawah layar pada ponsel, tidak menutupi konten.
+```
+
+### Prompt V.6 — Meja Belajar, Onboarding, Landing & Polish
+
+```
+Prompt V.6 — Kesan pertama dan kesan setiap hari. Ikuti "Aturan Umum" dan bagian Fase V di prompts/improvement-plan.md.
+
+1. Meja Belajar: kartu "Hari ini" dengan satu aksi dari fungsi murni pickTodayAction (review jatuh tempo, lalu tenggat lewat, lalu tantangan berjalan, lalu buat baru), dengan unit test. WeekStrip menggantikan badge api. Daftar tantangan seperti indeks buku: judul, MasteryMeter, review berikutnya.
+2. Onboarding: saat user belum punya tantangan, tiga langkah bergambar (pelajari, jelaskan, lihat celahmu) lalu langsung ke buat tantangan.
+3. Landing publik (DV6): pengunjung yang belum login ke / melihat landing. Isi: kalimat Feynman, tiga langkah, potongan hasil evaluasi asli dari fixture demo, tombol "Coba tanpa akun" (bila aktif) dan "Daftar". Middleware dan halaman login menyesuaikan.
+4. Restyle login, daftar, lupa dan atur ulang kata sandi, pengaturan (dengan pilihan tema), offline, 404, error.
+5. Polish: cek 360, 768, 1280 px di kedua tema; navigasi keyboard dan screen reader; Lighthouse aksesibilitas 100 di halaman publik.
+6. npm run shots dengan label "after". Ganti screenshot manifest dan README dengan layar aplikasi yang asli. Tambahkan perbandingan sebelum dan sesudah di README.
+```
+
+### ✅ Checkpoint Fase V
+- `npm run design:check` hijau: tidak ada gradient dekoratif, glow, blur, Inter, emoji, atau kontras di bawah AA.
+- Setiap layar di galeri punya screenshot sebelum dan sesudah di kedua tema.
+- **Uji dengan orang sungguhan**: minta 3–5 orang yang belum pernah melihat aplikasi ini melakukan tiga tugas tanpa bantuan: membuat tantangan, merekam penjelasan, dan menyebutkan satu poin yang harus dipelajari lagi dari halaman hasil. Catat di mana mereka ragu, lalu perbaiki sebelum lanjut ke Fase 4.
+
+---
+
 ## FASE 4 — Matang (setelah v1.0)
 
 Tujuan: menutup celah yang ditemukan saat v1.0 selesai, menjaga data dan storage tetap bersih, lalu membuktikan aplikasi dan penilaian AI bisa dipercaya dengan test otomatis.
@@ -447,6 +549,12 @@ E2E, Sentry, hapus akun, script maintenance, dan eval-golden sudah dijadwalkan d
 | 3.3 | Gap ke sumber & tren coverage | ✅ |
 | 3.4 | PWA yang benar | ✅ |
 | 3.5 | Mode demo & README | ✅ |
+| V.1 | Galeri komponen & audit visual | ⬜ |
+| V.2 | Fondasi: token, font, tema, logo | ⬜ |
+| V.3 | Komponen dasar | ⬜ |
+| V.4 | Layar hasil evaluasi | ⬜ |
+| V.5 | Panggung rekam & catatan belajar | ⬜ |
+| V.6 | Meja Belajar, onboarding, landing & polish | ⬜ |
 | 4.1 | Riwayat percobaan | ⬜ |
 | 4.2 | Hapus akun & pembersihan storage | ⬜ |
 | 4.3 | Test E2E & monitoring error | ⬜ |

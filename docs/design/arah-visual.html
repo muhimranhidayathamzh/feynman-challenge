@@ -1,0 +1,1467 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Arah Visual Feynman Challenge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400..700&family=Manrope:wght@400;600;800&family=IBM+Plex+Mono:wght@500;600&family=Nunito:wght@600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ---------- Board chrome (neutral on purpose) ---------- */
+      :root {
+        --board-bg: #ececea;
+        --board-ink: #1b1c1f;
+        --board-muted: #5d5f66;
+        --board-line: #d4d4d0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--board-bg);
+        color: var(--board-ink);
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 1480px;
+        margin: 0 auto;
+        padding: 40px 16px 80px;
+      }
+      .board-head {
+        max-width: 760px;
+        margin-bottom: 36px;
+      }
+      .board-head h1 {
+        font-size: 28px;
+        margin: 0 0 8px;
+        letter-spacing: -0.01em;
+      }
+      .board-head p {
+        margin: 0 0 8px;
+        color: var(--board-muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+        gap: 28px;
+        align-items: start;
+      }
+      .dir {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .dir-label {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .dir-label h2 {
+        margin: 0;
+        font-size: 18px;
+      }
+      .tag {
+        font-size: 12px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #1b1c1f;
+        color: #fff;
+      }
+      .tag.tag-rec {
+        background: #c8431b;
+      }
+      .dir-desc {
+        margin: 0;
+        font-size: 14px;
+        color: var(--board-muted);
+        min-height: 63px;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .chip {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+      }
+      .typeline {
+        font-size: 13px;
+        color: var(--board-muted);
+      }
+      .verdict {
+        font-size: 13px;
+        margin: 0;
+        padding-left: 18px;
+      }
+      .verdict li {
+        margin-bottom: 4px;
+      }
+      .verdict .plus::marker {
+        content: "+  ";
+        color: #2b7148;
+        font-weight: 800;
+      }
+      .verdict .minus::marker {
+        content: "-  ";
+        color: #b42318;
+        font-weight: 800;
+      }
+
+      /* ---------- Phone frame ---------- */
+      .phone {
+        width: 100%;
+        max-width: 360px;
+        border-radius: 28px;
+        overflow: hidden;
+        border: 8px solid #1b1c1f;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+      }
+      .screen {
+        padding: 18px 16px 20px;
+        min-height: 690px;
+      }
+      .back {
+        font-size: 12px;
+        margin-bottom: 6px;
+        display: block;
+      }
+      .mock h3 {
+        margin: 0 0 10px;
+      }
+      .summary {
+        font-size: 14px;
+        margin: 0 0 14px;
+      }
+      .scorebox {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+      .bars {
+        display: grid;
+        gap: 7px;
+        margin-bottom: 14px;
+      }
+      .bar-row {
+        display: grid;
+        grid-template-columns: 82px 1fr 22px;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+      }
+      .bar {
+        height: 8px;
+        border-radius: 99px;
+        overflow: hidden;
+      }
+      .bar > i {
+        display: block;
+        height: 100%;
+      }
+      .cov {
+        list-style: none;
+        margin: 0 0 14px;
+        padding: 0;
+        display: grid;
+        gap: 8px;
+      }
+      .cov li {
+        display: grid;
+        grid-template-columns: 18px 1fr;
+        gap: 8px;
+        font-size: 13px;
+        align-items: start;
+      }
+      .cov .study {
+        grid-column: 2;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .quote {
+        font-size: 13px;
+        margin: 0 0 16px;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+      .btn {
+        font: inherit;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 0;
+      }
+
+      /* ---------- 0. Sekarang (current) ---------- */
+      .d0 .screen {
+        background: #101218;
+        color: #eef0f5;
+        font-family: Inter, sans-serif;
+      }
+      .d0 .back {
+        color: #8b90a0;
+      }
+      .d0 h3 {
+        font-size: 20px;
+      }
+      .d0 .summary {
+        color: #a6abb8;
+      }
+      .d0 .card {
+        background: rgba(38, 42, 58, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 0 24px rgba(118, 92, 242, 0.18);
+      }
+      .d0 .ring {
+        width: 92px;
+        height: 92px;
+      }
+      .d0 .gtext {
+        background: linear-gradient(135deg, #735af2, #368ce2);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: 800;
+      }
+      .d0 .bar {
+        background: #262a36;
+      }
+      .d0 .bar > i {
+        background: linear-gradient(90deg, #735af2, #368ce2);
+      }
+      .d0 .cov .ok {
+        color: #3cc47a;
+      }
+      .d0 .cov .mid {
+        color: #f2b53a;
+      }
+      .d0 .cov .no {
+        color: #e4574b;
+      }
+      .d0 .study {
+        color: #b3a6ff;
+      }
+      .d0 .quote {
+        color: #8b90a0;
+        font-style: italic;
+        border-left: 2px solid #2d3140;
+        padding-left: 10px;
+      }
+      .d0 .btn-p {
+        background: linear-gradient(135deg, #6546e0, #1d6fcf);
+        color: #fff;
+        box-shadow: 0 0 24px rgba(118, 92, 242, 0.35);
+      }
+      .d0 .btn-s {
+        background: #232735;
+        color: #eef0f5;
+      }
+
+      /* ---------- A. Kertas & Kapur (recommended) ---------- */
+      .dA {
+        --paper: #f4efe4;
+        --surface: #fffcf5;
+        --sunken: #eae3d4;
+        --line: #ddd3c1;
+        --ink: #1e2230;
+        --ink2: #4e5566;
+        --ink3: #5f6474;
+        --accent: #c8431b;
+        --accent-press: #9f3413;
+        --accent-text: #a93814;
+        --ok: #2b7148;
+        --mid: #8f5e05;
+        --hl: #fbe38e;
+      }
+      .dA .screen {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      .dA .back {
+        color: var(--ink3);
+        font-weight: 600;
+      }
+      .dA h3 {
+        font-family: Newsreader, serif;
+        font-size: 25px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        line-height: 1.15;
+      }
+      .dA .summary {
+        font-family: Newsreader, serif;
+        font-size: 17px;
+        line-height: 1.45;
+        color: var(--ink);
+      }
+      .dA .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+      .dA .score {
+        font-family: Newsreader, serif;
+        font-size: 56px;
+        font-weight: 500;
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+      .dA .score small {
+        font-size: 18px;
+        color: var(--ink3);
+      }
+      .dA .delta {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--ok);
+        background: #e3efe6;
+        padding: 2px 8px;
+        border-radius: 99px;
+      }
+      .dA .bar {
+        background: var(--sunken);
+        border-radius: 3px;
+        height: 6px;
+      }
+      .dA .bar > i {
+        background: var(--ink);
+        border-radius: 3px;
+      }
+      .dA .cov li {
+        padding-bottom: 8px;
+        border-bottom: 1px dashed var(--line);
+      }
+      .dA .cov li:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .dA .study {
+        color: var(--accent-text);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .dA .quote {
+        font-family: Newsreader, serif;
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      .dA mark {
+        background: linear-gradient(
+          transparent 38%,
+          var(--hl) 38%,
+          var(--hl) 88%,
+          transparent 88%
+        );
+        color: inherit;
+        padding: 0 1px;
+      }
+      .dA .margin-note {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--ok);
+        text-transform: none;
+      }
+      .dA .btn-p {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 3px 0 var(--accent-press);
+      }
+      .dA .btn-s {
+        background: transparent;
+        color: var(--ink);
+        border: 1.5px solid var(--ink);
+      }
+      .dA .eyebrow {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--ink3);
+        margin-bottom: 6px;
+      }
+
+      /* ---------- B. Studio Suara ---------- */
+      .dB {
+        --bg: #111315;
+        --surf: #1a1d20;
+        --line: #2a2e33;
+        --ink: #edeeea;
+        --ink2: #a4a9a6;
+        --lime: #d3f36b;
+        --coral: #ff7a59;
+      }
+      .dB .screen {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: Manrope, sans-serif;
+      }
+      .dB .back {
+        color: var(--ink2);
+      }
+      .dB h3 {
+        font-size: 21px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .dB .summary {
+        color: var(--ink2);
+      }
+      .dB .card {
+        background: var(--surf);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+      .dB .score {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 50px;
+        font-weight: 600;
+        color: var(--lime);
+        line-height: 1;
+      }
+      .dB .score small {
+        font-size: 16px;
+        color: var(--ink2);
+      }
+      .dB .bar {
+        background: #262a2e;
+        border-radius: 2px;
+        height: 4px;
+      }
+      .dB .bar > i {
+        background: var(--lime);
+      }
+      .dB .cov li {
+        grid-template-columns: 30px 1fr;
+      }
+      .dB .cov .mono {
+        white-space: nowrap;
+      }
+      .dB .mono {
+        font-family: "IBM Plex Mono", monospace;
+      }
+      .dB .study {
+        color: var(--lime);
+      }
+      .dB .quote {
+        color: var(--ink2);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+      .dB mark {
+        background: rgba(211, 243, 107, 0.18);
+        color: var(--ink);
+      }
+      .dB .btn-p {
+        background: var(--coral);
+        color: #1a0f0b;
+        border-radius: 99px;
+      }
+      .dB .btn-s {
+        background: transparent;
+        color: var(--ink);
+        border: 1px solid var(--line);
+        border-radius: 99px;
+      }
+
+      /* ---------- C. Tumbuh Ceria ---------- */
+      .dC {
+        --bg: #fff8ec;
+        --surf: #ffffff;
+        --line: #f0e2c8;
+        --ink: #2a2a33;
+        --ink2: #5e5e6b;
+        --green: #1f9d55;
+        --green-d: #15783f;
+        --sun: #ffc43d;
+        --sky: #2f80ed;
+      }
+      .dC .screen {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: Nunito, sans-serif;
+      }
+      .dC .back {
+        color: var(--ink2);
+        font-weight: 700;
+      }
+      .dC h3 {
+        font-size: 24px;
+        font-weight: 900;
+      }
+      .dC .summary {
+        color: var(--ink2);
+        font-weight: 600;
+      }
+      .dC .card {
+        background: var(--surf);
+        border: 2px solid var(--line);
+        border-radius: 20px;
+        padding: 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 0 var(--line);
+      }
+      .dC .badge-score {
+        width: 88px;
+        height: 88px;
+        border-radius: 26px;
+        background: var(--sun);
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        font-size: 34px;
+        box-shadow: 0 5px 0 #d99a12;
+      }
+      .dC .bar {
+        background: #f2eadb;
+        height: 12px;
+      }
+      .dC .bar > i {
+        background: var(--green);
+        border-radius: 99px;
+      }
+      .dC .study {
+        color: var(--sky);
+      }
+      .dC .quote {
+        color: var(--ink2);
+        font-weight: 600;
+      }
+      .dC mark {
+        background: #ffe9a6;
+        color: inherit;
+        border-radius: 6px;
+        padding: 0 3px;
+      }
+      .dC .btn-p {
+        background: var(--green);
+        color: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 0 var(--green-d);
+        font-weight: 900;
+      }
+      .dC .btn-s {
+        background: #fff;
+        color: var(--sky);
+        border: 2px solid var(--line);
+        border-radius: 16px;
+        box-shadow: 0 4px 0 var(--line);
+        font-weight: 900;
+      }
+
+      /* ---------- Detail section for direction A ---------- */
+      .detail {
+        margin-top: 64px;
+      }
+      .detail > h2 {
+        font-size: 22px;
+        margin: 0 0 6px;
+      }
+      .detail > p {
+        color: var(--board-muted);
+        margin: 0 0 24px;
+        max-width: 760px;
+      }
+      .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+      }
+      .panel {
+        background: #fff;
+        border: 1px solid var(--board-line);
+        border-radius: 18px;
+        padding: 20px;
+      }
+      .panel h4 {
+        margin: 0 0 4px;
+        font-size: 15px;
+      }
+      .panel .note {
+        font-size: 13px;
+        color: var(--board-muted);
+        margin: 0 0 14px;
+      }
+
+      .stage {
+        background: #141b19;
+        color: #ece8df;
+        border-radius: 16px;
+        padding: 22px 18px;
+        font-family: "Plus Jakarta Sans", sans-serif;
+        display: grid;
+        gap: 16px;
+        justify-items: center;
+        text-align: center;
+      }
+      .stage .topic {
+        font-size: 13px;
+        color: #b9beb5;
+      }
+      .stage .timer {
+        font-family: Newsreader, serif;
+        font-size: 64px;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+      .stage .timer small {
+        display: block;
+        font-family: "Plus Jakarta Sans";
+        font-size: 12px;
+        color: #949b92;
+        margin-top: 6px;
+      }
+      .stage .hints {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .stage .hint {
+        font-size: 12px;
+        border: 1px dashed #3c4a45;
+        border-radius: 99px;
+        padding: 5px 10px;
+        color: #b9beb5;
+      }
+      .rec {
+        width: 76px;
+        height: 76px;
+        border-radius: 50%;
+        background: #ee7a52;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 0 0 8px rgba(238, 122, 82, 0.14);
+      }
+      .rec i {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        background: #1a120e;
+        display: block;
+      }
+
+      .paperA {
+        background: #f4efe4;
+        border-radius: 14px;
+        padding: 16px;
+        color: #1e2230;
+        font-family: "Plus Jakarta Sans";
+      }
+      .seg {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+        margin: 8px 0 4px;
+      }
+      .seg i {
+        height: 10px;
+        border-radius: 3px;
+        border: 1px solid #c9c2b3;
+      }
+      .lvl {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #5f6474;
+      }
+      .leitner {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .leitner div {
+        border: 1.5px solid #ddd3c1;
+        border-radius: 8px;
+        padding: 8px 4px;
+        text-align: center;
+        font-size: 11px;
+        color: #5f6474;
+        background: #fffcf5;
+      }
+      .leitner div b {
+        display: block;
+        font-family: Newsreader, serif;
+        font-size: 18px;
+        color: #1e2230;
+      }
+      .leitner .here {
+        border-color: #1e2230;
+        background: #1e2230;
+        color: #f4efe4;
+      }
+      .leitner .here b {
+        color: #f4efe4;
+      }
+
+      .today {
+        background: #fffcf5;
+        border: 1px solid #ddd3c1;
+        border-radius: 14px;
+        padding: 16px;
+      }
+      .today .k {
+        font-size: 12px;
+        font-weight: 700;
+        color: #5f6474;
+      }
+      .today h5 {
+        font-family: Newsreader, serif;
+        font-size: 22px;
+        font-weight: 600;
+        margin: 4px 0 6px;
+      }
+      .week {
+        display: flex;
+        gap: 6px;
+        margin: 12px 0;
+      }
+      .week span {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-size: 11px;
+        font-weight: 700;
+        border: 1.5px solid #ddd3c1;
+        color: #5f6474;
+      }
+      .week .done {
+        background: #2b7148;
+        border-color: #2b7148;
+        color: #fff;
+      }
+      .week .now {
+        border-color: #c8431b;
+        color: #a93814;
+      }
+
+      .tokens {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      .tokens td {
+        padding: 6px 4px;
+        border-bottom: 1px solid #eee;
+        vertical-align: middle;
+      }
+      .tokens .sw {
+        width: 26px;
+        height: 18px;
+        border-radius: 5px;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        display: inline-block;
+      }
+      .specimen .h {
+        font-family: Newsreader, serif;
+        font-size: 34px;
+        font-weight: 600;
+        line-height: 1.1;
+        margin: 0 0 6px;
+        letter-spacing: -0.01em;
+      }
+      .specimen .b {
+        font-size: 15px;
+        margin: 0 0 10px;
+      }
+      .specimen .n {
+        font-family: Newsreader, serif;
+        font-size: 44px;
+        font-weight: 500;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="board-head">
+        <h1>Arah visual Feynman Challenge</h1>
+        <p>
+          Layar yang sama (hasil evaluasi percobaan #2, topik Fotosintesis) digambar dalam
+          desain sekarang dan tiga arah baru, supaya bisa dibandingkan langsung. Isi,
+          data, dan urutan informasinya identik; yang berbeda hanya bahasa visualnya.
+        </p>
+        <p>
+          Rekomendasi: <strong>A. Kertas &amp; Kapur</strong>. Detailnya ada di bagian
+          bawah halaman.
+        </p>
+      </header>
+
+      <section class="grid">
+        <!-- ================= 0. Sekarang ================= -->
+        <article class="dir">
+          <div class="dir-label">
+            <h2>Sekarang</h2>
+            <span class="tag">acuan</span>
+          </div>
+          <p class="dir-desc">
+            Navy gelap, gradient ungu ke biru, glassmorphism, glow, Inter. Rapi dan
+            aksesibel, tapi identik dengan ribuan aplikasi buatan AI.
+          </p>
+          <div class="chips">
+            <span class="chip" style="background: #101218"></span
+            ><span class="chip" style="background: #1d2130"></span>
+            <span class="chip" style="background: #735af2"></span
+            ><span class="chip" style="background: #368ce2"></span
+            ><span class="chip" style="background: #eef0f5"></span>
+          </div>
+          <div class="typeline">Inter untuk semuanya</div>
+          <div class="phone d0 mock">
+            <div class="screen">
+              <span class="back">&larr; Fotosintesis</span>
+              <h3>
+                Hasil Evaluasi <span style="color: #8b90a0; font-weight: 400">· #2</span>
+              </h3>
+              <div class="card" style="display: flex; justify-content: center">
+                <svg class="ring" viewBox="0 0 100 100">
+                  <defs>
+                    <linearGradient id="g0" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#735af2" />
+                      <stop offset="1" stop-color="#368ce2" />
+                    </linearGradient>
+                  </defs>
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    fill="none"
+                    stroke="#262a36"
+                    stroke-width="9"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    fill="none"
+                    stroke="url(#g0)"
+                    stroke-width="9"
+                    stroke-linecap="round"
+                    stroke-dasharray="195 264"
+                    transform="rotate(-90 50 50)"
+                  />
+                  <text
+                    x="50"
+                    y="57"
+                    text-anchor="middle"
+                    font-size="24"
+                    font-weight="800"
+                    fill="#eef0f5"
+                    font-family="Inter"
+                  >
+                    7
+                  </text>
+                </svg>
+              </div>
+              <div class="card bars">
+                <div class="bar-row">
+                  <span>Kelengkapan</span
+                  ><span class="bar"><i style="width: 60%"></i></span><span>6</span>
+                </div>
+                <div class="bar-row">
+                  <span>Akurasi</span><span class="bar"><i style="width: 80%"></i></span
+                  ><span>8</span>
+                </div>
+                <div class="bar-row">
+                  <span>Kejelasan</span><span class="bar"><i style="width: 70%"></i></span
+                  ><span>7</span>
+                </div>
+              </div>
+              <div class="card">
+                <ul class="cov">
+                  <li>
+                    <span class="ok">&#10003;</span><span>Apa itu fotosintesis</span>
+                  </li>
+                  <li><span class="ok">&#10003;</span><span>Bahan dan hasil</span></li>
+                  <li>
+                    <span class="mid">!</span
+                    ><span
+                      >Peran klorofil <br /><span class="study">Pelajari lagi</span></span
+                    >
+                  </li>
+                  <li>
+                    <span class="no">&#10005;</span
+                    ><span>Reaksi terang dan siklus Calvin</span>
+                  </li>
+                </ul>
+                <p class="quote">
+                  "dia pakai energi dari cahaya matahari terus diubah jadi energi kimia"
+                </p>
+              </div>
+              <div class="actions">
+                <button class="btn btn-p">Coba Lagi</button
+                ><button class="btn btn-s">Kembali</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ================= A. Kertas & Kapur ================= -->
+        <article class="dir">
+          <div class="dir-label">
+            <h2>A. Kertas &amp; Kapur</h2>
+            <span class="tag tag-rec">rekomendasi</span>
+          </div>
+          <p class="dir-desc">
+            Belajar di atas kertas, menjelaskan di depan papan tulis. Hangat, tenang,
+            terasa seperti buku catatan pribadi yang dikoreksi guru yang baik.
+          </p>
+          <div class="chips">
+            <span class="chip" style="background: #f4efe4"></span
+            ><span class="chip" style="background: #fffcf5"></span>
+            <span class="chip" style="background: #1e2230"></span
+            ><span class="chip" style="background: #c8431b"></span>
+            <span class="chip" style="background: #fbe38e"></span
+            ><span class="chip" style="background: #2b7148"></span
+            ><span class="chip" style="background: #141b19"></span>
+          </div>
+          <div class="typeline">
+            Newsreader (judul, angka, bacaan) + Plus Jakarta Sans (antarmuka)
+          </div>
+          <div class="phone dA mock">
+            <div class="screen">
+              <span class="back">&larr; Fotosintesis</span>
+              <h3>Percobaan #2</h3>
+              <p class="summary">
+                Inti fotosintesis sudah kamu jelaskan dengan jelas. Tinggal dua tahapnya
+                yang belum.
+              </p>
+              <div class="card">
+                <div class="eyebrow">Skor</div>
+                <div class="scorebox">
+                  <div class="score">7<small> /10</small></div>
+                  <span class="delta">+1 dari #1</span>
+                </div>
+                <div class="bars" style="margin: 0">
+                  <div class="bar-row">
+                    <span>Kelengkapan</span
+                    ><span class="bar"><i style="width: 60%"></i></span><span>6</span>
+                  </div>
+                  <div class="bar-row">
+                    <span>Akurasi</span><span class="bar"><i style="width: 80%"></i></span
+                    ><span>8</span>
+                  </div>
+                  <div class="bar-row">
+                    <span>Kejelasan</span
+                    ><span class="bar"><i style="width: 70%"></i></span><span>7</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="eyebrow">Yang kamu jelaskan</div>
+                <ul class="cov">
+                  <li>
+                    <svg width="18" height="18" viewBox="0 0 18 18">
+                      <circle cx="9" cy="9" r="8" fill="#2B7148" />
+                      <path
+                        d="M5.5 9.3l2.3 2.2 4.7-5"
+                        stroke="#fff"
+                        stroke-width="1.8"
+                        fill="none"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      /></svg
+                    ><span>Apa itu fotosintesis</span>
+                  </li>
+                  <li>
+                    <svg width="18" height="18" viewBox="0 0 18 18">
+                      <circle cx="9" cy="9" r="8" fill="#2B7148" />
+                      <path
+                        d="M5.5 9.3l2.3 2.2 4.7-5"
+                        stroke="#fff"
+                        stroke-width="1.8"
+                        fill="none"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      /></svg
+                    ><span>Bahan dan hasil</span>
+                  </li>
+                  <li>
+                    <svg width="18" height="18" viewBox="0 0 18 18">
+                      <circle
+                        cx="9"
+                        cy="9"
+                        r="7.25"
+                        fill="none"
+                        stroke="#8F5E05"
+                        stroke-width="1.5"
+                      />
+                      <path d="M9 1.75a7.25 7.25 0 0 1 0 14.5z" fill="#8F5E05" /></svg
+                    ><span
+                      >Peran klorofil
+                      <span class="margin-note" style="color: #8f5e05"
+                        >· sebagian</span
+                      ></span
+                    ><a class="study">Pelajari lagi</a>
+                  </li>
+                  <li>
+                    <svg width="18" height="18" viewBox="0 0 18 18">
+                      <circle
+                        cx="9"
+                        cy="9"
+                        r="7.25"
+                        fill="none"
+                        stroke="#5F6474"
+                        stroke-width="1.5"
+                        stroke-dasharray="3 2.5"
+                      /></svg
+                    ><span
+                      >Reaksi terang dan siklus Calvin
+                      <span class="margin-note" style="color: #5f6474"
+                        >· belum dibahas</span
+                      ></span
+                    ><a class="study">Pelajari lagi</a>
+                  </li>
+                </ul>
+              </div>
+              <p class="quote">
+                "...tumbuhan nggak makan kayak kita, dia pakai
+                <mark>energi dari cahaya matahari terus diubah jadi energi kimia</mark>
+                dalam bentuk gula."
+              </p>
+              <div class="actions">
+                <button class="btn btn-p">Jelaskan lagi</button
+                ><button class="btn btn-s">Buka catatan</button>
+              </div>
+            </div>
+          </div>
+          <ul class="verdict">
+            <li class="plus">
+              Punya cerita yang cocok dengan produk: kertas untuk belajar, papan tulis
+              untuk menjelaskan.
+            </li>
+            <li class="plus">
+              Nyaman untuk membaca lama. Transkrip dengan stabilo membuat bukti penilaian
+              terasa nyata.
+            </li>
+            <li class="plus">
+              Plus Jakarta Sans dibuat untuk identitas kota Jakarta: pilihan lokal yang
+              punya alasan.
+            </li>
+            <li class="minus">
+              Butuh disiplin: kalau asal, bisa jatuh jadi gaya "kertas vintage" yang
+              klise.
+            </li>
+          </ul>
+        </article>
+
+        <!-- ================= B. Studio Suara ================= -->
+        <article class="dir">
+          <div class="dir-label"><h2>B. Studio Suara</h2></div>
+          <p class="dir-desc">
+            Seperti aplikasi rekaman atau podcast: gelap, fokus ke gelombang suara dan
+            angka, aksen lime dan coral.
+          </p>
+          <div class="chips">
+            <span class="chip" style="background: #111315"></span
+            ><span class="chip" style="background: #1a1d20"></span>
+            <span class="chip" style="background: #d3f36b"></span
+            ><span class="chip" style="background: #ff7a59"></span
+            ><span class="chip" style="background: #edeeea"></span>
+          </div>
+          <div class="typeline">Manrope + IBM Plex Mono (angka, timer, transkrip)</div>
+          <div class="phone dB mock">
+            <div class="screen">
+              <span class="back">&larr; Fotosintesis</span>
+              <h3>Percobaan #2</h3>
+              <p class="summary">
+                Inti fotosintesis sudah jelas. Dua tahapnya belum dibahas.
+              </p>
+              <div class="card">
+                <div class="scorebox">
+                  <div class="score">7<small>/10</small></div>
+                  <span class="mono" style="font-size: 12px; color: #d3f36b"
+                    >&#9650; 1</span
+                  >
+                </div>
+                <div class="bars" style="margin: 0">
+                  <div class="bar-row">
+                    <span>Kelengkapan</span
+                    ><span class="bar"><i style="width: 60%"></i></span
+                    ><span class="mono">6</span>
+                  </div>
+                  <div class="bar-row">
+                    <span>Akurasi</span><span class="bar"><i style="width: 80%"></i></span
+                    ><span class="mono">8</span>
+                  </div>
+                  <div class="bar-row">
+                    <span>Kejelasan</span
+                    ><span class="bar"><i style="width: 70%"></i></span
+                    ><span class="mono">7</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <ul class="cov">
+                  <li>
+                    <span style="color: #d3f36b" class="mono">[x]</span
+                    ><span>Apa itu fotosintesis</span>
+                  </li>
+                  <li>
+                    <span style="color: #d3f36b" class="mono">[x]</span
+                    ><span>Bahan dan hasil</span>
+                  </li>
+                  <li>
+                    <span style="color: #ffb86b" class="mono">[~]</span
+                    ><span
+                      >Peran klorofil<br /><span class="study">Pelajari lagi</span></span
+                    >
+                  </li>
+                  <li>
+                    <span style="color: #a4a9a6" class="mono">[ ]</span
+                    ><span>Reaksi terang dan siklus Calvin</span>
+                  </li>
+                </ul>
+              </div>
+              <p class="quote">
+                00:41 &nbsp;dia pakai
+                <mark>energi dari cahaya matahari terus diubah jadi energi kimia</mark>
+                dalam bentuk gula
+              </p>
+              <div class="actions">
+                <button class="btn btn-p">Rekam lagi</button
+                ><button class="btn btn-s">Catatan</button>
+              </div>
+            </div>
+          </div>
+          <ul class="verdict">
+            <li class="plus">Layar rekam akan terasa sangat kuat dan profesional.</li>
+            <li class="minus">
+              Kurang nyaman untuk membaca catatan panjang, dan masih "gelap teknologi"
+              yang pasaran.
+            </li>
+            <li class="minus">Terasa seperti alat kreator, bukan tempat belajar.</li>
+          </ul>
+        </article>
+
+        <!-- ================= C. Tumbuh Ceria ================= -->
+        <article class="dir">
+          <div class="dir-label"><h2>C. Tumbuh Ceria</h2></div>
+          <p class="dir-desc">
+            Gaya gamifikasi ala Duolingo: warna cerah, tombol tebal, sudut membulat, siap
+            diberi maskot.
+          </p>
+          <div class="chips">
+            <span class="chip" style="background: #fff8ec"></span
+            ><span class="chip" style="background: #1f9d55"></span>
+            <span class="chip" style="background: #ffc43d"></span
+            ><span class="chip" style="background: #2f80ed"></span
+            ><span class="chip" style="background: #2a2a33"></span>
+          </div>
+          <div class="typeline">Nunito untuk semuanya</div>
+          <div class="phone dC mock">
+            <div class="screen">
+              <span class="back">&larr; Fotosintesis</span>
+              <h3>Mantap, naik 1 poin!</h3>
+              <p class="summary">
+                Inti fotosintesis sudah jelas. Yuk kejar dua tahapnya!
+              </p>
+              <div class="card" style="display: flex; gap: 14px; align-items: center">
+                <div class="badge-score">7</div>
+                <div class="bars" style="flex: 1; margin: 0">
+                  <div class="bar-row" style="grid-template-columns: 1fr">
+                    <span>Kelengkapan</span
+                    ><span class="bar"><i style="width: 60%"></i></span>
+                  </div>
+                  <div class="bar-row" style="grid-template-columns: 1fr">
+                    <span>Akurasi</span
+                    ><span class="bar"><i style="width: 80%"></i></span>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <ul class="cov">
+                  <li>
+                    <span style="color: #1f9d55; font-weight: 900">&#10003;</span
+                    ><span>Apa itu fotosintesis</span>
+                  </li>
+                  <li>
+                    <span style="color: #1f9d55; font-weight: 900">&#10003;</span
+                    ><span>Bahan dan hasil</span>
+                  </li>
+                  <li>
+                    <span style="color: #e8a10b; font-weight: 900">&#9679;</span
+                    ><span
+                      >Peran klorofil<br /><span class="study">Pelajari lagi</span></span
+                    >
+                  </li>
+                  <li>
+                    <span style="color: #b8b0a0; font-weight: 900">&#9675;</span
+                    ><span>Reaksi terang dan siklus Calvin</span>
+                  </li>
+                </ul>
+              </div>
+              <p class="quote">
+                "dia pakai <mark>energi dari cahaya matahari</mark> terus diubah jadi
+                energi kimia"
+              </p>
+              <div class="actions">
+                <button class="btn btn-p">JELASKAN LAGI</button
+                ><button class="btn btn-s">CATATAN</button>
+              </div>
+            </div>
+          </div>
+          <ul class="verdict">
+            <li class="plus">
+              Paling ramah untuk pelajar sekolah dan pemula, kuat untuk kebiasaan harian.
+            </li>
+            <li class="minus">
+              Mudah terlihat seperti tiruan Duolingo. Butuh ilustrasi dan maskot yang
+              mahal agar tidak murahan.
+            </li>
+            <li class="minus">
+              Kurang cocok untuk mahasiswa dan profesional yang belajar materi serius.
+            </li>
+          </ul>
+        </article>
+      </section>
+
+      <!-- ================= Detail A ================= -->
+      <section class="detail">
+        <h2>Detail arah A: Kertas &amp; Kapur</h2>
+        <p>
+          Satu sistem, dua suasana. Halaman belajar dan hasil memakai kertas. Layar rekam
+          memakai papan tulis gelap, karena menjelaskan adalah momen "tampil" yang butuh
+          fokus penuh. Mode gelap aplikasi memakai suasana papan tulis yang sama.
+        </p>
+        <div class="detail-grid">
+          <div class="panel">
+            <h4>Layar rekam: panggung papan tulis</h4>
+            <p class="note">
+              Satu hal di layar: waktu dan suaramu. Hint tidak disembunyikan, tapi
+              harganya jujur ditulis.
+            </p>
+            <div class="stage">
+              <div class="topic">Jelaskan: Fotosintesis</div>
+              <div class="timer">2:14<small>dari 3:00</small></div>
+              <svg width="260" height="46" viewBox="0 0 260 46" aria-hidden="true">
+                <polyline
+                  points="0,23 12,21 20,27 30,12 40,34 52,17 62,29 74,8 86,38 98,19 110,26 122,14 134,31 146,20 158,25 170,11 182,35 194,22 206,27 218,16 230,29 242,22 260,23"
+                  fill="none"
+                  stroke="#ECE8DF"
+                  stroke-opacity=".85"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <div class="hints">
+                <span class="hint">Kata kunci · skor maks 9</span
+                ><span class="hint">Pertanyaan · maks 8</span>
+              </div>
+              <div class="rec" aria-label="Berhenti"><i></i></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h4>Meja Belajar: satu langkah berikutnya</h4>
+            <p class="note">
+              Dashboard membuka dengan satu hal yang harus dikerjakan hari ini, bukan
+              deretan statistik.
+            </p>
+            <div class="paperA">
+              <div class="today">
+                <div class="k">Hari ini · Kamis</div>
+                <h5>Review Fotosintesis</h5>
+                <div style="font-size: 13px; color: #4e5566">
+                  Jadwal review 7 hari tiba. Jelaskan ulang sekitar 3 menit.
+                </div>
+                <div class="week">
+                  <span class="done">S</span><span class="done">S</span
+                  ><span class="done">R</span><span class="now">K</span><span>J</span
+                  ><span>S</span><span>M</span>
+                </div>
+                <button
+                  class="btn"
+                  style="
+                    background: #c8431b;
+                    color: #fff;
+                    box-shadow: 0 3px 0 #9f3413;
+                    font-family: inherit;
+                  "
+                >
+                  Mulai jelaskan
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h4>Penguasaan dan jadwal review</h4>
+            <p class="note">
+              Penguasaan tampil sebagai tinta yang mengisi, bukan warna merah ke hijau
+              yang menghakimi. Kotak Leitner diperlihatkan apa adanya.
+            </p>
+            <div class="paperA">
+              <div style="font-weight: 700; font-size: 14px">
+                Cakap
+                <span style="color: #5f6474; font-weight: 500">· level 3 dari 5</span>
+              </div>
+              <div class="seg">
+                <i style="background: #9dbba6; border-color: #9dbba6"></i
+                ><i style="background: #6fa383; border-color: #6fa383"></i
+                ><i style="background: #468a66; border-color: #468a66"></i><i></i><i></i>
+              </div>
+              <div class="lvl"><span>Dicoba</span><span>Mantap</span></div>
+              <div class="leitner">
+                <div><b>1</b>1 hari</div>
+                <div><b>2</b>3 hari</div>
+                <div class="here"><b>3</b>7 hari</div>
+                <div><b>4</b>14 hari</div>
+                <div><b>5</b>30 hari</div>
+                <div><b>6</b>60 hari</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h4>Logo: diagram Feynman</h4>
+            <p class="note">
+              Dua garis bertemu di satu titik, lalu gelombang naik darinya: dua ide yang
+              bertemu melahirkan penjelasan, sekaligus suara yang keluar. Diambil dari
+              diagram Feynman, bukan ikon otak generik. Versi mendatar sengaja dihindari
+              karena terbaca seperti prompt terminal.
+            </p>
+            <div style="display: flex; gap: 18px; align-items: center">
+              <svg width="96" height="96" viewBox="0 0 96 96" aria-label="Konsep logo">
+                <rect width="96" height="96" rx="22" fill="#1E2230" />
+                <path
+                  d="M22 78 L48 54 L74 78"
+                  stroke="#F4EFE4"
+                  stroke-width="6"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M48 54 q-7 -4.75 0 -9.5 t0 -9.5 t0 -9.5 t0 -9.5"
+                  stroke="#EE7A52"
+                  stroke-width="6"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <circle cx="48" cy="54" r="5" fill="#F4EFE4" />
+              </svg>
+              <svg width="96" height="96" viewBox="0 0 96 96" aria-label="Konsep logo">
+                <rect width="96" height="96" rx="22" fill="#F4EFE4" stroke="#DDD3C1" />
+                <path
+                  d="M22 78 L48 54 L74 78"
+                  stroke="#1E2230"
+                  stroke-width="6"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M48 54 q-7 -4.75 0 -9.5 t0 -9.5 t0 -9.5 t0 -9.5"
+                  stroke="#C8431B"
+                  stroke-width="6"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <circle cx="48" cy="54" r="5" fill="#1E2230" />
+              </svg>
+            </div>
+            <p class="note" style="margin-top: 12px">
+              Konsep kasar. Versi final digambar ulang dengan grid dan diuji di ukuran 16
+              px.
+            </p>
+          </div>
+
+          <div class="panel specimen">
+            <h4>Tipografi</h4>
+            <p class="note">
+              Serif untuk suara "guru" dan angka; sans untuk tombol dan label.
+            </p>
+            <p class="h">Kalau nggak bisa menjelaskannya, kamu belum paham.</p>
+            <p class="b">
+              Plus Jakarta Sans untuk antarmuka: tombol, label, navigasi, dan formulir.
+              Angka tabular untuk timer dan skor.
+            </p>
+            <p class="n">7 <span style="font-size: 18px; color: #5f6474">/10</span></p>
+          </div>
+
+          <div class="panel">
+            <h4>Token warna inti (lolos WCAG AA)</h4>
+            <p class="note">
+              Kontras dihitung, bukan dikira-kira. Rasio terhadap latar tempat warna itu
+              dipakai.
+            </p>
+            <table class="tokens">
+              <tr>
+                <td><span class="sw" style="background: #f4efe4"></span></td>
+                <td>kertas</td>
+                <td>#F4EFE4</td>
+                <td>latar</td>
+              </tr>
+              <tr>
+                <td><span class="sw" style="background: #1e2230"></span></td>
+                <td>tinta</td>
+                <td>#1E2230</td>
+                <td>13,8 : 1</td>
+              </tr>
+              <tr>
+                <td><span class="sw" style="background: #5f6474"></span></td>
+                <td>tinta pudar</td>
+                <td>#5F6474</td>
+                <td>5,1 : 1</td>
+              </tr>
+              <tr>
+                <td><span class="sw" style="background: #c8431b"></span></td>
+                <td>vermilion</td>
+                <td>#C8431B</td>
+                <td>teks putih 4,9 : 1</td>
+              </tr>
+              <tr>
+                <td><span class="sw" style="background: #2b7148"></span></td>
+                <td>tercakup</td>
+                <td>#2B7148</td>
+                <td>5,8 : 1</td>
+              </tr>
+              <tr>
+                <td><span class="sw" style="background: #8f5e05"></span></td>
+                <td>sebagian</td>
+                <td>#8F5E05</td>
+                <td>5,4 : 1</td>
+              </tr>
+              <tr>
+                <td><span class="sw" style="background: #fbe38e"></span></td>
+                <td>stabilo</td>
+                <td>#FBE38E</td>
+                <td>tinta di atasnya 12,4 : 1</td>
+              </tr>
+              <tr>
+                <td><span class="sw" style="background: #141b19"></span></td>
+                <td>papan tulis</td>
+                <td>#141B19</td>
+                <td>kapur 14,3 : 1</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
