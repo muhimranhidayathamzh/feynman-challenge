@@ -165,6 +165,17 @@ The same checks run in CI on every push (`.github/workflows/ci.yml`). The servic
 
 To regenerate the app icons after changing the mark: `npm run icons`.
 
+### Screen gallery (design work)
+
+In development, `/dev/galeri` renders every screen and state (dashboard, notebook, recording, results, settings, dialogs) with fixed sample data, without Supabase. It returns 404 in production builds.
+
+```bash
+npm run dev                          # terminal 1
+npm run shots -- --label before      # terminal 2: docs/design/shots/before/*.png at 390 and 1280 px
+```
+
+Design rules live in [`docs/design/DESIGN.md`](docs/design/DESIGN.md), and the latest audit in [`docs/design/audit.md`](docs/design/audit.md).
+
 ### Lighthouse
 
 Measured on the public sign-in page against a local production build (`npm start`), Lighthouse 12:

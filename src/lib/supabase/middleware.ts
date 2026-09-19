@@ -16,8 +16,12 @@ const PUBLIC_PATHS = [
   "/api/auth/callback",
 ];
 
+// The screen gallery (/dev/galeri) renders fixtures only and exists only in
+// development; its pages return 404 in production builds.
+const DEV_PATHS = process.env.NODE_ENV === "production" ? [] : ["/dev"];
+
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.some(
+  return [...PUBLIC_PATHS, ...DEV_PATHS].some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
 }

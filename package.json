@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "shots": "node scripts/shots.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.9.0",
@@ -33,6 +34,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "^15.5.19",
+    "playwright-core": "^1.63.0",
     "prettier": "^3.9.8",
     "sharp": "^0.34.5",
     "typescript": "^5",
