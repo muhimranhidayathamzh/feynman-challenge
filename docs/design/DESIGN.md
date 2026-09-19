@@ -44,7 +44,7 @@ Pergantian suasana ini punya makna: user tahu tanpa membaca bahwa dia sedang "be
 
 ## 4. Warna
 
-Semua warna lewat token di `src/styles/tokens.css`. Rasio kontras dihitung terhadap latar tempat warna itu dipakai (WCAG 2.1).
+Semua warna lewat token di `src/styles/tokens.css`. Rasio kontras dihitung terhadap latar tempat warna itu dipakai (WCAG 2.1), dan diperiksa otomatis oleh `npm run design:check`.
 
 ### Suasana Kertas (terang)
 
@@ -54,12 +54,15 @@ Semua warna lewat token di `src/styles/tokens.css`. Rasio kontras dihitung terha
 | `--surface` | `#FFFCF5` | Kartu, lembar | |
 | `--sunken` | `#EAE3D4` | Input, trek progress, area cekung | |
 | `--line` | `#DDD3C1` | Garis rambut, pembatas | |
+| `--line-strong` | `#BFB4A0` | Garis hover, tepi yang perlu lebih tegas | |
 | `--ink` | `#1E2230` | Teks utama | 13,8 : 1 di kertas |
 | `--ink-2` | `#4E5566` | Teks sekunder | 6,5 : 1 |
 | `--ink-3` | `#5F6474` | Teks pudar, label kecil | 5,1 : 1 kertas, 4,6 : 1 cekung |
 | `--accent` | `#C8431B` | Vermilion: tombol utama, tombol rekam, fokus | teks putih 4,9 : 1 |
+| `--accent-hover` | `#B23A16` | Tombol utama saat hover | teks putih 6,0 : 1 |
 | `--accent-press` | `#9F3413` | Sisi bawah tombol utama (efek tekan) | |
 | `--accent-text` | `#A93814` | Tautan dan teks aksen | 5,6 : 1 |
+| `--accent-ink` | `#FFFFFF` | Teks di atas tombol vermilion | |
 | `--covered` | `#2B7148` | Poin tercakup, perubahan membaik | 5,8 : 1 di surface |
 | `--partial` | `#8F5E05` | Poin sebagian | 5,4 : 1 |
 | `--missing` | pakai `--ink-3` | Poin belum dibahas (lingkaran putus-putus) | |
@@ -74,12 +77,14 @@ Semua warna lewat token di `src/styles/tokens.css`. Rasio kontras dihitung terha
 | `--surface` | `#1B2421` | |
 | `--sunken` | `#101614` | |
 | `--line` | `#2C3833` | |
+| `--line-strong` | `#43524B` | |
 | `--ink` | `#ECE8DF` (kapur) | 14,3 : 1 |
 | `--ink-2` | `#B9BEB5` | 9,2 : 1 |
 | `--ink-3` | `#949B92` | 6,1 : 1 |
-| `--accent` | `#EE7A52`, teks di atasnya `#1A120E` | 6,6 : 1 |
+| `--accent` | `#EE7A52`, teks di atasnya (`--accent-ink`) `#1A120E` | 6,6 : 1 |
+| `--accent-hover` / `--accent-press` | `#F28D69` / `#B85A38` | |
 | `--covered` / `--partial` / `--error` | `#6CC291` / `#E6B552` / `#F08A7C` | 7,4 / 8,4 / 6,5 : 1 |
-| `--highlight` | `#E6B552` dengan opasitas 25% | |
+| `--highlight` | `#4E482D` (amber 25% di atas surface) | kapur di atasnya 7,5 : 1 |
 
 ### Aturan warna
 

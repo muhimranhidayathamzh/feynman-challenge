@@ -1,16 +1,24 @@
 /* ---------------------------------------------------------------------------
    Recording screen (immersive)
    ------------------------------------------------------------------------- */
+/* The stage is always "papan tulis" (data-mood="board"). Its background
+   spans the full width; the content column stays 32rem wide. It sets its own
+   colour because text colour inherited from <body> was resolved in the page
+   theme. */
 .record-shell {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-6);
   min-height: 100dvh;
-  padding: var(--space-6) var(--space-4) var(--space-10);
-  max-width: 32rem;
-  margin-inline: auto;
+  padding: var(--space-6) max(var(--space-4), calc((100% - 32rem) / 2)) var(--space-10);
+  background: var(--paper);
+  color: var(--ink);
   text-align: center;
+}
+
+body:has(.record-shell) {
+  background-color: var(--board);
 }
 
 .record-title {
@@ -45,7 +53,7 @@
 }
 
 .hint-tier[data-revealed="true"] {
-  border-color: var(--accent-glow);
+  border-color: var(--line-strong);
 }
 
 .hint-warning {

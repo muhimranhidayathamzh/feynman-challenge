@@ -90,7 +90,7 @@ async function offlineFallback() {
   const cached = await caches.match(OFFLINE_URL, { cacheName: OFFLINE_CACHE });
   if (cached) return cached;
   return new Response(
-    '<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline</title><body style="font-family:system-ui,sans-serif;background:#101218;color:#eef0f5;padding:2rem"><h1>Kamu sedang offline</h1><p>Sambungkan internet, lalu muat ulang halaman ini.</p></body></html>',
+    '<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline</title><body style="font-family:system-ui,sans-serif;background:#f4efe4;color:#1e2230;padding:2rem"><h1>Kamu sedang offline</h1><p>Sambungkan internet, lalu muat ulang halaman ini.</p></body></html>',
     { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } },
   );
 }

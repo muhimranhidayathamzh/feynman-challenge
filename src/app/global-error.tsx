@@ -24,18 +24,15 @@ export default function GlobalError({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#101218",
-          color: "#eef0f5",
+          background: "#f4efe4",
+          color: "#1e2230",
           fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
           padding: "1rem",
         }}
       >
         <div style={{ textAlign: "center", maxWidth: "28rem" }}>
-          <div style={{ fontSize: "2.5rem" }} aria-hidden="true">
-            😵‍💫
-          </div>
           <h2 style={{ margin: "0.5rem 0" }}>Aplikasi bermasalah</h2>
-          <p style={{ color: "#9aa3b2" }}>
+          <p style={{ color: "#4e5566" }}>
             Terjadi kesalahan fatal. Muat ulang untuk mencoba lagi.
           </p>
           <button
@@ -47,9 +44,10 @@ export default function GlobalError({
               borderRadius: "12px",
               border: "none",
               cursor: "pointer",
-              color: "#fff",
+              color: "#ffffff",
               fontWeight: 600,
-              background: "linear-gradient(135deg, hsl(250,85%,65%), hsl(210,75%,55%))",
+              background: "#c8431b",
+              boxShadow: "0 3px 0 #9f3413",
             }}
           >
             Muat ulang

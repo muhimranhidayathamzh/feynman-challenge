@@ -32,9 +32,9 @@ export function WaveformVisualizer({ stream, active }: Props) {
     const canvasCtx = canvas.getContext("2d");
 
     const styles = getComputedStyle(canvas);
-    const accent =
-      styles.getPropertyValue("--accent-primary").trim() || "hsl(250,85%,65%)";
-    const muted = styles.getPropertyValue("--text-muted").trim() || "hsl(220,10%,45%)";
+    // Chalk on the board: the line uses the stage ink, idle uses the faded ink.
+    const accent = styles.getPropertyValue("--ink").trim() || "#ece8df";
+    const muted = styles.getPropertyValue("--ink-3").trim() || "#949b92";
 
     let raf = 0;
 

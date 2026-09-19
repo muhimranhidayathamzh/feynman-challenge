@@ -20,7 +20,7 @@ Rencana perbaikan aktif: `prompts/improvement-plan.md` (3 fase, 16 prompt). Kerj
 | Audio | MediaRecorder API → WebM (Opus) |
 | Styling | Vanilla CSS custom properties — **NO Tailwind, NO CSS-in-JS** |
 | Validation | Zod 4 for all API I/O (`z.uuid()`, `z.iso.datetime()`, `z.url()`) |
-| Font | Inter (Google Fonts) |
+| Font | Newsreader + Plus Jakarta Sans (`next/font/google`) |
 | Hosting | Vercel |
 
 ## Architecture Rules
@@ -40,12 +40,13 @@ Rencana perbaikan aktif: `prompts/improvement-plan.md` (3 fase, 16 prompt). Kerj
 - Semua database access via Supabase RLS — user hanya bisa akses data sendiri.
 
 ### Styling Rules
-- **Vanilla CSS only** — gunakan CSS custom properties dari design system.
-- Dark mode default. Warna dari `globals.css` design system.
-- Glassmorphism cards: `backdrop-filter: blur()` + border subtle.
-- Accent color: `hsl(250, 85%, 65%)` (purple).
-- Semua spacing, color, typography HARUS pakai CSS variables, bukan hardcoded values.
-- Mobile-first responsive.
+- **Baca `docs/design/DESIGN.md` sebelum menyentuh CSS, komponen, atau copy.** Arah visual: "Kertas & Kapur".
+- **Vanilla CSS only**: pakai token dari `src/styles/tokens.css` (`--paper`, `--surface`, `--ink`, `--accent`, dst.), bukan nilai hardcoded.
+- Tema: Kertas (terang) dan Papan Tulis (gelap), dipilih lewat cookie `theme` (Terang/Gelap/Ikuti sistem). Layar rekam selalu Papan Tulis (`data-mood="board"`).
+- Dilarang: gradient dekoratif, glassmorphism/`backdrop-filter`, glow, warna ungu, font Inter, emoji di UI, merah untuk hasil belajar.
+- Aksen vermilion hanya untuk satu aksi utama per layar dan tombol rekam.
+- Font: Newsreader (judul, angka, bacaan) + Plus Jakarta Sans (antarmuka), lewat `next/font`.
+- Mobile-first responsive. `npm run design:check` wajib hijau.
 
 ### Error Handling
 - Semua API routes: try-catch dengan proper error responses.
@@ -89,6 +90,7 @@ Setiap prompt selesai, jalankan:
 npx tsc --noEmit        # Type check
 npm run lint            # ESLint CLI (next lint sudah deprecated)
 npm run format:check    # Prettier
+npm run design:check    # Aturan desain + kontras token
 npm test                # Vitest unit tests
 npm run build           # Build check
 ```

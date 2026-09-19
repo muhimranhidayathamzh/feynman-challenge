@@ -70,7 +70,8 @@ export function RecordingStage(props: RecordingStageProps) {
   const sending = review !== null && review.phase !== "review";
 
   return (
-    <main className="record-shell">
+    // Always the dark "papan tulis": explaining is the moment on stage.
+    <main className="record-shell" data-mood="board">
       <div className="row-between w-full">
         <ButtonLink
           href={`/challenge/${props.challengeId}`}

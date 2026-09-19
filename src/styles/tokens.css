@@ -1,82 +1,34 @@
 /* ---------------------------------------------------------------------------
-   1. Design Tokens
+   1. Design tokens — "Kertas & Kapur"
+   Source of truth: docs/design/DESIGN.md (§4 colour, §5 type, §6 shape,
+   §8 motion). Change a value here and in DESIGN.md in the same commit.
+   `npm run design:check` verifies contrast and that the dark blocks match.
    ------------------------------------------------------------------------- */
+
+/* ===== Theme-independent tokens ===== */
 :root {
-  /* --- Base — Dark Mode (§9) --- */
-  --bg-primary: hsl(228, 20%, 8%); /* Deep navy black */
-  --bg-secondary: hsl(228, 18%, 12%); /* Card background */
-  --bg-tertiary: hsl(228, 16%, 16%); /* Elevated surfaces */
-  --bg-glass: hsla(228, 20%, 16%, 0.6); /* Glassmorphism */
-
-  /* --- Text --- */
-  --text-primary: hsl(220, 20%, 95%); /* Main text */
-  --text-secondary: hsl(220, 15%, 65%); /* Subdued text */
-  /* Placeholder, captions. WCAG AA for normal text on every surface:
-     5.60:1 on bg-primary, 5.13:1 on bg-secondary, 4.58:1 on bg-tertiary.
-     (Was 45% lightness: 3.02–3.70:1, below AA.) */
-  --text-muted: hsl(220, 12%, 57%);
-  --text-on-accent: hsl(0, 0%, 100%);
-
-  /* --- Accent --- */
-  --accent-primary: hsl(250, 85%, 65%); /* Purple — brand color (fills, borders, focus) */
-  --accent-hover: hsl(250, 85%, 70%);
-  --accent-glow: hsla(250, 85%, 65%, 0.2); /* Glow effects */
-  /* Accent as TEXT (links, active nav). The brand purple is only 3.25–3.98:1
-     on our surfaces; this lighter tint is 5.06–6.20:1. */
-  --accent-text: hsl(250, 85%, 74%);
-
-  /* --- Mastery State Colors (§6.6) --- */
-  --mastery-not-started: hsl(220, 10%, 30%); /* Gray */
-  --mastery-attempted: hsl(0, 70%, 55%); /* Red */
-  --mastery-developing: hsl(25, 85%, 55%); /* Orange */
-  --mastery-proficient: hsl(45, 85%, 55%); /* Yellow */
-  --mastery-mastered: hsl(145, 65%, 45%); /* Green */
-  --mastery-solidified: hsl(210, 75%, 55%); /* Blue */
-
-  /* --- Semantic --- */
-  --success: hsl(145, 65%, 45%);
-  --warning: hsl(40, 90%, 55%);
-  --error: hsl(0, 75%, 55%); /* fills/borders; 3.52–4.30:1, not for small text */
-  --error-text: hsl(0, 80%, 70%); /* small error text: 5.47–6.69:1 */
-
-  /* Tinted surfaces for inline alerts */
-  --error-bg: hsla(0, 75%, 55%, 0.12);
-  --error-border: hsla(0, 75%, 55%, 0.35);
-  --error-fg: hsl(0, 80%, 78%);
-  --success-bg: hsla(145, 65%, 45%, 0.12);
-  --success-border: hsla(145, 65%, 45%, 0.35);
-  --success-fg: hsl(145, 60%, 75%);
-
-  /* --- Borders & Surfaces --- */
-  --border-subtle: hsla(220, 20%, 50%, 0.12);
-  --border-glass: hsla(220, 20%, 80%, 0.08);
-  --overlay: hsla(228, 30%, 4%, 0.7); /* modal backdrop */
-
-  /* --- Gradients --- */
-  --gradient-accent: linear-gradient(135deg, hsl(250, 85%, 65%), hsl(210, 75%, 55%));
-  /* Same hues, deeper, so white button labels pass AA (6.33:1 and 5.62:1 at
-     the two ends; the brand gradient drops to 3.49:1 on the blue end). */
-  --gradient-button: linear-gradient(135deg, hsl(250, 80%, 58%), hsl(215, 80%, 45%));
-  --gradient-surface: linear-gradient(
-    180deg,
-    hsla(228, 18%, 14%, 0.9),
-    hsla(228, 18%, 11%, 0.9)
-  );
-
-  /* --- Typography --- */
+  /* --- Fonts (next/font variables are set on <html> in app/layout.tsx) --- */
   --font-sans:
-    var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif;
+    var(--font-jakarta), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
 
-  --text-xs: 0.75rem; /* 12px */
-  --text-sm: 0.875rem; /* 14px */
-  --text-base: 1rem; /* 16px */
-  --text-lg: 1.125rem; /* 18px */
-  --text-xl: 1.25rem; /* 20px */
-  --text-2xl: 1.5rem; /* 24px */
-  --text-3xl: 1.875rem; /* 30px */
-  --text-4xl: 2.25rem; /* 36px */
-  --text-5xl: 3rem; /* 48px */
+  /* --- Type scale: generic sizes --- */
+  --text-xs: 0.75rem; /* 12 */
+  --text-sm: 0.875rem; /* 14 */
+  --text-base: 1rem; /* 16 */
+  --text-lg: 1.125rem; /* 18 */
+  --text-xl: 1.25rem; /* 20 */
+  --text-2xl: 1.5rem; /* 24 */
+  --text-3xl: 1.875rem; /* 30 */
+  --text-4xl: 2.25rem; /* 36 */
+  --text-5xl: 3rem; /* 48 */
+
+  /* --- Type scale: roles (DESIGN.md §5), mobile first --- */
+  --text-display: 2.5rem; /* 40: score, timer */
+  --text-h1: 1.75rem; /* 28 */
+  --text-h2: 1.3125rem; /* 21 */
+  --text-lead: 1.0625rem; /* 17: result summary, intros */
+  --text-read: 1.0625rem; /* 17: notes, transcript, long feedback */
 
   --leading-tight: 1.2;
   --leading-snug: 1.4;
@@ -100,24 +52,24 @@
   --space-16: 4rem;
   --space-20: 5rem;
 
-  /* --- Radius --- */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  /* --- Radius (DESIGN.md §6) --- */
+  --radius-sm: 8px; /* inputs, chips */
+  --radius-md: 12px; /* buttons */
+  --radius-lg: 14px; /* cards, sheets */
+  --radius-xl: 20px; /* large sheets, dialogs */
   --radius-full: 9999px;
 
-  /* --- Shadows --- */
-  --shadow-sm: 0 1px 2px hsla(228, 30%, 4%, 0.4);
-  --shadow-md: 0 4px 12px hsla(228, 30%, 4%, 0.45);
-  --shadow-lg: 0 12px 32px hsla(228, 40%, 3%, 0.55);
-  --shadow-glow: 0 0 24px var(--accent-glow);
-
-  /* --- Transitions --- */
+  /* --- Motion (DESIGN.md §8) --- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-fast: 150ms var(--ease-out);
-  --transition-base: 250ms var(--ease-out);
-  --transition-slow: 400ms var(--ease-out);
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 320ms;
+  --transition-fast: var(--motion-fast) var(--ease-out);
+  --transition-base: var(--motion-base) var(--ease-out);
+  --transition-slow: var(--motion-slow) var(--ease-out);
+
+  /* Chalkboard background, for surfaces outside the board subtree (body). */
+  --board: #141b19;
 
   /* --- Layout --- */
   --container-max: 1120px;
@@ -131,6 +83,165 @@
   --z-overlay: 300;
   --z-modal: 400;
   --z-toast: 500;
+}
 
+@media (min-width: 768px) {
+  :root {
+    --text-display: 3.5rem; /* 56 */
+    --text-h1: 2.125rem; /* 34 */
+    --text-h2: 1.5rem; /* 24 */
+    --text-lead: 1.1875rem; /* 19 */
+  }
+}
+
+/* ===== Palette: Kertas (light, default) ===== */
+/* @theme light */
+:root {
+  color-scheme: light;
+
+  --paper: #f4efe4;
+  --surface: #fffcf5;
+  --sunken: #eae3d4;
+  --line: #ddd3c1;
+  --line-strong: #bfb4a0;
+
+  --ink: #1e2230;
+  --ink-2: #4e5566;
+  --ink-3: #5f6474;
+
+  --accent: #c8431b;
+  --accent-hover: #b23a16;
+  --accent-press: #9f3413;
+  --accent-text: #a93814;
+  --accent-ink: #ffffff;
+
+  --covered: #2b7148;
+  --partial: #8f5e05;
+  --error: #b42318;
+  --highlight: #fbe38e;
+
+  --mastery-not-started: #cfc8b8;
+  --mastery-attempted: #9dbba6;
+  --mastery-developing: #6fa383;
+  --mastery-proficient: #468a66;
+  --mastery-mastered: #2b6e4e;
+  --mastery-solidified: #1b4a38;
+
+  --overlay: rgba(30, 34, 48, 0.45);
+  --shadow-sm: 0 1px 2px rgba(30, 34, 48, 0.08);
+  --shadow-md: 0 4px 12px rgba(30, 34, 48, 0.1);
+  --shadow-lg: 0 12px 32px rgba(30, 34, 48, 0.16);
+}
+
+/* ===== Palette: Papan Tulis (dark theme, and the recording stage) ===== */
+/* @theme dark */
+:root[data-theme="dark"],
+[data-mood="board"] {
   color-scheme: dark;
+
+  --paper: #141b19;
+  --surface: #1b2421;
+  --sunken: #101614;
+  --line: #2c3833;
+  --line-strong: #43524b;
+
+  --ink: #ece8df;
+  --ink-2: #b9beb5;
+  --ink-3: #949b92;
+
+  --accent: #ee7a52;
+  --accent-hover: #f28d69;
+  --accent-press: #b85a38;
+  --accent-text: #ee7a52;
+  --accent-ink: #1a120e;
+
+  --covered: #6cc291;
+  --partial: #e6b552;
+  --error: #f08a7c;
+  --highlight: #4e482d;
+
+  --mastery-not-started: #3a4541;
+  --mastery-attempted: #4c6e5b;
+  --mastery-developing: #5e8e72;
+  --mastery-proficient: #74ad8a;
+  --mastery-mastered: #92cba6;
+  --mastery-solidified: #bde6cb;
+
+  --overlay: rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+/* "Ikuti sistem": same values as the dark block above (design:check compares). */
+/* @theme dark-system */
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] {
+    color-scheme: dark;
+
+    --paper: #141b19;
+    --surface: #1b2421;
+    --sunken: #101614;
+    --line: #2c3833;
+    --line-strong: #43524b;
+
+    --ink: #ece8df;
+    --ink-2: #b9beb5;
+    --ink-3: #949b92;
+
+    --accent: #ee7a52;
+    --accent-hover: #f28d69;
+    --accent-press: #b85a38;
+    --accent-text: #ee7a52;
+    --accent-ink: #1a120e;
+
+    --covered: #6cc291;
+    --partial: #e6b552;
+    --error: #f08a7c;
+    --highlight: #4e482d;
+
+    --mastery-not-started: #3a4541;
+    --mastery-attempted: #4c6e5b;
+    --mastery-developing: #5e8e72;
+    --mastery-proficient: #74ad8a;
+    --mastery-mastered: #92cba6;
+    --mastery-solidified: #bde6cb;
+
+    --overlay: rgba(0, 0, 0, 0.6);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+  }
+}
+
+/* ===== Derived tokens =====
+   Declared wherever the palette can change, because a custom property that
+   uses var() is resolved on the element that declares it. */
+:root,
+[data-mood="board"] {
+  --focus-ring: color-mix(in srgb, var(--accent) 45%, transparent);
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  --accent-soft-border: color-mix(in srgb, var(--accent) 30%, var(--surface));
+
+  --success-bg: color-mix(in srgb, var(--covered) 12%, var(--surface));
+  --success-border: color-mix(in srgb, var(--covered) 35%, var(--surface));
+  --success-fg: var(--covered);
+  --error-bg: color-mix(in srgb, var(--error) 10%, var(--surface));
+  --error-border: color-mix(in srgb, var(--error) 35%, var(--surface));
+  --error-fg: var(--error);
+  --error-text: var(--error);
+
+  /* Legacy names (pre Fase V). Components move to the names above in V.3,
+     then these aliases are deleted. */
+  --bg-primary: var(--paper);
+  --bg-secondary: var(--surface);
+  --bg-tertiary: var(--sunken);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-2);
+  --text-muted: var(--ink-3);
+  --text-on-accent: var(--accent-ink);
+  --accent-primary: var(--accent);
+  --border-subtle: var(--line);
+  --success: var(--covered);
+  --warning: var(--partial);
 }

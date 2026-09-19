@@ -33,6 +33,9 @@ jobs:
       - name: Format check
         run: npm run format:check
 
+      - name: Design rules
+        run: npm run design:check
+
       - name: Unit tests
         run: npm test
 

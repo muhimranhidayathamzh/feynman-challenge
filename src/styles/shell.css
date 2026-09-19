@@ -19,10 +19,8 @@
   gap: var(--space-4);
   min-height: var(--header-h);
   padding: var(--space-2) var(--space-4);
-  background: var(--bg-glass);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border-glass);
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
 }
 
 .brand {
@@ -75,10 +73,8 @@
   align-items: stretch;
   gap: var(--space-2);
   padding: var(--space-2);
-  background: var(--bg-glass);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  border-top: 1px solid var(--border-glass);
+  background: var(--surface);
+  border-top: 1px solid var(--line);
 }
 
 .app-nav-link {
@@ -105,7 +101,7 @@
 
 .app-nav-link[data-active="true"] {
   color: var(--accent-text);
-  background: var(--accent-glow);
+  background: var(--accent-soft);
 }
 
 .app-nav-icon {
@@ -131,10 +127,8 @@
     height: calc(100dvh - var(--header-h));
     padding: var(--space-4);
     border-top: none;
-    border-right: 1px solid var(--border-glass);
+    border-right: 1px solid var(--line);
     background: transparent;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
   }
 
   .app-nav-link {
@@ -152,9 +146,16 @@
 }
 
 /* --- Brand & auth shell (Prompt 2.1) --- */
-.brand-icon {
-  color: var(--accent-text);
+.brand-mark {
+  color: var(--ink);
   flex: 0 0 auto;
+}
+
+/* The wordmark speaks in the teacher voice (Newsreader). */
+.brand-name {
+  font-family: var(--font-serif);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
 }
 
 .auth-shell {
@@ -195,8 +196,8 @@
   padding: var(--space-3) var(--space-4);
   margin-bottom: var(--space-4);
   border-radius: var(--radius-md);
-  background: var(--accent-glow);
-  border: 1px solid var(--accent-glow);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-soft-border);
 }
 
 .demo-banner > p {

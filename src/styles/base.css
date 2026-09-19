@@ -33,23 +33,30 @@ h4,
 h5,
 h6 {
   line-height: var(--leading-tight);
-  font-weight: var(--weight-bold);
-  letter-spacing: -0.02em;
+  font-weight: var(--weight-semibold);
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
 
+/* The teacher's voice: page and section titles in Newsreader (DESIGN.md §5). */
+h1,
+h2 {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
 h1 {
-  font-size: var(--text-4xl);
+  font-size: var(--text-h1);
 }
 h2 {
-  font-size: var(--text-3xl);
+  font-size: var(--text-h2);
 }
 h3 {
-  font-size: var(--text-2xl);
+  font-size: var(--text-xl);
+  letter-spacing: -0.01em;
 }
 h4 {
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
 }
 
 p {

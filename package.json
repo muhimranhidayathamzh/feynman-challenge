@@ -11,8 +11,9 @@
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "icons": "node scripts/generate-icons.mjs",
-    "shots": "node scripts/shots.mjs"
+    "icons": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-icons.mjs",
+    "shots": "node scripts/shots.mjs",
+    "design:check": "node scripts/check-design.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.9.0",

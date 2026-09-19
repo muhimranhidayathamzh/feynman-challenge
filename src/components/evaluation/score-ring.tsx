@@ -74,9 +74,7 @@ export function ScoreRing({ score, previousScore = null }: Props) {
           />
         </svg>
         <div className="ring-center" aria-hidden="true">
-          <span className="score-value" style={{ color }}>
-            {Math.round(display)}
-          </span>
+          <span className="score-value">{Math.round(display)}</span>
           <span className="text-muted">/ 10</span>
         </div>
       </div>

@@ -9,6 +9,7 @@
 //   --widths 390,1280   viewport widths
 //   --only a,b          only these frame ids
 //   --themes light,dark sets the "theme" cookie per run (Fase V.2+); omit for default
+//   --out <dir>         write to <dir>/<label> instead of docs/design/shots
 //
 // Uses the Chrome installed on this machine (playwright-core, channel "chrome").
 // Set SHOTS_CHROME to a browser executable to use another one.
@@ -35,7 +36,10 @@ const base = arg("base", "http://localhost:3000").replace(/\/$/, "");
 const widths = arg("widths", "390,1280").split(",").map(Number);
 const only = arg("only")?.split(",");
 const themes = arg("themes")?.split(",") ?? ["default"];
-const outDir = path.join(root, "docs", "design", "shots", label);
+// --out <dir> writes elsewhere (e.g. a temp folder for work-in-progress checks).
+const outDir = arg("out")
+  ? path.resolve(arg("out"), label)
+  : path.join(root, "docs", "design", "shots", label);
 
 try {
   const response = await fetch(`${base}/dev/galeri`);
@@ -120,7 +124,7 @@ try {
       await context.close();
     }
   }
-  console.log(`${count} screenshot di docs/design/shots/${label}/`);
+  console.log(`${count} screenshot di ${path.relative(root, outDir) || outDir}`);
 } finally {
   await browser.close();
 }

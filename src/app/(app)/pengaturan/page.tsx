@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { SettingsView } from "@/components/settings/settings-view";
+import { THEME_COOKIE, parseTheme } from "@/lib/theme";
 import { DEFAULT_TIMEZONE } from "@/lib/utils/date";
 import { createClient } from "@/lib/supabase/server";
 
@@ -51,6 +53,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
       pendingEmail={user.new_email ?? null}
       hasPassword={hasPassword}
       justConverted={justConverted}
+      theme={parseTheme((await cookies()).get(THEME_COOKIE)?.value)}
     />
   );
 }

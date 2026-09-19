@@ -203,6 +203,7 @@ function content(id: string): ReactNode {
           pendingEmail={null}
           hasPassword
           justConverted={false}
+          theme="system"
         />
       );
     case "pengaturan-demo":
@@ -216,6 +217,7 @@ function content(id: string): ReactNode {
           pendingEmail={null}
           hasPassword={false}
           justConverted={false}
+          theme="system"
         />
       );
     case "dialog":

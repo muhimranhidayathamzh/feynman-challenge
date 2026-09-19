@@ -1,22 +1,18 @@
 /* ---------------------------------------------------------------------------
-   4. Cards & Glassmorphism (§9)
+   4. Cards (no glass: DESIGN.md §6)
    ------------------------------------------------------------------------- */
 .card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
-  box-shadow: var(--shadow-md);
 }
 
 .glass {
-  background: var(--bg-glass);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
-  box-shadow: var(--shadow-lg);
 }
 
 .card-hover {
@@ -28,8 +24,8 @@
 
 .card-hover:hover {
   transform: translateY(-2px);
-  border-color: var(--accent-glow);
-  box-shadow: var(--shadow-lg);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-md);
 }
 
 /* ---------------------------------------------------------------------------
@@ -65,15 +61,20 @@
   pointer-events: none;
 }
 
+/* Tactile: a solid edge under the button that disappears when pressed. */
 .btn-primary {
-  background: var(--gradient-button);
-  color: var(--text-on-accent);
-  box-shadow: var(--shadow-sm);
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 3px 0 var(--accent-press);
 }
 
 .btn-primary:hover {
-  box-shadow: var(--shadow-glow);
-  transform: translateY(-1px);
+  background: var(--accent-hover);
+}
+
+.btn-primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--accent-press);
 }
 
 .btn-secondary {
@@ -153,7 +154,7 @@
 .textarea:focus {
   outline: none;
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .textarea {
@@ -258,4 +259,39 @@
   padding-left: var(--space-5);
   display: grid;
   gap: var(--space-1);
+}
+
+/* --- Theme choice (Pengaturan, Prompt V.2) --- */
+.theme-options {
+  border: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.theme-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.theme-option:hover {
+  border-color: var(--line-strong);
+}
+
+.theme-option:has(input:checked) {
+  border-color: var(--ink);
+}
+
+.theme-option input {
+  margin-top: 0.2rem;
+  accent-color: var(--accent);
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
 }

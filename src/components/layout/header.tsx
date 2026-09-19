@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Brain, Flame, LogOut } from "lucide-react";
+import { Flame, LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Icon } from "@/components/ui/icon";
+
+import { BrandMark } from "./brand-mark";
 import { useAuth } from "@/lib/auth/auth-provider";
 
 interface Props {
@@ -35,8 +37,8 @@ export function Header({ displayName, streakCount, isAnonymous }: Props) {
   return (
     <header className="app-header">
       <Link href="/" className="brand" aria-label="Feynman Challenge, ke beranda">
-        <Icon icon={Brain} size={22} className="brand-icon" />
-        <span className="gradient-text">Feynman Challenge</span>
+        <BrandMark size={28} />
+        <span className="brand-name">Feynman Challenge</span>
       </Link>
 
       <div className="row gap-3">

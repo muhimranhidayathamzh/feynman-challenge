@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DeadlineBadge } from "@/components/challenge/deadline-badge";
 import { MasteryIndicator } from "@/components/challenge/mastery-indicator";
 import type { ChallengeCardData } from "@/lib/utils/dashboard";
-import { MASTERY_META, scoreColor } from "@/lib/utils/labels";
+import { MASTERY_META } from "@/lib/utils/labels";
 
 export type { ChallengeCardData };
 
@@ -23,10 +23,7 @@ export function ChallengeCard({ challenge }: { challenge: ChallengeCardData }) {
       </div>
 
       {challenge.latestScore !== null && (
-        <span
-          className="challenge-card-score"
-          style={{ color: scoreColor(challenge.latestScore) }}
-        >
+        <span className="challenge-card-score">
           {challenge.latestScore}
           <span className="challenge-card-score-max"> / 10</span>
         </span>

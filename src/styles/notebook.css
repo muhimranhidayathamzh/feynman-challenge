@@ -66,14 +66,14 @@
 
 /* Arrived via "Pelajari lagi" on the results page (Prompt 3.3). */
 .editor-row.is-highlighted {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  border-color: var(--ink-3);
+  box-shadow: 0 0 0 3px var(--highlight);
   animation: outlineHighlight 1.2s var(--ease-out) 2;
 }
 
 @keyframes outlineHighlight {
   50% {
-    box-shadow: 0 0 0 6px var(--accent-glow);
+    box-shadow: 0 0 0 6px var(--highlight);
   }
 }
 
@@ -108,6 +108,7 @@
 
 .trend-dot-partial {
   --dot-color: var(--warning);
+  /* design-check: allow-gradient (half-filled status mark, not decoration) */
   background: linear-gradient(90deg, var(--dot-color) 50%, transparent 50%);
 }
 

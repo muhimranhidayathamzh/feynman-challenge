@@ -1,10 +1,12 @@
-import { KeyRound, Mail, Save, UserRound } from "lucide-react";
+import { KeyRound, Mail, Palette, Save, UserRound } from "lucide-react";
 
 import { Card, CardTitle } from "@/components/ui/card";
+import type { ThemePreference } from "@/lib/theme";
 
 import { ConvertAccount } from "./convert-account";
 import { PasswordSection } from "./password-section";
 import { ProfileForm } from "./profile-form";
+import { ThemeForm } from "./theme-form";
 
 interface Props {
   displayName: string;
@@ -16,6 +18,7 @@ interface Props {
   pendingEmail: string | null;
   hasPassword: boolean;
   justConverted: boolean;
+  theme: ThemePreference;
 }
 
 /** Settings markup. Data is loaded by the page (or the dev gallery). */
@@ -38,6 +41,11 @@ export function SettingsView(props: Props) {
           initialTimezone={props.timezone}
           timezones={props.timezones}
         />
+      </Card>
+
+      <Card className="stack gap-4">
+        <CardTitle icon={Palette}>Tampilan</CardTitle>
+        <ThemeForm initial={props.theme} />
       </Card>
 
       {props.isDemo ? (

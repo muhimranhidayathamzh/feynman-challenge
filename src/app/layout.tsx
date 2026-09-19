@@ -1,15 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Newsreader, Plus_Jakarta_Sans } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 
 import { AuthProvider } from "@/lib/auth/auth-provider";
 import { PwaRegister } from "@/components/pwa-register";
 import { ToastProvider } from "@/components/ui/toast";
+import { THEME_COOKIE, parseTheme, themeColorFor } from "@/lib/theme";
 
-const inter = Inter({
+// Interface (DESIGN.md §5). Made by Tokotype for the city of Jakarta.
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-jakarta",
   display: "swap",
+});
+
+// The teacher's voice: titles, numbers, notes, transcripts.
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-newsreader",
+  display: "swap",
+  style: ["normal", "italic"],
+  axes: ["opsz"],
 });
 
 export const metadata: Metadata = {
@@ -18,7 +30,7 @@ export const metadata: Metadata = {
     template: "%s · Feynman Challenge",
   },
   description:
-    "Kalau kamu nggak bisa menjelaskannya, kamu belum paham. Kuasai materi apapun lewat tantangan menjelaskan ulang.",
+    "Kalau kamu nggak bisa menjelaskannya, kamu belum paham. Kuasai materi apa pun lewat tantangan menjelaskan ulang.",
   applicationName: "Feynman Challenge",
   keywords: [
     "feynman technique",
@@ -30,7 +42,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Feynman Challenge" }],
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "Feynman Challenge",
   },
   formatDetection: {
@@ -46,20 +58,31 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
-  themeColor: "hsl(228, 20%, 8%)",
-  colorScheme: "dark",
-  width: "device-width",
-  initialScale: 1,
-};
+async function currentTheme() {
+  // Static routes (e.g. /offline) get an empty store and fall back to "system".
+  return parseTheme((await cookies()).get(THEME_COOKIE)?.value);
+}
 
-export default function RootLayout({
+export async function generateViewport(): Promise<Viewport> {
+  return {
+    themeColor: themeColorFor(await currentTheme()),
+    width: "device-width",
+    initialScale: 1,
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const theme = await currentTheme();
   return (
-    <html lang="id" className={inter.variable}>
+    <html
+      lang="id"
+      data-theme={theme}
+      className={`${jakarta.variable} ${newsreader.variable}`}
+    >
       <body>
         <AuthProvider>
           <ToastProvider>

@@ -22,19 +22,19 @@ describe("getDeadlineInfo — status and nudge per spec §6.5", () => {
   it("3 days away", () => {
     const info = getDeadlineInfo(inDays(3), TODAY);
     expect(info.status).toBe("due_soon");
-    expect(info.nudge).toBe("3 hari lagi ⏰");
+    expect(info.nudge).toBe("3 hari lagi");
   });
 
   it("1 day away", () => {
     const info = getDeadlineInfo(inDays(1), TODAY);
     expect(info.status).toBe("due_soon");
-    expect(info.nudge).toBe("Besok! Sudah siap? 🎙️");
+    expect(info.nudge).toBe("Besok. Sudah siap?");
   });
 
   it("today", () => {
     const info = getDeadlineInfo(inDays(0), TODAY);
     expect(info.status).toBe("due_today");
-    expect(info.nudge).toBe("Hari ini! Kamu pasti bisa 💪");
+    expect(info.nudge).toBe("Hari ini. Kamu pasti bisa.");
   });
 
   it("missed by one day: automatically extended, gently", () => {
@@ -55,7 +55,7 @@ describe("getDeadlineInfo — status and nudge per spec §6.5", () => {
   it("grace period passed too", () => {
     const info = getDeadlineInfo(inDays(-AUTO_EXTEND_DAYS - 1), TODAY);
     expect(info.status).toBe("extended_overdue");
-    expect(info.nudge).toBe("Mau reschedule atau istirahat dulu?");
+    expect(info.nudge).toBe("Mau jadwal ulang atau istirahat dulu?");
     expect(info.daysUntil).toBe(-1);
     expect(info.isExtended).toBe(true);
   });

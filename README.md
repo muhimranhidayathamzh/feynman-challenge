@@ -157,6 +157,7 @@ npm run dev      # http://localhost:3000
 npx tsc --noEmit        # type check (strict, zero any)
 npm run lint            # ESLint
 npm run format:check    # Prettier
+npm run design:check    # design rules: no gradients/glass/glow, token contrast (AA)
 npm test                # Vitest: every pure module in src/lib has tests beside it
 npm run build           # production build
 ```

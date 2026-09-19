@@ -50,7 +50,7 @@ export function getDeadlineInfo(
         status: "due_today",
         effectiveDate: deadline,
         daysUntil: 0,
-        nudge: "Hari ini! Kamu pasti bisa 💪",
+        nudge: "Hari ini. Kamu pasti bisa.",
         isExtended: false,
       };
     }
@@ -59,7 +59,7 @@ export function getDeadlineInfo(
         status: "due_soon",
         effectiveDate: deadline,
         daysUntil: 1,
-        nudge: "Besok! Sudah siap? 🎙️",
+        nudge: "Besok. Sudah siap?",
         isExtended: false,
       };
     }
@@ -68,7 +68,7 @@ export function getDeadlineInfo(
         status: "due_soon",
         effectiveDate: deadline,
         daysUntil: days,
-        nudge: `${days} hari lagi ⏰`,
+        nudge: `${days} hari lagi`,
         isExtended: false,
       };
     }
@@ -97,7 +97,7 @@ export function getDeadlineInfo(
     status: "extended_overdue",
     effectiveDate: extended,
     daysUntil: daysExtended,
-    nudge: "Mau reschedule atau istirahat dulu?",
+    nudge: "Mau jadwal ulang atau istirahat dulu?",
     isExtended: true,
   };
 }
