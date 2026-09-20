@@ -3,7 +3,13 @@ import type { ReactNode } from "react";
 import { cx } from "@/lib/utils/cx";
 
 export type IllustrationName =
-  "meja-kosong" | "catatan-kosong" | "offline" | "error" | "mendengarkan" | "hening";
+  | "meja-kosong"
+  | "catatan-kosong"
+  | "offline"
+  | "error"
+  | "mendengarkan"
+  | "hening"
+  | "hasil";
 
 interface Props {
   name: IllustrationName;
@@ -86,6 +92,20 @@ const DRAWINGS: Record<IllustrationName, ReactNode> = {
       <path d="M80 56 q-5 -3 0 -6 q5 -3 0 -6" stroke={WAVE} strokeWidth="3" />
       <path d="M80 38 q-5 -3 0 -6" stroke={WAVE} strokeWidth="3" strokeDasharray="1 5" />
       <path d="M112 30 L120 38 M120 30 L112 38" strokeWidth="2" />
+    </>
+  ),
+  // A marked-up page: highlighted evidence and a gap still to fill.
+  hasil: (
+    <>
+      <rect x="34" y="16" width="92" height="88" rx="6" fill="var(--surface)" />
+      <path
+        d="M46 36 H104 M46 50 H98 M46 64 H108 M46 78 H86"
+        strokeWidth="2"
+        opacity="0.55"
+      />
+      <path d="M46 50 H98" stroke={WAVE} strokeWidth="7" opacity="0.35" />
+      <path d="M112 30 l4 4 7-8" strokeWidth="3" />
+      <path d="M110 74 h16" strokeWidth="2" strokeDasharray="2 4" />
     </>
   ),
   // A voice travelling into an open notebook: the AI is listening and noting.

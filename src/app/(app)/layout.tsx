@@ -32,6 +32,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     }
   }
 
+  // Signed out (only possible on the public landing page): no app chrome.
+  if (!user) return <>{children}</>;
+
   return (
     <AppShell
       displayName={displayName}

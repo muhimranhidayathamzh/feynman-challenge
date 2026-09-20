@@ -45,7 +45,7 @@ export function FollowUpSection({
     <Sheet as="section" className="stack gap-4" aria-labelledby="followup-title">
       <div className="stack gap-1">
         <SheetTitle>
-          <span id="followup-title">Uji Pemahamanmu</span>
+          <span id="followup-title">Uji pemahamanmu</span>
         </SheetTitle>
         <p className="text-secondary text-sm">
           Jawab singkat secara lisan. Ini untuk belajar, tidak mengubah skormu.

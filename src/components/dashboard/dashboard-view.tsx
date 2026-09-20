@@ -2,99 +2,99 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
 import { DASHBOARD_TABS, type DashboardTab } from "@/lib/utils/challenge-status";
 import type { DashboardData } from "@/lib/utils/dashboard";
+import type { WeekDay } from "@/lib/utils/streak";
 
-import { ChallengeList } from "./challenge-list";
-import { DueSoonSection } from "./due-soon-section";
-import { ReviewTodaySection } from "./review-today-section";
-import { StreakDisplay } from "./streak-display";
+import { ChallengeIndex } from "./challenge-index";
+import { Onboarding } from "./onboarding";
+import { TodayCard } from "./today-card";
 
 interface Props {
   displayName: string;
   streak: number;
-  bestStreak: number;
+  week: WeekDay[];
+  /** Today in the user's timezone, e.g. "21 Sep". */
+  dateLabel: string;
   activeTab: DashboardTab;
   data: DashboardData;
 }
 
-/** Home screen markup. Data comes from buildDashboard (page or dev gallery). */
+/**
+ * "Meja Belajar" (DESIGN.md §11): one action for today, then the index of
+ * every challenge. Data comes from buildDashboard (page or dev gallery).
+ */
 export function DashboardView({
   displayName,
   streak,
-  bestStreak,
+  week,
+  dateLabel,
   activeTab,
   data,
 }: Props) {
+  if (data.isEmpty) {
+    return (
+      <div className="page">
+        <Onboarding displayName={displayName} />
+      </div>
+    );
+  }
+
+  const overdue =
+    data.today.kind === "overdue"
+      ? (data.dueSoon.find((item) => item.id === data.today.challengeId)?.deadline ??
+        null)
+      : null;
+
   return (
     <div className="page page-wide">
-      <header className="row-between flex-wrap gap-4">
-        <div className="stack gap-1">
-          <h1>Halo, {displayName}</h1>
-          <p className="text-secondary">Siap menjelaskan sesuatu hari ini?</p>
+      <h1 className="dashboard-greeting">Halo, {displayName}</h1>
+
+      <TodayCard
+        action={data.today}
+        overdueDeadline={overdue}
+        dateLabel={dateLabel}
+        week={week}
+        streak={streak}
+        alsoWaiting={data.alsoWaiting}
+      />
+
+      <section className="stack gap-3" aria-labelledby="all-challenges-title">
+        <div className="row-between flex-wrap gap-3">
+          <h2 id="all-challenges-title" className="section-title">
+            Tantanganmu
+          </h2>
+          <ButtonLink href="/challenge/new" variant="secondary" size="sm" icon={Plus}>
+            Tantangan baru
+          </ButtonLink>
         </div>
-        <StreakDisplay streakCount={streak} bestStreak={bestStreak} />
-      </header>
 
-      {data.isEmpty ? (
-        <EmptyState
-          illustration="meja-kosong"
-          title="Mejamu masih kosong"
-          actions={
-            <ButtonLink href="/challenge/new" size="lg" icon={Plus}>
-              Buat tantangan pertama
-            </ButtonLink>
-          }
-        >
-          <p>
-            Pilih satu topik yang ingin kamu kuasai. AI menyusun outline-nya, kamu
-            belajar, lalu jelaskan ulang dengan suaramu sendiri.
+        <nav className="tabs" aria-label="Filter tantangan">
+          {DASHBOARD_TABS.map((tab) => {
+            const current = tab.status === activeTab.status;
+            return (
+              <Link
+                key={tab.slug}
+                href={tab.slug === "aktif" ? "/" : `/?tab=${tab.slug}`}
+                className="tab"
+                aria-current={current ? "page" : undefined}
+                scroll={false}
+              >
+                {tab.label}
+                <span className="tab-count">{data.counts[tab.status]}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {data.tabCards.length > 0 ? (
+          <ChallengeIndex challenges={data.tabCards} />
+        ) : (
+          <p className="text-muted text-sm">
+            Belum ada tantangan berstatus {activeTab.label.toLowerCase()}.
           </p>
-        </EmptyState>
-      ) : (
-        <>
-          <DueSoonSection items={data.dueSoon} />
-          <ReviewTodaySection items={data.reviews} />
-
-          <section className="stack gap-3" aria-labelledby="all-challenges-title">
-            <div className="row-between flex-wrap gap-3">
-              <h2 id="all-challenges-title" className="section-title">
-                Tantangan
-              </h2>
-              <ButtonLink href="/challenge/new" variant="secondary" size="sm" icon={Plus}>
-                Baru
-              </ButtonLink>
-            </div>
-
-            <nav className="tabs" aria-label="Filter tantangan">
-              {DASHBOARD_TABS.map((tab) => {
-                const current = tab.status === activeTab.status;
-                return (
-                  <Link
-                    key={tab.slug}
-                    href={tab.slug === "aktif" ? "/" : `/?tab=${tab.slug}`}
-                    className="tab"
-                    aria-current={current ? "page" : undefined}
-                    scroll={false}
-                  >
-                    {tab.label}
-                    <span className="tab-count">{data.counts[tab.status]}</span>
-                  </Link>
-                );
-              })}
-            </nav>
-
-            {data.tabCards.length > 0 ? (
-              <ChallengeList challenges={data.tabCards} />
-            ) : (
-              <p className="text-muted text-sm">
-                Belum ada tantangan berstatus {activeTab.label.toLowerCase()}.
-              </p>
-            )}
-          </section>
-        </>
-      )}
+        )}
+      </section>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import type { Database } from "@/types";
 // /offline is precached by the service worker without cookies: it must be
 // reachable signed out, or the login page would be cached in its place.
 const PUBLIC_PATHS = [
+  "/",
   "/login",
   "/signup",
   "/lupa-password",

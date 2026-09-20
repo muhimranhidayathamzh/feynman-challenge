@@ -2,6 +2,21 @@
 
 All notable changes to Feynman Challenge. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Visual overhaul: "Kertas & Kapur" (Fase V)
+
+A full redesign of the interface, planned in `docs/design/DESIGN.md` and audited in `docs/design/audit.md`. No database changes.
+
+- **Two moods**: a warm paper light theme for reading and studying, and a chalkboard dark theme. The recording screen is always chalkboard. The theme is chosen in Pengaturan (Terang / Gelap / Ikuti sistem) and stored in a cookie, so the server renders it without a flash.
+- **Typography and tokens**: Newsreader for headings, numbers and prose, Plus Jakarta Sans for the interface. Colour, space, and type tokens were rebuilt and every pair is contrast-checked (AA) by `npm run design:check`, which also bans gradients, glass, glow, purple, and emoji in the UI.
+- **Result page**: the verdict is read first as a sentence, then the score, then the points. The transcript is annotated, and clicking a point scrolls to the evidence for it and back.
+- **Recording stage**: a full chalkboard with a large clock, calmer waveform, and hints that state the score cap they cost.
+- **Notebook**: reading-first layout, sources as a bibliography, outline editing behind an "Ubah" toggle, mastery and review state in the header.
+- **Meja Belajar**: the dashboard now opens with one action for today, a week strip instead of a streak badge, and the rest of the challenges as an index.
+- **Public landing page**: signed-out visitors see what the app does, three steps, and a real sample evaluation, instead of a login form.
+- **Screen gallery**: `/dev/galeri` renders 24 screens and states with fixed data (404 in production), and `npm run shots` photographs them at 390 and 1280 px in both themes.
+
 ## [1.0.0] - 2026-09-19
 
 The first release after the 3-phase improvement plan in `prompts/improvement-plan.md`. Run migrations **003 to 006** on an existing database before deploying (see README, "Database").

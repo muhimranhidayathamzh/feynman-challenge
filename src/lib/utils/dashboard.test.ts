@@ -66,3 +66,66 @@ describe("buildDashboard", () => {
     ]);
   });
 });
+
+describe("pickTodayAction", () => {
+  it("puts the most overdue review first", () => {
+    const data = buildDashboard(
+      [
+        row({ id: "late", title: "Fotosintesis", next_review_at: "2026-09-12" }),
+        row({ id: "due", title: "Newton", next_review_at: TODAY }),
+        row({ id: "deadline", title: "Inflasi", deadline: "2026-09-10" }),
+      ],
+      TODAY,
+      "active",
+    );
+    expect(data.today.kind).toBe("review");
+    expect(data.today.headline).toBe("Review Fotosintesis");
+    expect(data.today.href).toBe("/challenge/late/record");
+    // The rest is listed below the card, never repeated inside it.
+    expect(data.alsoWaiting.map((item) => item.id)).toEqual(["due", "deadline"]);
+  });
+
+  it("falls back to a passed deadline, then to a near one", () => {
+    const passed = buildDashboard(
+      [row({ id: "a", deadline: "2026-09-10" })],
+      TODAY,
+      "active",
+    );
+    expect(passed.today.kind).toBe("overdue");
+
+    const near = buildDashboard(
+      [row({ id: "b", deadline: "2026-09-20" })],
+      TODAY,
+      "active",
+    );
+    expect(near.today.kind).toBe("due");
+    expect(near.today.href).toBe("/challenge/b/record");
+  });
+
+  it("otherwise continues the challenge touched last", () => {
+    const data = buildDashboard(
+      [
+        row({ id: "new", title: "Big O", mastery_state: "not_started" }),
+        row({ id: "old", title: "Newton" }),
+      ],
+      TODAY,
+      "active",
+    );
+    expect(data.today.kind).toBe("continue");
+    // A challenge never explained sends you to the notebook first.
+    expect(data.today.href).toBe("/challenge/new");
+    expect(data.today.headline).toBe("Mulai Big O");
+  });
+
+  it("asks for a first challenge when there is nothing", () => {
+    const data = buildDashboard([], TODAY, "active");
+    expect(data.today.kind).toBe("create");
+    expect(data.today.challengeId).toBeNull();
+    expect(data.alsoWaiting).toEqual([]);
+  });
+
+  it("ignores parked challenges when choosing what to continue", () => {
+    const data = buildDashboard([row({ id: "p", status: "parked" })], TODAY, "parked");
+    expect(data.today.kind).toBe("create");
+  });
+});

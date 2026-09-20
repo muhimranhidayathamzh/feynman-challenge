@@ -4,10 +4,12 @@
 > A PWA that helps self-learners master any topic with the **Feynman Technique**: explain it out loud, and let AI tell you exactly which parts you really understood.
 
 <p align="center">
-  <img src="public/screenshots/login-narrow.png" alt="Feynman Challenge sign-in screen on a phone" width="260" />
+  <img src="docs/design/shots/after/dashboard-isi-390-light.png" alt="Meja Belajar on a phone: one action for today" width="250" />
+  <img src="docs/design/shots/after/rekam-merekam-390-light.png" alt="The recording stage: a chalkboard with a large clock" width="250" />
+  <img src="docs/design/shots/after/hasil-selesai-390-light.png" alt="A result: summary, score, points and the annotated transcript" width="250" />
 </p>
 
-**Try it without an account:** the sign-in page has a **"Coba tanpa akun"** button (demo mode) that opens a fully worked example challenge, including an evaluated attempt, without spending any AI quota.
+**Try it without an account:** the landing page has a **"Coba tanpa akun"** button (demo mode) that opens a fully worked example challenge, including an evaluated attempt, without spending any AI quota.
 
 ---
 
@@ -27,6 +29,7 @@ You pick a topic. AI drafts a learning outline and sources. You study, then **re
 - **Gentle accountability**: deadlines are calendar days in your timezone, missed ones auto-extend once, and streaks count real completed evaluations.
 - **Demo mode**: anonymous sign-in with a seeded example, stricter AI quota, and a one-step path to keep the account (link an email, then set a password).
 - **Installable PWA**: maskable icons, shortcuts, an offline page, and a service worker that never caches private pages.
+- **"Kertas & Kapur" interface**: a warm paper light theme for studying and a chalkboard dark theme for the recording stage, in Newsreader and Plus Jakarta Sans. One action per screen, evidence before numbers, and never red for a learning gap. The rules live in [`docs/design/DESIGN.md`](docs/design/DESIGN.md) and are enforced by `npm run design:check`.
 
 ---
 
@@ -179,14 +182,25 @@ Design rules live in [`docs/design/DESIGN.md`](docs/design/DESIGN.md), and the l
 
 ### Lighthouse
 
-Measured on the public sign-in page against a local production build (`npm start`), Lighthouse 12:
+Measured on the public pages against a local production build (`npm start`), Lighthouse 12 mobile:
 
-| | Performance | Accessibility | Best Practices | SEO |
+| Page | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| Mobile | 94 | 100 | 100 | 90 |
-| Desktop | 100 | 100 | 100 | 90 |
+| Landing (`/`) | 78 | 100 | 100 | 90 |
+| Sign in (`/login`) | 85 | 100 | 100 | 90 |
 
-The SEO point is lost because Next.js 15 streams `<title>` and `<meta name="description">` into the body for clients it does not recognise as crawlers, and Lighthouse 12 no longer identifies itself as one. Pages behind sign-in were not measured.
+Accessibility is 100 on both. Performance is the simulated-slow-4G score of a server-rendered page with the app's JavaScript; layout shift is 0. The SEO point is lost because Next.js 15 streams `<title>` and `<meta name="description">` into the body for clients it does not recognise as crawlers, and Lighthouse 12 no longer identifies itself as one. Pages behind sign in were not measured.
+
+### Before and after the visual redesign
+
+Every screen was photographed from the dev gallery before Fase V and again after it: [`docs/design/shots/before`](docs/design/shots/before) and [`docs/design/shots/after`](docs/design/shots/after), at 390 px and 1280 px (the "after" set also in both themes).
+
+| Before | After |
+|---|---|
+| <img src="docs/design/shots/before/hasil-selesai-390.png" alt="Result page before" width="230" /> | <img src="docs/design/shots/after/hasil-selesai-390-light.png" alt="Result page after" width="230" /> |
+| <img src="docs/design/shots/before/catatan-390.png" alt="Notebook before" width="230" /> | <img src="docs/design/shots/after/catatan-390-light.png" alt="Notebook after" width="230" /> |
+
+The findings that drove the change are listed in [`docs/design/audit.md`](docs/design/audit.md).
 
 ---
 

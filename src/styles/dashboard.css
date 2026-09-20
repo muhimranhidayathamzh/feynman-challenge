@@ -1,78 +1,223 @@
 /* ---------------------------------------------------------------------------
-   Dashboard
+   Meja Belajar, onboarding, and the public landing page
+   (Prompt V.6, DESIGN.md §11)
    ------------------------------------------------------------------------- */
-.dashboard-grid {
+
+.dashboard-greeting {
+  font-size: var(--text-h2);
+}
+
+/* --- "Hari ini": one action, this week, then what else is waiting --- */
+.today-card {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--space-4);
+  gap: var(--space-6);
 }
 
-.challenge-card {
-  display: block;
+@media (min-width: 768px) {
+  .today-card {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-items: start;
+  }
 }
 
-.challenge-card:hover {
-  color: inherit;
+.today-eyebrow {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-3);
 }
 
-.streak-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-full);
-  background: var(--sunken);
-  border: 1px solid var(--line);
+.today-headline {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  font-weight: var(--weight-medium);
+  line-height: 1.2;
 }
 
-/* A row that lets its status wrap below the title on narrow screens, so a
-   long title never collapses to one word per line (audit #10). */
-.alert-row {
+.today-side {
+  display: grid;
+  gap: var(--space-5);
+  padding-top: var(--space-1);
+}
+
+@media (min-width: 768px) {
+  .today-side {
+    padding-left: var(--space-6);
+    border-left: 1px dashed var(--line);
+  }
+}
+
+.waiting-list {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.waiting-link {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-1) var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  padding: var(--space-2);
+  margin-inline: calc(var(--space-2) * -1);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
 }
 
-.alert-row > .row-between {
+.waiting-link:hover {
+  background: var(--sunken);
+  color: inherit;
+}
+
+/* --- The challenge index --- */
+.challenge-index {
+  display: grid;
+}
+
+.challenge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-2);
+  margin-inline: calc(var(--space-2) * -1);
+  border-bottom: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  color: inherit;
+  transition: background var(--transition-fast);
+}
+
+.challenge-index li:last-child .challenge-row {
+  border-bottom: 0;
+}
+
+.challenge-row:hover {
+  background: var(--sunken);
+  color: inherit;
+}
+
+.challenge-row-main {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.challenge-row-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  line-height: var(--leading-snug);
+}
+
+.challenge-row-meta {
+  display: flex;
   flex-wrap: wrap;
-  row-gap: var(--space-1);
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
 }
 
-/* --- Card + streak (Prompt 2.1) --- */
-.challenge-card-title {
-  font-size: var(--text-lg);
-}
-
-.challenge-card-score {
+.challenge-row-score {
   font-family: var(--font-serif);
   font-size: var(--text-2xl);
-  font-weight: var(--weight-medium);
   font-variant-numeric: tabular-nums;
-}
-
-.challenge-card-score-max {
-  color: var(--ink-3);
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-}
-
-.streak-icon {
-  color: var(--partial);
   flex: 0 0 auto;
 }
 
-/* --- Due-soon rows with actions (Prompt 2.3) --- */
-.alert-row-stacked {
-  flex-direction: column;
-  align-items: stretch;
+.challenge-row-score-max {
+  color: var(--ink-3);
+  font-size: var(--text-base);
 }
 
-.alert-row-link:hover {
-  color: var(--accent-text);
+/* --- Onboarding and landing steps --- */
+.onboarding-steps {
+  display: grid;
+  gap: var(--space-4);
+  counter-reset: step;
+}
+
+@media (min-width: 768px) {
+  .onboarding-steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.onboarding-step {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  height: 100%;
+}
+
+.onboarding-step .illustration {
+  width: 7.5rem;
+}
+
+.onboarding-step-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
+}
+
+.onboarding-step-number {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-full);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+}
+
+/* --- Landing --- */
+.landing {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  width: 100%;
+  max-width: 64rem;
+  margin-inline: auto;
+  padding: var(--space-8) var(--space-4) var(--space-12);
+}
+
+.landing-hero {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  text-align: center;
+  max-width: 44rem;
+  margin-inline: auto;
+}
+
+.landing-title {
+  font-size: clamp(2rem, 1.4rem + 3vw, 3.25rem);
+  font-weight: var(--weight-medium);
+  line-height: 1.15;
+}
+
+.landing-lead {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  line-height: var(--leading-normal);
+  color: var(--ink-2);
+  max-width: 38ch;
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.landing-steps,
+.landing-sample {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.landing-footer {
+  text-align: center;
 }

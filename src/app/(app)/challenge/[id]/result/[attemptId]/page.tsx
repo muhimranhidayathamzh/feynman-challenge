@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .select("title")
     .eq("id", id)
     .maybeSingle();
-  return { title: data?.title ? `Hasil — ${data.title}` : "Hasil Evaluasi" };
+  return { title: data?.title ? `Hasil — ${data.title}` : "Hasil evaluasi" };
 }
 
 export default async function ResultPage({ params }: PageProps) {

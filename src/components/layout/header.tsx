@@ -42,15 +42,17 @@ export function Header({ displayName, streakCount, isAnonymous }: Props) {
       </Link>
 
       <div className="row gap-3">
-        <Link
-          href="/"
-          className="badge"
-          title="Streak harian"
-          aria-label={`Streak harian: ${streakCount} hari`}
-        >
-          <Icon icon={Flame} size={14} />
-          {streakCount}
-        </Link>
+        {streakCount > 0 && (
+          <Link
+            href="/"
+            className="badge"
+            title="Streak harian"
+            aria-label={`Streak harian: ${streakCount} hari`}
+          >
+            <Icon icon={Flame} size={14} />
+            {streakCount}
+          </Link>
+        )}
 
         <span className="text-secondary text-sm show-from-sm">{displayName}</span>
 

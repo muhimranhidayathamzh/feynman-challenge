@@ -14,7 +14,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Beranda", icon: House },
-  { href: "/challenge/new", label: "Tantangan Baru", icon: Plus },
+  { href: "/challenge/new", label: "Tantangan baru", icon: Plus },
   { href: "/pengaturan", label: "Pengaturan", icon: Settings },
 ];
 

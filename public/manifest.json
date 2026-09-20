@@ -55,18 +55,18 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/login-narrow.png",
+      "src": "/screenshots/beranda-narrow.png",
       "sizes": "780x1688",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Halaman masuk Feynman Challenge di ponsel"
+      "label": "Meja Belajar: satu aksi untuk hari ini"
     },
     {
-      "src": "/screenshots/login-wide.png",
+      "src": "/screenshots/hasil-wide.png",
       "sizes": "1280x800",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Halaman masuk Feynman Challenge di desktop"
+      "label": "Hasil evaluasi dengan transkrip beranotasi"
     }
   ]
 }

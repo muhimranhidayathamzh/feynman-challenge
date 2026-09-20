@@ -16,6 +16,7 @@ export interface FrameMeta {
 
 export const FRAMES: readonly FrameMeta[] = [
   { id: "komponen", group: "Sistem", title: "Komponen", shell: "bare", path: "/" },
+  { id: "landing", group: "Publik", title: "Landing", shell: "bare", path: "/" },
   { id: "login", group: "Publik", title: "Masuk", shell: "auth", path: "/login" },
   { id: "daftar", group: "Publik", title: "Daftar", shell: "auth", path: "/signup" },
   { id: "offline", group: "Publik", title: "Offline", shell: "bare", path: "/offline" },

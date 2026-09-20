@@ -15,6 +15,7 @@ import {
 } from "@/components/evaluation/evaluation-views";
 import { FollowUpSection } from "@/components/evaluation/follow-up-section";
 import { AppShell } from "@/components/layout/app-shell";
+import { Landing } from "@/components/marketing/landing";
 import { OfflineScreen } from "@/components/pwa/offline-screen";
 import {
   RecordingStage,
@@ -24,6 +25,8 @@ import { SettingsView } from "@/components/settings/settings-view";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/ui/toast";
 import { DASHBOARD_TABS } from "@/lib/utils/challenge-status";
+import { formatDay } from "@/lib/utils/date";
+import { weekStrip } from "@/lib/utils/streak";
 import type { HintLevel } from "@/types";
 import NotFound from "@/app/not-found";
 
@@ -39,7 +42,8 @@ function Dashboard({ empty = false }: { empty?: boolean }) {
     <DashboardView
       displayName={fx.DISPLAY_NAME}
       streak={empty ? 0 : 4}
-      bestStreak={empty ? 0 : 9}
+      week={weekStrip(fx.TODAY, empty ? null : fx.TODAY, empty ? 0 : 4)}
+      dateLabel={formatDay(fx.TODAY)}
       activeTab={ACTIVE_TAB}
       data={empty ? fx.dashboardEmpty : fx.dashboardFull}
     />
@@ -92,6 +96,8 @@ function content(id: string): ReactNode {
   switch (id) {
     case "komponen":
       return <ComponentSheet />;
+    case "landing":
+      return <Landing features={{ google: true, anonymous: true }} />;
     case "login":
       return (
         <LoginForm

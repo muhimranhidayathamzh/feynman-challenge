@@ -128,7 +128,7 @@ export function CreateForm() {
               loading={status === "generating"}
               disabled={busy || topic.trim().length < 3}
             >
-              {status === "generating" ? "AI sedang menyusun…" : "Susun Rencana Belajar"}
+              {status === "generating" ? "AI sedang menyusun…" : "Susun rencana belajar"}
             </Button>
           </form>
         </Sheet>
@@ -139,14 +139,14 @@ export function CreateForm() {
       {(status === "preview" || status === "creating") && plan && (
         <Sheet as="section" className="stack gap-5 animate-fade-in-up">
           <div className="row-between">
-            <h3>Rencana Belajar</h3>
+            <h3>Rencana belajar</h3>
             <Badge icon={Timer} title="Estimasi durasi rekaman">
               {formatDuration(plan.estimated_duration_sec)}
             </Badge>
           </div>
 
           <div className="stack gap-3">
-            <h4 className="text-secondary text-sm">Outline Materi</h4>
+            <h4 className="text-secondary text-sm">Poin yang perlu dijelaskan</h4>
             <ol className="stack gap-3">
               {plan.outline.map((item, index) => (
                 <li key={`${index}-${item.title}`} className="row items-start gap-3">
@@ -166,7 +166,7 @@ export function CreateForm() {
 
           {plan.sources.length > 0 && (
             <div className="stack gap-3">
-              <h4 className="text-secondary text-sm">Sumber Belajar</h4>
+              <h4 className="text-secondary text-sm">Sumber belajar</h4>
               <ul className="stack gap-2">
                 {plan.sources.map((source, index) => (
                   <li key={`${index}-${source.title}`} className="row gap-2">
