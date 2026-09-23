@@ -9,7 +9,7 @@ export function LandingDemoButton() {
   const [error, setError] = useState<string | null>(null);
   return (
     <div className="stack gap-2 items-center">
-      <DemoButton onError={setError} />
+      <DemoButton onError={setError} variant="primary" />
       {error && (
         <p className="text-sm text-error" role="alert">
           {error}

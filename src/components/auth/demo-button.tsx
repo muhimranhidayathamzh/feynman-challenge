@@ -12,6 +12,12 @@ import { createClient } from "@/lib/supabase/client";
 
 interface Props {
   onError: (message: string) => void;
+  /**
+   * "ghost" under the sign-in form, which already has its own primary action.
+   * "primary" on the landing page, where trying the demo IS the main action
+   * (DESIGN.md: one accented action per screen).
+   */
+  variant?: "primary" | "ghost";
 }
 
 /**
@@ -19,7 +25,7 @@ interface Props {
  * Supabase, see README), seeds the example challenge, and lands on its
  * evaluated attempt. The account can later be kept from Pengaturan.
  */
-export function DemoButton({ onError }: Props) {
+export function DemoButton({ onError, variant = "ghost" }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -55,7 +61,7 @@ export function DemoButton({ onError }: Props) {
 
   return (
     <Button
-      variant="ghost"
+      variant={variant}
       size="lg"
       block
       icon={Sparkles}

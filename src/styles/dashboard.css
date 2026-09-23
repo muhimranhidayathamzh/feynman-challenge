@@ -221,3 +221,56 @@
 .landing-footer {
   text-align: center;
 }
+
+/* --- Link preview card (dev-only page /dev/og, photographed by npm run og) --- */
+.og-card {
+  position: relative;
+  width: 1200px;
+  height: 630px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-5);
+  padding: 5rem;
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+}
+
+.og-rule {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 3rem;
+  width: 2px;
+  background: var(--accent);
+  opacity: 0.55;
+}
+
+.og-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.og-wordmark {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+}
+
+.og-headline {
+  font-family: var(--font-serif);
+  font-size: 4.25rem;
+  font-weight: var(--weight-medium);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  max-width: 22ch;
+}
+
+.og-sub {
+  font-size: 1.5rem;
+  line-height: var(--leading-normal);
+  color: var(--ink-2);
+  max-width: 44ch;
+}

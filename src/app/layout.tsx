@@ -7,6 +7,7 @@ import { AuthProvider } from "@/lib/auth/auth-provider";
 import { PwaRegister } from "@/components/pwa-register";
 import { ToastProvider } from "@/components/ui/toast";
 import { THEME_COOKIE, parseTheme, themeColorFor } from "@/lib/theme";
+import { siteUrl } from "@/lib/site";
 
 // Interface (DESIGN.md §5). Made by Tokotype for the city of Jakarta.
 const jakarta = Plus_Jakarta_Sans({
@@ -24,13 +25,19 @@ const newsreader = Newsreader({
   axes: ["opsz"],
 });
 
+const SITE = siteUrl();
+const TAGLINE =
+  "Kalau kamu nggak bisa menjelaskannya, kamu belum paham. Kuasai materi apa pun lewat tantangan menjelaskan ulang.";
+
 export const metadata: Metadata = {
+  // Absolute base for every relative URL below; without it a shared link
+  // previews as localhost.
+  metadataBase: new URL(SITE),
   title: {
     default: "Feynman Challenge",
     template: "%s · Feynman Challenge",
   },
-  description:
-    "Kalau kamu nggak bisa menjelaskannya, kamu belum paham. Kuasai materi apa pun lewat tantangan menjelaskan ulang.",
+  description: TAGLINE,
   applicationName: "Feynman Challenge",
   keywords: [
     "feynman technique",
@@ -47,6 +54,22 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
+  },
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "Feynman Challenge",
+    locale: "id_ID",
+    url: "/",
+    title: "Feynman Challenge",
+    description: TAGLINE,
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Feynman Challenge" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Feynman Challenge",
+    description: TAGLINE,
+    images: ["/og.png"],
   },
   manifest: "/manifest.json",
   icons: {

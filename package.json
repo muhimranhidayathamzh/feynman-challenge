@@ -13,7 +13,8 @@
     "format:check": "prettier --check .",
     "icons": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-icons.mjs",
     "shots": "node scripts/shots.mjs",
-    "design:check": "node scripts/check-design.mjs"
+    "design:check": "node scripts/check-design.mjs",
+    "og": "node scripts/og-image.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.9.0",
