@@ -521,14 +521,85 @@ Prompt 4.4 — Buktikan skor AI stabil dan adil. Ikuti "Aturan Umum" di prompts/
 
 ---
 
+## FASE U — Uji Pribadi
+
+Tujuan: menaruh aplikasi di Vercel dan **memakainya sendiri selama seminggu**, dengan alat ukur terpasang sebelum pemakaian dimulai — bukan sesudahnya, saat datanya sudah hilang.
+
+Fase ini ada karena keputusan untuk menguji sendiri dulu sebelum publik. Selama belum ada orang asing, rate limit, CAPTCHA, dan halaman legal belum melindungi siapa pun, jadi semuanya tetap di Fase 5.
+
+Fase ini juga menutup dua cacat yang ditemukan saat meninjau ulang keputusan sendiri:
+
+1. Plafon harian di migrasi 007 menghitung semua panggilan AI sama rata, padahal satu `evaluate` (audio tiga menit) jauh lebih mahal daripada satu `hints`. Banjir panggilan murah bisa menghentikan evaluasi untuk semua orang.
+2. `usageMetadata` dari Gemini (token masuk, keluar, thinking) dibuang, sehingga plafon 500 itu angka karangan. Biaya marginal per evaluasi tidak diketahui.
+
+**Urutan eksekusi:** U.1 → U.2 → U.3 → pakai seminggu → checkpoint.
+
+**Keputusan tambahan:**
+
+| # | Keputusan | Default | Dipakai di |
+|---|---|---|---|
+| D20 | Pencatatan biaya | Kolom token dan lama panggilan di `ai_usage`. Tidak pernah menyimpan isi prompt, transkrip, atau audio | U.1 |
+| D21 | Satuan plafon | Plafon dihitung dalam **unit berbobot**, bukan jumlah panggilan. evaluate 5, followup 3, generate 2, hints 1 | U.1 |
+| D22 | Deploy | Vercel Hobby, domain `*.vercel.app`, `NEXT_PUBLIC_ALLOW_INDEXING` kosong. Supabase free tier cukup selama dipakai tiap hari | U.3 |
+
+### Prompt U.1 — Ukur Biaya, Perbaiki Plafon
+
+```
+Prompt U.1 — Plafon yang berarti, bukan tebakan. Ikuti "Aturan Umum" di prompts/improvement-plan.md.
+
+1. Migrasi 008: ai_usage dapat kolom cost_units (integer, default 1), prompt_tokens, output_tokens, thinking_tokens, latency_ms (semuanya nullable), dan model text. Tidak ada isi prompt atau transkrip yang disimpan.
+2. consume_ai_quota memakai bobot (D21): sisipkan baris dengan cost_units sesuai kind, dan plafon global menjumlahkan cost_units, bukan count(*). Kuota per pengguna tetap menghitung panggilan seperti sekarang. app_settings.ai_global_per_day berganti makna jadi unit per hari; perbarui komentarnya.
+3. Lapisan Gemini meneruskan usageMetadata dan lama panggilan kembali ke pemanggil. Keempat route AI mencatatnya lewat satu fungsi record, setelah panggilan selesai, dengan after() supaya tidak menambah waktu tunggu pengguna. Gagal mencatat tidak boleh menggagalkan permintaan.
+4. Fungsi murni di src/lib/ai untuk memetakan kind ke bobot dan merangkum pemakaian, dengan unit test.
+5. supabase/verify.sql diperbarui agar memeriksa kolom dan migrasi baru.
+6. README: cara membaca biaya sesungguhnya dari ai_usage dengan satu query, dan cara menyetel plafon berdasarkan angka itu.
+```
+
+### Prompt U.2 — Monitoring Error
+
+```
+Prompt U.2 — Error yang tidak kamu lihat tetap tercatat. Ikuti "Aturan Umum" di prompts/improvement-plan.md.
+
+Ini bagian Sentry dari Prompt 4.3, ditarik ke depan; sisa 4.3 (AI_MOCK dan Playwright) tetap di Fase 4.
+
+1. @sentry/nextjs untuk server dan client. Mati sepenuhnya bila SENTRY_DSN kosong, jadi pengembangan lokal tidak terpengaruh.
+2. Tidak pernah mengirim isi request, transkrip, audio, catatan, atau email. Pasang scrubbing dan buktikan lewat unit test untuk fungsi penyaringnya.
+3. Tag: kode error Gemini, kind panggilan AI, dan lama evaluasi. Cukup untuk menjawab "apa yang rusak" tanpa data pribadi.
+4. Tambahkan variabel ke env.ts dan .env.local.example.
+5. Periksa dampaknya ke ukuran bundle middleware dan halaman. Catat di ringkasan.
+```
+
+### Prompt U.3 — Deploy ke Vercel
+
+```
+Prompt U.3 — Hidup di internet, tapi belum diumumkan. Ikuti "Aturan Umum" di prompts/improvement-plan.md.
+
+1. Daftar periksa deploy di README: variabel lingkungan di Vercel, Redirect URL Supabase untuk domain baru, NEXT_PUBLIC_SITE_URL diisi lalu redeploy, NEXT_PUBLIC_ALLOW_INDEXING dibiarkan kosong.
+2. Turunkan ai_global_per_day ke angka yang masuk akal untuk satu orang, dan catat alasannya.
+3. Uji asap produksi, dicatat hasilnya: daftar, masuk, buat tantangan, rekam, evaluasi, jawab pertanyaan lanjutan, review, ganti tema, pasang sebagai PWA, mode offline.
+4. Pastikan robots.txt produksi benar-benar menjawab Disallow: / dan halaman membawa noindex.
+5. Pastikan service worker berperilaku benar di domain sungguhan: aset ter-cache, navigasi tidak, dan /offline muncul saat jaringan mati.
+```
+
+### ✅ Checkpoint Fase U
+- Satu query ke `ai_usage` menjawab: berapa token dan berapa rupiah satu evaluasi sebenarnya.
+- Plafon global disetel dari angka itu, bukan dari tebakan.
+- Error yang sengaja dibuat muncul di Sentry tanpa data pribadi.
+- **Dipakai sendiri tujuh hari.** Catat tiga hal, bukan "bagus/jelek": di mana kamu ragu, di mana kamu bosan, dan **apakah kamu benar-benar kembali saat review jatuh tempo**.
+- Yang ketiga menentukan Prompt 5.4. Kalau kamu sendiri lupa kembali, tidak ada pengguna yang akan ingat, dan pengingat naik jadi pekerjaan wajib sebelum publik.
+
+---
+
 ## FASE 5 — Siap Publik
 
 Tujuan: mengubah aplikasi yang jalan menjadi situs yang boleh dibagikan ke orang asing — tanpa menghancurkan biaya, tanpa melanggar kewajiban data, dan tanpa buta saat ada yang rusak.
 
 Dikerjakan **sebelum** sisa Fase 4. Dua prompt Fase 4 ditarik ke depan ke dalam fase ini (lihat urutan eksekusi di bawah); nomornya tidak diubah supaya riwayat commit tetap terbaca.
 
-**Urutan eksekusi Fase 5:** 5.1 → 4.2 → 5.2 → bagian Sentry dari 4.3 → 5.3.
-Sisa Fase 4 (4.1 riwayat percobaan, E2E dari 4.3, 4.4 eval-golden) dikerjakan setelah situs hidup.
+Dikerjakan **setelah Fase U**, ketika keputusan untuk membuka pintu sudah diambil.
+
+**Urutan eksekusi Fase 5:** 5.1 → 4.2 → 5.2 → 5.4 (bila checkpoint Fase U memintanya) → 5.3.
+Sentry sudah dikerjakan di U.2. Sisa Fase 4 (4.1 riwayat percobaan, E2E dari 4.3, 4.4 eval-golden) dikerjakan setelah situs hidup.
 
 **Keputusan tambahan:**
 
@@ -539,6 +610,7 @@ Sisa Fase 4 (4.1 riwayat percobaan, E2E dari 4.3, 4.4 eval-golden) dikerjakan se
 | D17 | Konfirmasi email | **Nyalakan** sebelum publik. Tanpa itu siapa pun bisa mendaftar memakai email orang lain | 5.1 |
 | D18 | Pengirim email | SMTP kustom (Resend atau Postmark). SMTP bawaan Supabase hanya untuk uji coba dan dibatasi beberapa email per jam | 5.3 |
 | D19 | Analitik | Hanya yang tanpa cookie dan tanpa data pribadi (Vercel Analytics atau Umami). Tidak pernah merekam isi transkrip | 5.3 |
+| D23 | Saluran pengingat | Email dulu (jalan di semua perangkat, memakai SMTP dari D18). Web Push menyusul: iOS hanya mendukungnya setelah PWA dipasang | 5.4 |
 
 ### Prompt 5.1 — Gerbang Penyalahgunaan
 
@@ -577,6 +649,21 @@ Prompt 5.3 — Hidupkan di domain sungguhan. Ikuti "Aturan Umum" di prompts/impr
 6. Lighthouse ulang di domain produksi.
 ```
 
+### Prompt 5.4 — Pengingat Review
+
+```
+Prompt 5.4 — Mesin spaced repetition butuh saluran. Ikuti "Aturan Umum" di prompts/improvement-plan.md.
+
+Kerjakan bila checkpoint Fase U menunjukkan bahwa kembali tepat waktu memang sulit tanpa diingatkan.
+
+1. Alasannya struktural, bukan fitur tambahan: Leitner box menjadwalkan review 3, 7, 14 hari lagi, tapi sampai sekarang tidak ada apa pun yang memanggil orang kembali. Tanpa saluran, penjadwalannya tidak berarti.
+2. Email harian (D23) lewat Vercel Cron + route yang dilindungi CRON_SECRET: satu email untuk pengguna yang punya review jatuh tempo hari itu, dikirim pada jam yang masuk akal di zona waktunya, maksimal satu per hari.
+3. Pengguna bisa mematikannya di Pengaturan, dan setiap email punya tautan berhenti langganan yang bekerja tanpa login.
+4. Jangan pernah mengirim ke akun anonim, dan jangan mengirim kalau tidak ada yang jatuh tempo.
+5. Logika pemilihan penerima dan penjadwalan jam kirim sebagai fungsi murni di src/lib/utils dengan unit test; zona waktu diuji dengan beberapa kasus.
+6. Web Push menyusul setelah email terbukti jalan.
+```
+
 ### ✅ Checkpoint Fase 5
 - Rate limit dan CAPTCHA terbukti menolak percobaan berulang, sementara pemakaian normal tidak pernah tersenggol.
 - Menarik rem di app_settings benar-benar menghentikan panggilan AI, dan melepasnya memulihkan.
@@ -590,7 +677,9 @@ Prompt 5.3 — Hidupkan di domain sungguhan. Ikuti "Aturan Umum" di prompts/impr
 
 E2E, Sentry, hapus akun, script maintenance, dan eval-golden sudah dijadwalkan di Fase 4.
 
-- **Rekam offline** (IndexedDB + Background Sync, fallback untuk Safari), **push notification** (Web Push + Vercel Cron), **halaman analitik**, **rekaman video**, **ekspor progres**, **banyak notebook**.
+Pengingat review naik dari backlog ke Prompt 5.4: itu bukan fitur tambahan, melainkan saluran yang membuat spaced repetition berarti.
+
+- **Rekam offline** (IndexedDB + Background Sync, fallback untuk Safari), **Web Push** (setelah email di 5.4 terbukti), **halaman analitik**, **rekaman video**, **ekspor progres**, **banyak notebook**.
 
 ---
 
@@ -620,8 +709,12 @@ E2E, Sentry, hapus akun, script maintenance, dan eval-golden sudah dijadwalkan d
 | V.4 | Layar hasil evaluasi | ✅ |
 | V.5 | Panggung rekam & catatan belajar | ✅ |
 | V.6 | Meja Belajar, onboarding, landing & polish | ✅ |
+| U.1 | Ukur biaya, perbaiki plafon | ⬜ |
+| U.2 | Monitoring error (Sentry) | ⬜ |
+| U.3 | Deploy ke Vercel | ⬜ |
 | 5.1 | Gerbang penyalahgunaan (rate limit, CAPTCHA, konfirmasi email) | ⬜ |
 | 5.2 | Halaman legal & keterbukaan AI | ⬜ |
+| 5.4 | Pengingat review (bila checkpoint Fase U memintanya) | ⬜ |
 | 5.3 | Peluncuran | ⬜ |
 | 4.1 | Riwayat percobaan | ⬜ |
 | 4.2 | Hapus akun & pembersihan storage | ⬜ |
