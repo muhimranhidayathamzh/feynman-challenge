@@ -709,7 +709,7 @@ Pengingat review naik dari backlog ke Prompt 5.4: itu bukan fitur tambahan, mela
 | V.4 | Layar hasil evaluasi | ✅ |
 | V.5 | Panggung rekam & catatan belajar | ✅ |
 | V.6 | Meja Belajar, onboarding, landing & polish | ✅ |
-| U.1 | Ukur biaya, perbaiki plafon | ⬜ |
+| U.1 | Ukur biaya, perbaiki plafon | ✅ |
 | U.2 | Monitoring error (Sentry) | ⬜ |
 | U.3 | Deploy ke Vercel | ⬜ |
 | 5.1 | Gerbang penyalahgunaan (rate limit, CAPTCHA, konfirmasi email) | ⬜ |
