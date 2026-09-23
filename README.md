@@ -1,5 +1,13 @@
 # 🧠 Feynman Challenge
 
+<p align="center">
+  <a href="https://github.com/muhimranhidayathamzh/feynman-challenge/actions/workflows/ci.yml"><img src="https://github.com/muhimranhidayathamzh/feynman-challenge/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
+  <img src="https://img.shields.io/badge/TypeScript-strict,%20zero%20any-3178C6" alt="TypeScript strict, zero any" />
+  <img src="https://img.shields.io/badge/tests-213%20passing-2b7148" alt="213 unit tests passing" />
+  <img src="https://img.shields.io/badge/a11y-Lighthouse%20100-2b7148" alt="Lighthouse accessibility 100" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-c8431b" alt="MIT license" /></a>
+</p>
+
 > _"Kalau kamu nggak bisa menjelaskannya, kamu belum paham."_
 > A PWA that helps self-learners master any topic with the **Feynman Technique**: explain it out loud, and let AI tell you exactly which parts you really understood.
 
