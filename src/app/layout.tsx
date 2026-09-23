@@ -7,7 +7,7 @@ import { AuthProvider } from "@/lib/auth/auth-provider";
 import { PwaRegister } from "@/components/pwa-register";
 import { ToastProvider } from "@/components/ui/toast";
 import { THEME_COOKIE, parseTheme, themeColorFor } from "@/lib/theme";
-import { siteUrl } from "@/lib/site";
+import { indexingAllowed, siteUrl } from "@/lib/site";
 
 // Interface (DESIGN.md §5). Made by Tokotype for the city of Jakarta.
 const jakarta = Plus_Jakarta_Sans({
@@ -55,6 +55,9 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+  // Belt and braces with robots.ts: a meta tag travels with the page even
+  // when something fetches it directly.
+  robots: indexingAllowed() ? undefined : { index: false, follow: false },
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",

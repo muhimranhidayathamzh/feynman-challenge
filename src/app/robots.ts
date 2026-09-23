@@ -1,14 +1,18 @@
 import type { MetadataRoute } from "next";
 
-import { siteUrl } from "@/lib/site";
+import { indexingAllowed, siteUrl } from "@/lib/site";
 
 /**
- * Only the pages a signed-out visitor can actually see are worth crawling.
- * Everything else either needs a session (and would serve a redirect to a
- * crawler) or is an API route, so it is disallowed explicitly rather than
- * left to chance.
+ * Indexing is opt-in (NEXT_PUBLIC_ALLOW_INDEXING), so a test deployment is
+ * never crawled by accident. Once it is on, only the pages a signed-out
+ * visitor can actually see are crawlable; everything else either needs a
+ * session or is an API route, and is disallowed explicitly.
  */
 export default function robots(): MetadataRoute.Robots {
+  if (!indexingAllowed()) {
+    return { rules: { userAgent: "*", disallow: "/" } };
+  }
+
   return {
     rules: {
       userAgent: "*",

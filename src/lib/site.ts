@@ -54,6 +54,19 @@ function normaliseOrigin(value: string | undefined): string | null {
 }
 
 /**
+ * Whether search engines may index this deployment.
+ *
+ * Default is NO. A test deployment on a vercel.app URL that gets indexed is
+ * painful to undo — removal from a search index takes far longer than the
+ * mistake takes to make — so indexing is opt-in, switched on deliberately when
+ * the real launch happens.
+ */
+export function indexingAllowed(): boolean {
+  const value = process.env.NEXT_PUBLIC_ALLOW_INDEXING?.trim().toLowerCase();
+  return value === "1" || value === "true";
+}
+
+/**
  * The origin for this process. Read with static `process.env.X` accesses so
  * Next.js can inline the public one into the client bundle.
  */
