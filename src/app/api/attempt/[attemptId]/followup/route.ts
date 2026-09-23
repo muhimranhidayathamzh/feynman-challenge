@@ -97,7 +97,7 @@ export async function POST(request: Request, context: RouteContext) {
           code: "quota",
           retryAfterSeconds: quota.retryAfterSeconds,
         },
-        { status: 429 },
+        { status: quota.status },
       );
     }
 

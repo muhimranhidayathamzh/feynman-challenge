@@ -132,7 +132,10 @@ export async function POST(request: Request) {
         code: "quota",
         retryAfterSeconds: quota.retryAfterSeconds,
       },
-      { status: 429, headers: { "Retry-After": String(quota.retryAfterSeconds) } },
+      {
+        status: quota.status,
+        headers: { "Retry-After": String(quota.retryAfterSeconds) },
+      },
     );
   }
 

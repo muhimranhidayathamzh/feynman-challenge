@@ -409,7 +409,7 @@ export type Database = {
       /** Checks + records one AI use for the caller (security definer). */
       consume_ai_quota: {
         Args: { p_kind: string; p_per_day: number; p_per_minute: number };
-        Returns: { allowed: boolean; retry_after_seconds: number }[];
+        Returns: { allowed: boolean; retry_after_seconds: number; reason: string }[];
       };
     };
     Enums: { [_ in never]: never };

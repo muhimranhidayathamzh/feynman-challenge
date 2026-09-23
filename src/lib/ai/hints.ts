@@ -14,7 +14,7 @@ export type HintsRegenResult =
   | { status: "ok"; updated: number }
   | { status: "none-missing" }
   | { status: "not-found" }
-  | { status: "quota"; message: string; retryAfterSeconds: number }
+  | { status: "quota"; message: string; retryAfterSeconds: number; httpStatus: 429 | 503 }
   | { status: "error"; code: GeminiErrorCode | "db" };
 
 /**
@@ -53,6 +53,7 @@ export async function regenerateMissingHints(
       status: "quota",
       message: quota.message,
       retryAfterSeconds: quota.retryAfterSeconds,
+      httpStatus: quota.status,
     };
   }
 

@@ -54,7 +54,7 @@ export async function POST(_request: Request, context: RouteContext) {
             code: "quota",
             retryAfterSeconds: result.retryAfterSeconds,
           },
-          { status: 429 },
+          { status: result.httpStatus },
         );
       case "error": {
         const response =
