@@ -1,7 +1,7 @@
 -- ---------------------------------------------------------------------------
--- verify.sql — periksa apakah migrasi 001 sampai 006 sudah lengkap.
+-- verify.sql — periksa apakah migrasi 001 sampai 008 sudah lengkap.
 --
--- Jalankan di Supabase SQL Editor SETELAH menjalankan semua migrasi.
+-- Jalankan di Supabase SQL Editor SETELAH menjalankan semua migrasi (001-008).
 -- Hanya membaca, tidak mengubah apa pun. Aman diulang.
 --
 -- Semua baris harus "OK". Kalau ada "KURANG", jalankan ulang migrasi
@@ -17,6 +17,7 @@ with expected_tables (name, from_migration) as (
     ('challenge_notes', '001'),
     ('attempts', '001'),
     ('ai_usage', '003'),
+    ('app_settings', '007'),
     ('attempt_followups', '006')
 ),
 expected_functions (name, from_migration) as (
@@ -26,7 +27,8 @@ expected_functions (name, from_migration) as (
     ('claim_attempt_evaluation', '003'),
     ('finalize_attempt_evaluation', '003'),
     ('finalize_attempt_rejected', '003'),
-    ('consume_ai_quota', '003')
+    ('consume_ai_quota', '003'),
+    ('record_ai_usage', '008')
 ),
 expected_columns (tbl, col, from_migration) as (
   values
@@ -38,7 +40,14 @@ expected_columns (tbl, col, from_migration) as (
     ('attempts', 'audio_issue', '005'),
     ('challenges', 'review_box', '006'),
     ('challenges', 'next_review_at', '006'),
-    ('attempts', 'follow_up_questions', '006')
+    ('attempts', 'follow_up_questions', '006'),
+    ('app_settings', 'ai_enabled', '007'),
+    ('app_settings', 'ai_global_per_day', '007'),
+    ('ai_usage', 'cost_units', '008'),
+    ('ai_usage', 'prompt_tokens', '008'),
+    ('ai_usage', 'output_tokens', '008'),
+    ('ai_usage', 'thinking_tokens', '008'),
+    ('ai_usage', 'latency_ms', '008')
 )
 
 -- 1. Tabel ada?

@@ -4,8 +4,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types";
 
 import { ANONYMOUS_AI_QUOTA, consumeAiQuota } from "./quota";
+import { costUnitsFor } from "./usage";
 
-type RpcRow = { allowed: boolean; retry_after_seconds: number; reason: string };
+type RpcRow = {
+  allowed: boolean;
+  retry_after_seconds: number;
+  reason: string;
+  usage_id?: string | null;
+};
 
 /** A Supabase client stub: only `rpc` is ever called by consumeAiQuota. */
 function stub(result: { data?: RpcRow[] | null; error?: unknown }) {
@@ -22,8 +28,21 @@ function refused(row: RpcRow, anonymous = false) {
 
 describe("consumeAiQuota", () => {
   it("allows the call when the database says so", async () => {
+    const result = await refused({
+      allowed: true,
+      retry_after_seconds: 0,
+      reason: "ok",
+      usage_id: "c0ffee00-0000-4000-8000-000000000000",
+    });
+    expect(result).toEqual({
+      allowed: true,
+      usageId: "c0ffee00-0000-4000-8000-000000000000",
+    });
+  });
+
+  it("tolerates a row without a usage id instead of crashing the request", async () => {
     const result = await refused({ allowed: true, retry_after_seconds: 0, reason: "ok" });
-    expect(result).toEqual({ allowed: true });
+    expect(result).toEqual({ allowed: true, usageId: null });
   });
 
   it("sends the anonymous limits for anonymous users", async () => {
@@ -35,6 +54,7 @@ describe("consumeAiQuota", () => {
       p_kind: "evaluate",
       p_per_day: ANONYMOUS_AI_QUOTA.evaluate.perDay,
       p_per_minute: ANONYMOUS_AI_QUOTA.evaluate.perMinute,
+      p_cost_units: costUnitsFor("evaluate"),
     });
   });
 

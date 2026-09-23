@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { z } from "zod";
 
-import { consumeAiQuota } from "@/lib/ai/quota";
+import { consumeAiQuota, recordAiUsage } from "@/lib/ai/quota";
+import type { AiCallUsage } from "@/lib/ai/usage";
 import type { GenerateResponse } from "@/lib/api/contracts";
 import { THINKING_BUDGET, generateJson } from "@/lib/gemini/generate";
 import { OUTLINE_SYSTEM_INSTRUCTION, buildOutlinePrompt } from "@/lib/gemini/prompts";
@@ -68,8 +69,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Accounting only: recorded after the response, never in the hot path.
+    let usage: AiCallUsage | null = null;
+
     // --- Gemini ---
     const result = await generateJson({
+      onUsage: (value) => {
+        usage = value;
+      },
       label: "outline",
       contents: buildOutlinePrompt(parsed.data.topic),
       systemInstruction: OUTLINE_SYSTEM_INSTRUCTION,
@@ -80,6 +87,8 @@ export async function POST(request: Request) {
       timeoutMs: GEMINI_TIMEOUT_MS,
       budgetMs: ROUTE_BUDGET_MS - (Date.now() - started),
     });
+
+    after(() => recordAiUsage(supabase, quota.usageId, usage));
 
     const payload: GenerateResponse = {
       outline: result.outline,

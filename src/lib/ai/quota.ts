@@ -4,6 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/types";
 
+import { costUnitsFor, type AiCallUsage } from "./usage";
+
 /** Kinds of AI calls that count against a user's quota. */
 export type AiUsageKind = "generate" | "evaluate" | "hints" | "followup";
 
@@ -35,7 +37,14 @@ export const ANONYMOUS_AI_QUOTA: Limits = {
 export type QuotaReason = "ok" | "disabled" | "global" | "minute" | "day" | "anon";
 
 export type QuotaResult =
-  | { allowed: true }
+  | {
+      allowed: true;
+      /**
+       * The `ai_usage` row this call just claimed. Pass it to recordAiUsage
+       * once Gemini answers, to complete it with what the call actually cost.
+       */
+      usageId: string | null;
+    }
   | {
       allowed: false;
       reason: QuotaReason;
@@ -99,6 +108,7 @@ export async function consumeAiQuota(
     p_kind: kind,
     p_per_day: limits.perDay,
     p_per_minute: limits.perMinute,
+    p_cost_units: costUnitsFor(kind),
   });
 
   const row = data?.[0];
@@ -113,7 +123,7 @@ export async function consumeAiQuota(
     };
   }
 
-  if (row.allowed) return { allowed: true };
+  if (row.allowed) return { allowed: true, usageId: row.usage_id ?? null };
 
   const reason = (row.reason ?? "day") as QuotaReason;
   const wait = Math.max(1, row.retry_after_seconds);
@@ -124,4 +134,31 @@ export async function consumeAiQuota(
   }
 
   return { allowed: false, reason, retryAfterSeconds: wait, message, status };
+}
+
+/**
+ * Completes the `ai_usage` row that consumeAiQuota claimed with what the call
+ * actually cost. Call it from `after()`, so accounting never adds to the time
+ * the learner waits.
+ *
+ * Accounting must never break a request that already succeeded, so every
+ * failure here is swallowed after being logged.
+ */
+export async function recordAiUsage(
+  supabase: SupabaseClient<Database>,
+  usageId: string | null,
+  usage: AiCallUsage | null,
+): Promise<void> {
+  if (!usageId || !usage) return;
+
+  const { error } = await supabase.rpc("record_ai_usage", {
+    p_usage_id: usageId,
+    p_model: usage.model,
+    p_prompt_tokens: usage.promptTokens,
+    p_output_tokens: usage.outputTokens,
+    p_thinking_tokens: usage.thinkingTokens,
+    p_latency_ms: usage.latencyMs,
+  });
+
+  if (error) console.warn("[quota] record_ai_usage failed:", error.message);
 }

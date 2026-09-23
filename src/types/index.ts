@@ -408,8 +408,29 @@ export type Database = {
       };
       /** Checks + records one AI use for the caller (security definer). */
       consume_ai_quota: {
-        Args: { p_kind: string; p_per_day: number; p_per_minute: number };
-        Returns: { allowed: boolean; retry_after_seconds: number; reason: string }[];
+        Args: {
+          p_kind: string;
+          p_per_day: number;
+          p_per_minute: number;
+          p_cost_units: number;
+        };
+        Returns: {
+          allowed: boolean;
+          retry_after_seconds: number;
+          reason: string;
+          usage_id: string | null;
+        }[];
+      };
+      record_ai_usage: {
+        Args: {
+          p_usage_id: string;
+          p_model: string;
+          p_prompt_tokens: number | null;
+          p_output_tokens: number | null;
+          p_thinking_tokens: number | null;
+          p_latency_ms: number;
+        };
+        Returns: undefined;
       };
     };
     Enums: { [_ in never]: never };

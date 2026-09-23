@@ -3,6 +3,7 @@ import "server-only";
 import type { ContentListUnion, Schema } from "@google/genai";
 import type { ZodType } from "zod";
 
+import { parseUsageMetadata, type AiCallUsage } from "@/lib/ai/usage";
 import { GEMINI_MODEL, getGeminiClient } from "@/lib/gemini/client";
 import {
   GeminiError,
@@ -45,6 +46,12 @@ export interface GenerateJsonParams<T> {
   budgetMs: number;
   /** Extra tries after the first one. Default 2. */
   maxRetries?: number;
+  /**
+   * Called once, after the attempt that succeeded, with what that call cost.
+   * Never called when every attempt failed. Purely for accounting: throwing
+   * from here would fail a request that already worked, so it must not throw.
+   */
+  onUsage?: (usage: AiCallUsage) => void;
 }
 
 function sleep(ms: number): Promise<void> {
@@ -90,6 +97,13 @@ export async function generateJson<T>(params: GenerateJsonParams<T>): Promise<T>
       clearTimeout(timer);
 
       const ms = Date.now() - callStarted;
+      if (params.onUsage) {
+        try {
+          params.onUsage(parseUsageMetadata(response.usageMetadata, GEMINI_MODEL, ms));
+        } catch (usageError) {
+          console.warn(`[gemini] ${params.label}: onUsage threw`, usageError);
+        }
+      }
       console.info(`[gemini] ${params.label} attempt=${attempt + 1} ${ms}ms`);
 
       const text = response.text;

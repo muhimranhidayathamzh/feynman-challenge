@@ -143,6 +143,7 @@ In the Supabase SQL Editor, run every migration **in order**. Each one is idempo
 | `005_ai_quality.sql` | AI hints per outline point, unexplained jargon, unscorable-audio handling |
 | `006_learning_loop.sql` | Spaced repetition (`review_box`, `next_review_at`), follow-up questions and answers |
 | `007_public_safety.sql` | `app_settings`: app-wide AI kill switch and daily ceiling, checked inside `consume_ai_quota` |
+| `008_ai_cost.sql` | Weighted ceiling (cost units instead of calls) and per-call token and latency accounting |
 
 Then run [`supabase/verify.sql`](supabase/verify.sql) in the same editor. It is read-only and prints one row per table, RLS policy, function, column and bucket setting, each marked OK or missing, so a half-applied migration cannot go unnoticed.
 
@@ -152,6 +153,28 @@ To stop all AI spend at any time, with no deployment:
 update public.app_settings set ai_enabled = false where id = 1;        -- brake on
 update public.app_settings set ai_global_per_day = 50 where id = 1;    -- or lower the ceiling
 ```
+
+### What a call actually costs
+
+The ceiling is spent in **cost units**, not calls, because the calls are not comparable: `evaluate` sends minutes of audio, `hints` sends a few lines of text. The weights live in [`src/lib/ai/usage.ts`](src/lib/ai/usage.ts) and are passed to SQL, so the two cannot drift apart.
+
+Every call records its own token counts and latency, never any prompt, transcript or audio. Once a few days of real use have accumulated, derive the ceiling from the data instead of from intuition:
+
+```sql
+select kind,
+       count(*)                        as calls,
+       round(avg(prompt_tokens))       as avg_prompt_tokens,
+       round(avg(output_tokens))       as avg_output_tokens,
+       round(avg(thinking_tokens))     as avg_thinking_tokens,
+       round(avg(latency_ms))          as avg_ms,
+       sum(cost_units)                 as units
+from public.ai_usage
+where created_at > now() - interval '7 days'
+group by kind
+order by units desc;
+```
+
+Multiply the token averages by the current Gemini price list to get the real cost per evaluation, then set `ai_global_per_day` to the daily spend you are willing to carry.
 
 ### 5. Authentication (Supabase dashboard)
 - **Redirect URLs** (Authentication > URL Configuration): add `http://localhost:3000/api/auth/callback` and `https://<your-domain>/api/auth/callback`. Email confirmation, password recovery, OAuth, and the demo-account email link all land there.

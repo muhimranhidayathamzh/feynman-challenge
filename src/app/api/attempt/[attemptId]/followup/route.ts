@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { createPartFromBase64 } from "@google/genai";
 import { z } from "zod";
 
-import { consumeAiQuota } from "@/lib/ai/quota";
+import { consumeAiQuota, recordAiUsage } from "@/lib/ai/quota";
+import type { AiCallUsage } from "@/lib/ai/usage";
 import {
   AUDIO_ISSUE_MESSAGES,
   FollowupRequestSchema,
@@ -123,7 +124,13 @@ export async function POST(request: Request, context: RouteContext) {
     }
     const base64 = Buffer.from(await audioFile.arrayBuffer()).toString("base64");
 
+    // Accounting only: recorded after the response, never in the hot path.
+    let usage: AiCallUsage | null = null;
+
     const result = await generateJson({
+      onUsage: (value) => {
+        usage = value;
+      },
       label: "followup",
       contents: [
         {
@@ -143,6 +150,8 @@ export async function POST(request: Request, context: RouteContext) {
       timeoutMs: GEMINI_TIMEOUT_MS,
       budgetMs: ROUTE_BUDGET_MS - (Date.now() - started),
     });
+
+    after(() => recordAiUsage(supabase, quota.usageId, usage));
 
     // Unusable audio: store the explanation instead of a verdict.
     const issue = result.audio_issue;

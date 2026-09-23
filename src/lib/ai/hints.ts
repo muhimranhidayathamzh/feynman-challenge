@@ -1,8 +1,11 @@
 import "server-only";
 
+import { after } from "next/server";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { consumeAiQuota } from "@/lib/ai/quota";
+import { consumeAiQuota, recordAiUsage } from "@/lib/ai/quota";
+import type { AiCallUsage } from "@/lib/ai/usage";
 import { generateJson } from "@/lib/gemini/generate";
 import { HINTS_SYSTEM_INSTRUCTION, buildHintsPrompt } from "@/lib/gemini/prompts";
 import { GeminiError, type GeminiErrorCode } from "@/lib/gemini/retry";
@@ -57,9 +60,15 @@ export async function regenerateMissingHints(
     };
   }
 
+  // Accounting only: recorded after the response, never in the hot path.
+  let usage: AiCallUsage | null = null;
+
   let result;
   try {
     result = await generateJson({
+      onUsage: (value) => {
+        usage = value;
+      },
       label: "hints",
       contents: buildHintsPrompt({
         topic: challenge.title,
@@ -84,6 +93,8 @@ export async function regenerateMissingHints(
       code: error instanceof GeminiError ? error.code : "unknown",
     };
   }
+
+  after(() => recordAiUsage(supabase, quota.usageId, usage));
 
   let updated = 0;
   for (const { item, position } of targets) {

@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { createPartFromBase64 } from "@google/genai";
 import { z } from "zod";
 
-import { consumeAiQuota } from "@/lib/ai/quota";
+import { consumeAiQuota, recordAiUsage } from "@/lib/ai/quota";
+import type { AiCallUsage } from "@/lib/ai/usage";
 import type { EvaluateResponse } from "@/lib/api/contracts";
 import { THINKING_BUDGET, generateJson } from "@/lib/gemini/generate";
 import {
@@ -183,7 +184,13 @@ export async function POST(request: Request) {
       maxScore,
     });
 
+    // Accounting only: recorded after the response, never in the hot path.
+    let usage: AiCallUsage | null = null;
+
     const result = await generateJson({
+      onUsage: (value) => {
+        usage = value;
+      },
       label: "evaluate",
       contents: [
         { text: prompt },
@@ -198,6 +205,8 @@ export async function POST(request: Request) {
       timeoutMs: GEMINI_TIMEOUT_MS,
       budgetMs: ROUTE_BUDGET_MS - (Date.now() - started),
     });
+
+    after(() => recordAiUsage(supabase, quota.usageId, usage));
 
     // --- Audio could not be judged: complete WITHOUT scores ---
     // No mastery, latest_score, last_attempt_at, or streak change.
