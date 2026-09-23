@@ -521,6 +521,71 @@ Prompt 4.4 — Buktikan skor AI stabil dan adil. Ikuti "Aturan Umum" di prompts/
 
 ---
 
+## FASE 5 — Siap Publik
+
+Tujuan: mengubah aplikasi yang jalan menjadi situs yang boleh dibagikan ke orang asing — tanpa menghancurkan biaya, tanpa melanggar kewajiban data, dan tanpa buta saat ada yang rusak.
+
+Dikerjakan **sebelum** sisa Fase 4. Dua prompt Fase 4 ditarik ke depan ke dalam fase ini (lihat urutan eksekusi di bawah); nomornya tidak diubah supaya riwayat commit tetap terbaca.
+
+**Urutan eksekusi Fase 5:** 5.1 → 4.2 → 5.2 → bagian Sentry dari 4.3 → 5.3.
+Sisa Fase 4 (4.1 riwayat percobaan, E2E dari 4.3, 4.4 eval-golden) dikerjakan setelah situs hidup.
+
+**Keputusan tambahan:**
+
+| # | Keputusan | Default | Dipakai di |
+|---|---|---|---|
+| D15 | CAPTCHA | Cloudflare Turnstile (gratis, tanpa batas permintaan) di daftar dan mode demo | 5.1 |
+| D16 | Rate limit per-IP | Di dalam aplikasi, jendela geser di memori per instance. Naik ke Upstash Redis kalau sudah banyak instance | 5.1 |
+| D17 | Konfirmasi email | **Nyalakan** sebelum publik. Tanpa itu siapa pun bisa mendaftar memakai email orang lain | 5.1 |
+| D18 | Pengirim email | SMTP kustom (Resend atau Postmark). SMTP bawaan Supabase hanya untuk uji coba dan dibatasi beberapa email per jam | 5.3 |
+| D19 | Analitik | Hanya yang tanpa cookie dan tanpa data pribadi (Vercel Analytics atau Umami). Tidak pernah merekam isi transkrip | 5.3 |
+
+### Prompt 5.1 — Gerbang Penyalahgunaan
+
+```
+Prompt 5.1 — Orang asing boleh masuk, penyalahguna tidak. Ikuti "Aturan Umum" di prompts/improvement-plan.md.
+
+1. Rate limit per-IP untuk /api/* (D16): jendela geser murni di src/lib/utils dengan unit test, dipakai lewat satu helper di route. Batas berbeda untuk rute AI, rute tulis biasa, dan rute auth. Ambil IP dari header proxy Vercel, jangan percaya header yang bisa dipalsukan sembarang klien. Jawab 429 dengan Retry-After.
+2. Cloudflare Turnstile (D15): widget di halaman daftar dan di tombol "Coba tanpa akun", token dikirim lewat options.captchaToken ke signUp dan signInAnonymously. Mati total dan tidak menghalangi apa pun bila NEXT_PUBLIC_TURNSTILE_SITE_KEY kosong, supaya pengembangan lokal tidak terganggu.
+3. Konfirmasi email (D17): nyalakan di Supabase, sesuaikan copy alur daftar agar jelas "cek emailmu", dan pastikan tautan konfirmasi mendarat di /api/auth/callback.
+4. Uji: tanpa kunci Turnstile semua alur tetap jalan; dengan kunci, permintaan tanpa token ditolak.
+5. README: bagian "Pengamanan" yang menjelaskan rem global (007), kuota, rate limit, dan CAPTCHA sebagai empat lapis berbeda.
+```
+
+### Prompt 5.2 — Halaman Legal & Keterbukaan AI
+
+```
+Prompt 5.2 — Orang menitipkan suaranya, mereka berhak tahu apa yang terjadi. Ikuti "Aturan Umum" di prompts/improvement-plan.md.
+
+1. /privasi: data apa yang dikumpulkan (email, nama tampilan, zona waktu, rekaman suara, transkrip, catatan), tujuannya, berapa lama disimpan, dan bahwa rekaman dikirim ke Google Gemini untuk dinilai. Sebutkan hak penghapusan dan tautkan ke cara menghapus akun (4.2).
+2. /syarat: ketentuan singkat dan manusiawi. Bukan nasihat hukum; tandai bahwa penilaian AI bisa keliru dan tidak untuk keputusan penting.
+3. Tautan keduanya di footer landing, halaman daftar, dan Pengaturan. Keduanya publik di middleware dan masuk sitemap.
+4. Saat merekam pertama kali dan di halaman daftar, satu kalimat jujur: rekamanmu dikirim ke Google Gemini untuk dinilai, dan bisa kamu hapus kapan saja.
+5. Tulis dalam bahasa Indonesia yang bisa dibaca orang biasa, bukan salinan template.
+```
+
+### Prompt 5.3 — Peluncuran
+
+```
+Prompt 5.3 — Hidupkan di domain sungguhan. Ikuti "Aturan Umum" di prompts/improvement-plan.md.
+
+1. NEXT_PUBLIC_SITE_URL di env produksi, lalu pastikan Open Graph, robots, dan sitemap memakai domain itu, bukan localhost.
+2. SMTP kustom (D18) di Supabase, plus Redirect URL produksi. Uji: lupa kata sandi benar-benar mengirim email ke kotak masuk sungguhan.
+3. Analitik tanpa cookie (D19).
+4. Daftar periksa peluncuran di README: Supabase Pro (free tier dipause 7 hari dan tidak punya backup), batas anggaran di kunci Gemini, plafon ai_global_per_day disetel sadar, backup basis data aktif.
+5. Uji asap di produksi: daftar, konfirmasi email, buat tantangan, rekam, evaluasi, reset kata sandi, hapus akun. Catat hasilnya.
+6. Lighthouse ulang di domain produksi.
+```
+
+### ✅ Checkpoint Fase 5
+- Rate limit dan CAPTCHA terbukti menolak percobaan berulang, sementara pemakaian normal tidak pernah tersenggol.
+- Menarik rem di app_settings benar-benar menghentikan panggilan AI, dan melepasnya memulihkan.
+- Halaman privasi dan syarat bisa dibuka tanpa login, dan hapus akun benar-benar menghapus rekaman.
+- Error yang sengaja dibuat di produksi muncul di Sentry tanpa data pribadi.
+- Uji asap produksi lolos seluruhnya, termasuk email sungguhan.
+
+---
+
 ## Backlog (setelah Fase 4)
 
 E2E, Sentry, hapus akun, script maintenance, dan eval-golden sudah dijadwalkan di Fase 4.
@@ -555,6 +620,9 @@ E2E, Sentry, hapus akun, script maintenance, dan eval-golden sudah dijadwalkan d
 | V.4 | Layar hasil evaluasi | ✅ |
 | V.5 | Panggung rekam & catatan belajar | ✅ |
 | V.6 | Meja Belajar, onboarding, landing & polish | ✅ |
+| 5.1 | Gerbang penyalahgunaan (rate limit, CAPTCHA, konfirmasi email) | ⬜ |
+| 5.2 | Halaman legal & keterbukaan AI | ⬜ |
+| 5.3 | Peluncuran | ⬜ |
 | 4.1 | Riwayat percobaan | ⬜ |
 | 4.2 | Hapus akun & pembersihan storage | ⬜ |
 | 4.3 | Test E2E & monitoring error | ⬜ |
