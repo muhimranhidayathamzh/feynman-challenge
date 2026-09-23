@@ -28,6 +28,7 @@ You pick a topic. AI drafts a learning outline and sources. You study, then **re
 - **Spaced repetition**: Leitner boxes (1, 3, 7, 14, 30, 60 days) decide when each topic comes back. Mastery climbs `not_started → attempted → developing → proficient → mastered → solidified` and slips a level if a review is badly overdue.
 - **Gentle accountability**: deadlines are calendar days in your timezone, missed ones auto-extend once, and streaks count real completed evaluations.
 - **Demo mode**: anonymous sign-in with a seeded example, stricter AI quota, and a one-step path to keep the account (link an email, then set a password).
+- **Four layers of cost control**: a per-user AI quota enforced atomically in SQL, tighter limits for demo accounts, an app-wide daily ceiling, and a kill switch — the last two flipped from the SQL editor with no redeploy.
 - **Installable PWA**: maskable icons, shortcuts, an offline page, and a service worker that never caches private pages.
 - **"Kertas & Kapur" interface**: a warm paper light theme for studying and a chalkboard dark theme for the recording stage, in Newsreader and Plus Jakarta Sans. One action per screen, evidence before numbers, and never red for a learning gap. The rules live in [`docs/design/DESIGN.md`](docs/design/DESIGN.md) and are enforced by `npm run design:check`.
 
@@ -99,6 +100,7 @@ src/
 | **Deadlines as calendar days + user timezone** | "Today" is always computed in the learner's IANA timezone. Auto-extension and streak display are derived at read time instead of being stored and going stale. |
 | **Spaced repetition over time decay** | Leitner boxes schedule the next review from performance. Early reviews do not earn promotions, so "solidified" really means spaced, successful recall. |
 | **Quota in SQL** | `consume_ai_quota` counts calls atomically, so concurrent requests cannot slip past the limit. Anonymous demo accounts get tighter limits. |
+| **The emergency brake lives in SQL, not in env vars** | Per-user quota is the wrong unit for a public site: anonymous sign-in means accounts are free to mint. `app_settings` holds an `ai_enabled` switch and a daily ceiling read inside `consume_ai_quota`, so spend can be stopped in one `UPDATE`, with no deployment. The global count deliberately skips a global lock — a small overshoot on a cost guard beats serialising every AI call. |
 | **Network-only navigations in the service worker** | Authenticated HTML is never cached, so a shared device cannot show a previous user's data offline. Caches are versioned per build and wiped on logout. |
 
 ---
@@ -122,7 +124,12 @@ NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...      # server-only
 GEMINI_API_KEY=...                 # server-only
+
+NEXT_PUBLIC_SITE_URL=...           # canonical origin, for Open Graph and the sitemap
+NEXT_PUBLIC_ALLOW_INDEXING=        # leave empty; "1" only for the real launch
 ```
+
+Indexing is opt-in. While `NEXT_PUBLIC_ALLOW_INDEXING` is empty, `robots.txt` serves `Disallow: /` and every page carries `noindex`, so a test deployment cannot end up in search results.
 
 ### 4. Database
 In the Supabase SQL Editor, run every migration **in order**. Each one is idempotent.
@@ -135,6 +142,16 @@ In the Supabase SQL Editor, run every migration **in order**. Each one is idempo
 | `004_time_and_state.sql` | User timezone, `deadline` as a date, `last_attempt_at` |
 | `005_ai_quality.sql` | AI hints per outline point, unexplained jargon, unscorable-audio handling |
 | `006_learning_loop.sql` | Spaced repetition (`review_box`, `next_review_at`), follow-up questions and answers |
+| `007_public_safety.sql` | `app_settings`: app-wide AI kill switch and daily ceiling, checked inside `consume_ai_quota` |
+
+Then run [`supabase/verify.sql`](supabase/verify.sql) in the same editor. It is read-only and prints one row per table, RLS policy, function, column and bucket setting, each marked OK or missing, so a half-applied migration cannot go unnoticed.
+
+To stop all AI spend at any time, with no deployment:
+
+```sql
+update public.app_settings set ai_enabled = false where id = 1;        -- brake on
+update public.app_settings set ai_global_per_day = 50 where id = 1;    -- or lower the ceiling
+```
 
 ### 5. Authentication (Supabase dashboard)
 - **Redirect URLs** (Authentication > URL Configuration): add `http://localhost:3000/api/auth/callback` and `https://<your-domain>/api/auth/callback`. Email confirmation, password recovery, OAuth, and the demo-account email link all land there.
@@ -167,7 +184,7 @@ npm run build           # production build
 
 The same checks run in CI on every push (`.github/workflows/ci.yml`). The service worker is registered only in production builds, so test PWA behaviour with `npm run build && npm start`.
 
-To regenerate the app icons after changing the mark: `npm run icons`.
+Other scripts: `npm run icons` regenerates the app icons after changing the mark, and `npm run og` re-photographs the link-preview card.
 
 ### Screen gallery (design work)
 
@@ -176,7 +193,10 @@ In development, `/dev/galeri` renders every screen and state (dashboard, noteboo
 ```bash
 npm run dev                          # terminal 1
 npm run shots -- --label before      # terminal 2: docs/design/shots/before/*.png at 390 and 1280 px
+npm run og                           # terminal 2: public/og.png, the 1200x630 link preview
 ```
+
+The link-preview card is itself a page (`/dev/og`) rendered with the app's own tokens and fonts, so it cannot drift from the design.
 
 Design rules live in [`docs/design/DESIGN.md`](docs/design/DESIGN.md), and the latest audit in [`docs/design/audit.md`](docs/design/audit.md).
 
@@ -204,12 +224,28 @@ The findings that drove the change are listed in [`docs/design/audit.md`](docs/d
 
 ---
 
+## ☁️ Deploying
+
+The app runs on Vercel with no extra configuration; everything below is set once.
+
+1. **Import the repository** in Vercel. Next.js is detected automatically.
+2. **Environment variables**: the four from [Environment](#3-environment), plus `NEXT_PUBLIC_SITE_URL` once the domain is known. Only the two `NEXT_PUBLIC_` Supabase values reach the browser; the service-role and Gemini keys are read exclusively through `src/lib/env.ts`, which is guarded by `server-only`.
+3. **Supabase → URL Configuration**: add `https://<your-domain>/api/auth/callback` to the redirect URLs, alongside the localhost one.
+4. **Set the AI ceiling** for the audience you expect (`app_settings.ai_global_per_day`).
+5. **Leave `NEXT_PUBLIC_ALLOW_INDEXING` empty** until the launch is real.
+
+Supabase's free tier pauses a project after seven days without activity and keeps no backups, so a deployment meant to be used needs the paid tier. Its built-in email service is rate limited for testing only — password resets need custom SMTP before real users arrive.
+
+---
+
 ## 🗺️ Roadmap
 
-The improvement plan that produced v1.0 lives in [`prompts/improvement-plan.md`](prompts/improvement-plan.md), with a backlog at the end: end-to-end tests, error monitoring, account deletion, offline recording, and push reminders. See [`CHANGELOG.md`](CHANGELOG.md) for what changed.
+The plan of record is [`prompts/improvement-plan.md`](prompts/improvement-plan.md): every phase, the decisions behind it, and a status table. Phases 1–3 shipped as v1.0.0, phase V was the visual redesign, and **phase 5** collects the gates before a public launch — per-IP rate limiting and CAPTCHA, account deletion, privacy and terms, error monitoring. Phase 4 (attempt history, end-to-end tests, AI scoring consistency) follows the launch. Offline recording, push reminders, analytics and export remain in the backlog.
+
+[`docs/README.md`](docs/README.md) maps the rest of the documentation. See [`CHANGELOG.md`](CHANGELOG.md) for what changed.
 
 ---
 
 ## 📄 License
 
-MIT. Built as a portfolio project.
+MIT — see [`LICENSE`](LICENSE). Built as a portfolio project.

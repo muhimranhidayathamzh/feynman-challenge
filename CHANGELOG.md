@@ -4,6 +4,14 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Getting ready for the public (Fase 5, in progress)
+
+- **Cost brakes that need no deployment**: migration 007 adds `app_settings` with an app-wide AI kill switch and a daily ceiling, both checked inside `consume_ai_quota`. Per-user quota was the wrong unit for a public site, where anonymous accounts are free to mint. The four AI routes now answer 503 for an app-wide brake and 429 only when a learner hit their own limit.
+- **Link previews**: `metadataBase`, Open Graph and Twitter cards, `robots.txt` and a sitemap. The preview image is a page rendered with the app's own tokens and fonts (`npm run og`), so it cannot drift from the design.
+- **Indexing is opt-in**: without `NEXT_PUBLIC_ALLOW_INDEXING`, `robots.txt` disallows everything and pages carry `noindex`, so a test deployment cannot reach search results.
+- **Landing hierarchy fixed**: "Coba tanpa akun" is the action the page wants and was rendered as the weakest element on screen; it is now the single accented action.
+- **Documentation**: `supabase/verify.sql` checks that every migration landed, `docs/README.md` maps the documentation, and the repository finally carries the MIT `LICENSE` its README always claimed.
+
 ### Visual overhaul: "Kertas & Kapur" (Fase V)
 
 A full redesign of the interface, planned in `docs/design/DESIGN.md` and audited in `docs/design/audit.md`. No database changes.
