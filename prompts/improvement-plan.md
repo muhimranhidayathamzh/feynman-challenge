@@ -521,6 +521,26 @@ Prompt 4.4 — Buktikan skor AI stabil dan adil. Ikuti "Aturan Umum" di prompts/
 
 ---
 
+## Urutan Eksekusi Final
+
+**Keputusan 2026-09-26:** semua peningkatan diselesaikan **sebelum** aplikasi dipakai, supaya versi yang pertama kali dipakai adalah versi yang sudah jadi. Bagian ini menggantikan urutan di Fase U, Fase 5, dan Fase 4. Nomor prompt tidak diubah supaya riwayat commit tetap terbaca.
+
+| Urutan | Prompt | Alasan posisinya |
+|---|---|---|
+| 1 | 4.1 Riwayat percobaan | Lubang yang paling terasa: hasil lama sulit dibuka lagi |
+| 2 | 4.2 Hapus akun & pembersihan storage | Hak atas data; 5.2 menautkan ke fitur ini |
+| 3 | 5.2 Halaman legal & keterbukaan AI | Menjelaskan apa yang terjadi pada rekaman, termasuk cara menghapusnya |
+| 4 | 5.1 Gerbang penyalahgunaan | Rate limit, Turnstile, konfirmasi email |
+| 5 | U.2 Monitoring error | Sentry, mati tanpa DSN |
+| 6 | 5.4 Pengingat review | **Tidak lagi bersyarat.** Spaced repetition tanpa saluran pemanggil tidak lengkap |
+| 7 | 4.3 Test E2E | Dikerjakan setelah semua fitur ada, supaya menjaga seluruh alur |
+| 8 | 4.4 Konsistensi penilaian AI | Butuh rekaman asli (D14) |
+| 9 | U.3 + 5.3 Deploy & peluncuran | Terakhir: yang dipakai adalah versi final |
+
+Semua kode dibangun agar tetap jalan tanpa layanan luar yang belum disiapkan (Turnstile, Sentry, penyedia email): fiturnya mati dengan tenang sampai kuncinya diisi. Yang benar-benar butuh masukan pemilik proyek hanya rekaman untuk 4.4 dan project Supabase kedua untuk 4.3 (D12), dan keduanya punya jalan cadangan.
+
+---
+
 ## FASE U — Uji Pribadi
 
 Tujuan: menaruh aplikasi di Vercel dan **memakainya sendiri selama seminggu**, dengan alat ukur terpasang sebelum pemakaian dimulai — bukan sesudahnya, saat datanya sudah hilang.
@@ -714,7 +734,7 @@ Pengingat review naik dari backlog ke Prompt 5.4: itu bukan fitur tambahan, mela
 | U.3 | Deploy ke Vercel | ⬜ |
 | 5.1 | Gerbang penyalahgunaan (rate limit, CAPTCHA, konfirmasi email) | ⬜ |
 | 5.2 | Halaman legal & keterbukaan AI | ⬜ |
-| 5.4 | Pengingat review (bila checkpoint Fase U memintanya) | ⬜ |
+| 5.4 | Pengingat review | ⬜ |
 | 5.3 | Peluncuran | ⬜ |
 | 4.1 | Riwayat percobaan | ⬜ |
 | 4.2 | Hapus akun & pembersihan storage | ⬜ |
