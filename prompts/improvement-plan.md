@@ -451,6 +451,20 @@ Ditambahkan 2026-09-27 setelah pemilik proyek merasa visual dan fiturnya belum p
 6. Logika murni di src/lib/utils dengan unit test. Uji interaksi di browser sungguhan, termasuk keyboard. DESIGN.md §10 dan §11 diperbarui di commit yang sama.
 ```
 
+### Prompt V.8 — Landing untuk Sebuah Produk
+
+```
+Prompt V.8 — Landing yang membuat orang ingin mencoba, bukan sekadar menerangkan. Ikuti "Aturan Umum" dan DESIGN.md.
+
+Ditambahkan 2026-09-27 atas permintaan pemilik proyek: tanpa Fotosintesis, dan terasa seperti landing produk yang profesional.
+
+1. Ganti topik demo menjadi topik dewasa sehari-hari (bunga majemuk) di satu sumber data, sehingga landing, tantangan "Coba tanpa akun", dan galeri ikut berubah. Sumber belajar harus terbukti ada.
+2. Tes untuk data demo: setiap kutipan bukti ada kata per kata di transkrip, istilah jargon tertandai, setiap status coverage terwakili.
+3. Landing sebagai halaman produk: bilah atas, hero terbelah dengan papan tulis, cara kerja, demo bukti interaktif dari komponen hasil yang asli, jadwal ulang, alasan metode, pertanyaan umum, ajakan penutup, kaki halaman.
+4. Setiap klaim dicocokkan dengan kode. Tidak ada testimoni, angka pengguna, atau fitur yang belum dibangun.
+5. Ukur Lighthouse sebagai median tiga run; jangan terbitkan angka run tunggal.
+```
+
 ### ✅ Checkpoint Fase V
 - `npm run design:check` hijau: tidak ada gradient dekoratif, glow, blur, Inter, emoji, atau kontras di bawah AA.
 - Setiap layar di galeri punya screenshot sebelum dan sesudah di kedua tema.
@@ -542,6 +556,7 @@ Prompt 4.4 — Buktikan skor AI stabil dan adil. Ikuti "Aturan Umum" di prompts/
 
 | Urutan | Prompt | Alasan posisinya |
 |---|---|---|
+| 0 | V.8 Landing untuk sebuah produk | Dikerjakan lebih dulu (2026-09-27): pemilik proyek ingin landing yang profesional, tanpa Fotosintesis |
 | 0 | V.7 Tinjauan ulang lima layar | Dikerjakan lebih dulu (2026-09-27): pemilik proyek belum sreg dengan visualnya |
 | 1 | 4.1 Riwayat percobaan | Lubang yang paling terasa: hasil lama sulit dibuka lagi |
 | 2 | 4.2 Hapus akun & pembersihan storage | Hak atas data; 5.2 menautkan ke fitur ini |
@@ -746,6 +761,7 @@ Pengingat review naik dari backlog ke Prompt 5.4: itu bukan fitur tambahan, mela
 | V.5 | Panggung rekam & catatan belajar | ✅ |
 | V.6 | Meja Belajar, onboarding, landing & polish | ✅ |
 | V.7 | Tinjauan ulang lima layar | ✅ |
+| V.8 | Landing untuk sebuah produk | ✅ |
 | U.1 | Ukur biaya, perbaiki plafon | ✅ |
 | U.2 | Monitoring error (Sentry) | ⬜ |
 | U.3 | Deploy ke Vercel | ⬜ |
