@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------
-   Public landing page (V.8): a product page inside the Kertas & Kapur
-   system. Paper for reading, the chalkboard for the product and the closing
-   call, one accented action (the demo) repeated only at the top and the end.
+   Public landing page (V.10), from docs/design/landing-konsep.html.
+   Paper for reading, the chalkboard only for the closing call. One accented
+   action per screen: at the top, and again at the close.
    ------------------------------------------------------------------------- */
 .lp {
   background: var(--paper);
@@ -34,107 +34,119 @@
   min-height: 64px;
 }
 
-/* Small label above a heading. Ink, not vermilion: the accent is reserved
-   for the one action (DESIGN.md §4). */
+/* Small label above a heading. Ink, not vermilion: the accent is kept for
+   the one action (DESIGN.md section 4). */
 .lp-eyebrow {
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   color: var(--ink-3);
 }
 
-/* --- Hero --- */
-.lp-hero {
-  padding-block: var(--space-12) var(--space-16);
+/* --- 1. The mirror: one question, answered in the visitor's head --- */
+.lp-mirror {
+  padding-block: var(--space-16);
 }
 
-.lp-hero-grid {
-  display: grid;
-  gap: var(--space-10);
-  align-items: center;
-}
-
-@media (min-width: 960px) {
-  .lp-hero {
+@media (min-width: 768px) {
+  .lp-mirror {
     padding-block: var(--space-20);
   }
+}
 
-  .lp-hero-grid {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    gap: var(--space-16);
+.lp-mirror-inner {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+  max-width: 52rem;
+}
+
+.lp-mirror-question {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 1.6rem + 4.4vw, 5rem);
+  font-weight: var(--weight-medium);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  overflow-wrap: break-word;
+  max-width: 18ch;
+}
+
+.lp-mirror-instruction {
+  font-family: var(--font-serif);
+  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  color: var(--ink-2);
+}
+
+/* Ten seconds of ink, once. Decorative; reduced motion shows it full. */
+.lp-mirror-timer {
+  width: 100%;
+  max-width: 36rem;
+  height: 2px;
+  margin-block: var(--space-4) var(--space-2);
+  background: var(--line);
+  overflow: hidden;
+}
+
+.lp-mirror-timer > span {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transform-origin: left;
+  animation: lp-fill 10s linear both;
+}
+
+/* The relief arrives after the ten seconds. The text is in the page from
+   the start (screen readers read it at once); only its appearance waits,
+   and never the button below it. */
+.lp-mirror-reveal {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 36rem;
+  animation: lp-appear 600ms var(--ease-out) 10s both;
+}
+
+.lp-mirror-relief {
+  font-family: var(--font-serif);
+  font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+  line-height: 1.25;
+}
+
+.lp-mirror-reason {
+  color: var(--ink-2);
+  line-height: var(--leading-normal);
+}
+
+@keyframes lp-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }
 
-.lp-hero-copy {
-  display: grid;
-  justify-items: start;
-  gap: var(--space-5);
+@keyframes lp-appear {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-.lp-hero-title {
-  font-family: var(--font-serif);
-  font-size: clamp(2.25rem, 1.6rem + 2.8vw, 3.75rem);
-  font-weight: var(--weight-medium);
-  line-height: 1.08;
-  letter-spacing: -0.02em;
-  max-width: 16ch;
-}
-
-.lp-hero-lead {
-  font-family: var(--font-serif);
-  font-size: clamp(1.125rem, 1rem + 0.4vw, 1.3125rem);
-  line-height: var(--leading-normal);
-  color: var(--ink-2);
-  max-width: 36rem;
-}
-
-.landing-actions {
+/* --- The one action --- */
+.lp-action {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  margin-top: var(--space-4);
 }
 
-/* The chalkboard, through the stage's own palette (data-mood="board"). In
-   the dark theme board and page share one colour: the hairline keeps it a
-   board instead of a gap. */
-.landing-board {
-  display: grid;
-  justify-items: center;
-  gap: var(--space-3);
-  padding: var(--space-8) var(--space-5);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-xl);
-  background: var(--paper);
-  color: var(--ink);
-  text-align: center;
-}
-
-.landing-board-title {
-  font-family: var(--font-serif);
-  font-size: var(--text-h2);
-  font-weight: var(--weight-semibold);
-}
-
-/* A still of the stage's chalk line: the same stroke the live waveform
-   draws (ink, 2.5 px, round). */
-.landing-wave {
-  width: min(15rem, 80%);
-  height: 3rem;
-  fill: none;
-  stroke: var(--ink);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-}
-
-/* The stage's record button, as a picture: nothing to press here. */
-.landing-rec.rec-button {
-  margin-top: var(--space-2);
-  cursor: default;
-}
-
-.landing-rec.rec-button:hover {
-  background: var(--accent);
+.lp-action-note {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
 }
 
 /* --- Sections --- */
@@ -155,7 +167,7 @@
 .lp-section-head {
   display: grid;
   gap: var(--space-3);
-  max-width: 44rem;
+  max-width: 46rem;
 }
 
 .lp-section-title {
@@ -166,14 +178,121 @@
   letter-spacing: -0.01em;
 }
 
-.lp-section-lead {
+.lp-prose {
   font-family: var(--font-serif);
   font-size: var(--text-lead);
   line-height: var(--leading-normal);
   color: var(--ink-2);
 }
 
-/* --- How it works: numbered columns under an ink rule, not cards (§12) --- */
+.lp-prose p {
+  max-width: 36rem;
+}
+
+.lp-columns {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 768px) {
+  .lp-columns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-12);
+  }
+}
+
+.lp-split {
+  display: grid;
+  gap: var(--space-8);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .lp-split {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: var(--space-12);
+  }
+}
+
+.lp-split-top {
+  align-items: start;
+}
+
+/* --- 3. The corrected page: the result page's own marks --- */
+.lp-sheet {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.lp-sheet-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-3);
+}
+
+.lp-sheet-text {
+  font-family: var(--font-serif);
+  font-size: var(--text-read);
+  line-height: 1.85;
+}
+
+.lp-sheet-notes {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--line);
+}
+
+.lp-sheet-notes li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--ink-2);
+}
+
+.lp-sheet-notes strong {
+  color: var(--ink);
+  font-weight: var(--weight-semibold);
+}
+
+.lp-sheet-notes svg {
+  flex: 0 0 auto;
+  margin-top: 0.1em;
+}
+
+/* A sample of the dotted underline, in place of a verdict mark. */
+.lp-sheet-term {
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 0.9rem;
+  margin-top: 0.1em;
+  border-bottom: 2px dotted var(--ink-3);
+}
+
+.lp-sheet-focus {
+  display: grid;
+  gap: var(--space-1);
+  padding-inline-start: var(--space-4);
+  border-inline-start: 3px solid var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  line-height: var(--leading-snug);
+}
+
+.lp-sheet-focus span {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-3);
+}
+
+/* --- 4. Steps: numbered columns under an ink rule, not cards (section 12) --- */
 .lp-steps {
   display: grid;
   gap: var(--space-8);
@@ -207,74 +326,26 @@
   font-weight: var(--weight-semibold);
 }
 
-/* --- How a result reads: the verdicts, with no example content --- */
-.lp-verdicts {
-  display: grid;
-}
-
-.lp-verdict-row {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  padding-block: var(--space-3);
-  border-bottom: 1px dashed var(--line);
-}
-
-.lp-verdict-row:first-child {
-  padding-top: 0;
-}
-
-.lp-verdict-row svg {
-  flex: 0 0 auto;
-  margin-top: 0.15em;
-}
-
-.lp-marks-legend {
-  line-height: 1.9;
-  color: var(--ink-2);
-}
-
-/* --- Prose sections --- */
-.lp-split {
-  display: grid;
-  gap: var(--space-8);
-  align-items: center;
-}
-
-@media (min-width: 768px) {
-  .lp-split {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: var(--space-12);
-  }
-}
-
-.lp-prose {
-  font-family: var(--font-serif);
-  font-size: var(--text-lead);
-  line-height: var(--leading-normal);
-  color: var(--ink-2);
-}
-
-.lp-prose p {
+.lp-steps-after {
   max-width: 36rem;
 }
 
-.lp-columns {
+/* --- 5. Safety --- */
+.lp-safety {
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
-@media (min-width: 768px) {
-  .lp-columns {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: var(--space-12);
-  }
+.lp-safety li {
+  padding-inline-start: var(--space-4);
+  border-inline-start: 2px solid var(--line-strong);
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  line-height: var(--leading-snug);
 }
 
-/* --- FAQ --- */
 .lp-faq {
   display: grid;
-  max-width: 48rem;
   border-top: 1px solid var(--line-strong);
 }
 
@@ -310,7 +381,7 @@
   color: var(--ink-2);
 }
 
-/* --- Closing call, at the board --- */
+/* --- 6. The close, at the board --- */
 .lp-closing {
   padding-block: var(--space-16);
   border-top: 1px solid var(--line-strong);
@@ -333,21 +404,24 @@
 
 .lp-closing-title {
   font-family: var(--font-serif);
-  font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.75rem);
+  font-size: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
   font-weight: var(--weight-medium);
-  line-height: 1.15;
-  max-width: 22ch;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  overflow-wrap: break-word;
+  max-width: 20ch;
 }
 
 .lp-closing-lead {
   font-family: var(--font-serif);
   font-size: var(--text-lead);
+  line-height: var(--leading-normal);
   color: var(--ink-2);
+  max-width: 34rem;
 }
 
-.lp-closing .landing-actions {
+.lp-closing .lp-action {
   justify-content: center;
-  padding-top: var(--space-2);
 }
 
 /* --- Footer --- */

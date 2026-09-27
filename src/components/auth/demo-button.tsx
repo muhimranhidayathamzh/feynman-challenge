@@ -16,6 +16,8 @@ interface Props {
    * (DESIGN.md: one accented action per screen).
    */
   variant?: "primary" | "ghost";
+  /** The landing phrases the same action as the benefit ("Temukan celahmu"). */
+  label?: string;
 }
 
 /**
@@ -24,7 +26,11 @@ interface Props {
  * tries the product on a topic of their own rather than reading a prepared
  * example (V.9). The account can later be kept from Pengaturan.
  */
-export function DemoButton({ onError, variant = "ghost" }: Props) {
+export function DemoButton({
+  onError,
+  variant = "ghost",
+  label = "Coba tanpa akun",
+}: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -58,7 +64,7 @@ export function DemoButton({ onError, variant = "ghost" }: Props) {
       loading={loading}
       onClick={() => void handleClick()}
     >
-      Coba tanpa akun
+      {label}
     </Button>
   );
 }

@@ -240,7 +240,7 @@ Measured on the public pages against a local production build (`npm start`), Lig
 | Landing (`/`) | 84 | 100 | 100 | 100 | 91 |
 | Sign in (`/login`) | 88 | — | 100 | 100 | — |
 
-Accessibility is 100 on both. Mobile performance is the simulated-slow-4G score; layout shift is 0. The landing shows no example content; its picture of the recording stage is drawn with the stage's own components rather than a screenshot.
+Accessibility is 100 on both. Mobile performance is the simulated-slow-4G score; layout shift is 0. The landing opens with a ten-second test (explain an everyday mechanism in your head) rather than screenshots of the app; the reasoning is in [`docs/design/landing-konsep.html`](docs/design/landing-konsep.html).
 
 SEO needs two readings. A default build scores **54**, on purpose: indexing is opt-in (see [Environment](#3-environment)), so every page says `noindex` and Lighthouse's heavily weighted "is crawlable" audit fails. With `NEXT_PUBLIC_ALLOW_INDEXING=1` the landing scores 91; the remaining point is lost because Next.js 15 streams `<meta name="description">` into the body for clients it does not recognise as crawlers, and Lighthouse 12 no longer identifies itself as one. Pages behind sign in were not measured.
 

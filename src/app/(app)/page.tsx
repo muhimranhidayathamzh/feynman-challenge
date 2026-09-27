@@ -1,5 +1,6 @@
 import { DashboardView } from "@/components/dashboard/dashboard-view";
 import { Landing } from "@/components/marketing/landing";
+import { pickQuestion } from "@/lib/utils/landing-questions";
 import { getAuthFeatures } from "@/lib/auth/features";
 import { tabFromSlug } from "@/lib/utils/challenge-status";
 import { buildDashboard } from "@/lib/utils/dashboard";
@@ -26,7 +27,13 @@ export default async function HomePage({ searchParams }: PageProps) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return <Landing features={await getAuthFeatures()} />;
+    // A different everyday question on each visit (the page is rendered per request).
+    return (
+      <Landing
+        features={await getAuthFeatures()}
+        question={pickQuestion(Math.random())}
+      />
+    );
   }
 
   const [{ data: profile }, { data: challenges }, clock, params] = await Promise.all([

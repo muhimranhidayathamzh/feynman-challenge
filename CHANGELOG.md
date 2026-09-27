@@ -4,6 +4,17 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### A landing that lets visitors feel the problem (V.10)
+
+Three rounds of landing revisions each fixed a fragment while the approach stayed wrong: the page explained the product instead of the visitor's problem. A concept study ([`docs/design/landing-konsep.html`](docs/design/landing-konsep.html)) started from the visitor instead, and this rebuild follows its recommendation.
+
+- **A ten-second test opens the page.** One large question about an everyday mechanism ("Bagaimana resleting bekerja?"), answered in the visitor's head. An ink line fills for ten seconds, then: "Tersendat? Kamu tidak sendirian." The primary action is visible from the first second and never waits. The question changes per visit, from a list of five that includes items from the original study.
+- **The problem gets its name**: the illusion of explanatory depth, from Rozenblit and Keil at Yale (2002), where people lowered their own rating of how well they understood zippers and locks after trying to explain them.
+- **A corrected paragraph shows how the product reads an explanation**, with the result page's own marks and meanings: the highlighter for quoted evidence, the dotted underline for an unexplained term, the partial and missing verdicts, and "Fokus berikutnya". It is about the feeling of understanding itself, so it needs no example topic.
+- Then the three steps, a safety section answering the biggest hesitation (speaking out loud), and a close at the board that asks the opening question again.
+- Honest by construction: no testimonials, user counts, countdown pressure or scarcity; the one study cited is real.
+- Verified across all five questions, six screen sizes and both themes (60 combinations), including the ten-second timing and reduced motion. Lighthouse, median of three runs: mobile 84, desktop 100, accessibility 100.
+
 ### A plain landing, and "Coba tanpa akun" on your own topic (V.9)
 
 - **No example topic anywhere a visitor looks.** The owner wants people to meet the product on their own topic. The landing keeps the recording stage as its picture of the product, drawn from the stage's own components with no content in it, and the interactive evidence demo gives way to an explanation of how a result reads: the three verdicts, the highlighter, the dotted underline for unexplained terms, and how the score is computed.

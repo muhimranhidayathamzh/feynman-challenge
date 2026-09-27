@@ -1,43 +1,39 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { LogIn, Plus, Square, UserPlus } from "lucide-react";
+import { Plus } from "lucide-react";
 
-import { LeitnerStrip } from "@/components/challenge/leitner-strip";
-import { MasteryMeter } from "@/components/challenge/mastery-meter";
 import { CoverageMark } from "@/components/evaluation/coverage-mark";
 import { BrandMark } from "@/components/layout/brand-mark";
-import { StageTimer } from "@/components/recording/stage-timer";
 import { ButtonLink } from "@/components/ui/button";
-import { Sheet } from "@/components/ui/sheet";
 import type { AuthFeatures } from "@/lib/auth/auth-features";
 import { cx } from "@/lib/utils/cx";
-import { COVERAGE_STATUS_LABEL } from "@/lib/utils/labels";
-import type { CoverageStatus } from "@/types";
+import { closingQuestion } from "@/lib/utils/landing-questions";
 
 import { LandingDemoButton } from "./landing-demo-button";
 
 // ---------------------------------------------------------------------------
-// The public front page (DV6; a product page since V.8, plain since V.9).
+// The public front page (V.10), from docs/design/landing-konsep.html.
 //
-// No example topic anywhere: the owner wants visitors to meet the product on
-// their own topic, so "Coba tanpa akun" opens "Tantangan baru" directly. The
-// pictures of the product are the product's own components with no content
-// in them (the stage's clock and hints, the verdict marks), so the page can
-// neither drift from the app nor promise a screen it does not have. Nothing
-// here claims a feature that does not exist yet.
+// One story: the visitor experiences the problem (a ten-second test of an
+// everyday mechanism), learns its name (the illusion of explanatory depth),
+// sees how the product reads an explanation (a corrected paragraph with the
+// result page's own marks), learns the steps, feels safe, and meets the
+// opening question again at the end.
+//
+// Honest by construction: no testimonials, user counts, countdowns or
+// scarcity, and no example topic. The one study cited is real and findable.
 // ---------------------------------------------------------------------------
 
-/** The stage's default length (see the record page). */
-const STAGE_SECONDS = 180;
+const CTA_LABEL = "Temukan celahmu";
 
 const STEPS = [
   {
     title: "Pilih topik",
-    body: "Tulis apa saja yang ingin kamu pahami. AI menyusun poin yang perlu kamu jelaskan dan sumber belajarnya.",
+    body: "Apa saja yang ingin kamu pahami. AI menyusun poin yang perlu kamu jelaskan dan sumber belajarnya.",
   },
   {
     title: "Jelaskan dengan suaramu",
-    body: "Rekam penjelasanmu seperti menerangkan ke teman. Bantuan tersedia, dan harganya tertulis jujur.",
+    body: "Rekam penjelasanmu seperti menerangkan ke teman. Kalau buntu, ada bantuan, dan harganya tertulis jujur.",
   },
   {
     title: "Lihat celahmu",
@@ -45,37 +41,22 @@ const STEPS = [
   },
 ];
 
-/** What each verdict means, in the words the result page uses. */
-const VERDICTS: { status: CoverageStatus; body: string }[] = [
-  {
-    status: "covered",
-    body: "Kamu menjelaskannya dengan benar. Kalimatmu yang jadi bukti ditandai stabilo.",
-  },
-  {
-    status: "partial",
-    body: "Sudah kamu singgung, tapi belum lengkap. Catatannya menyebut apa yang kurang.",
-  },
-  {
-    status: "missing",
-    body: "Belum muncul di penjelasanmu. “Pelajari lagi” membawamu langsung ke bagian itu.",
-  },
+const SAFETY = [
+  "Rekamanmu privat. Hanya kamu yang bisa memutarnya.",
+  "Dengarkan dulu sebelum mengirim, dan rekam ulang kapan saja.",
+  "Gratis. Bisa dicoba tanpa akun dan tanpa email.",
 ];
 
 const FAQ: { question: string; answer: string }[] = [
   {
+    question: "Ke mana rekamanku pergi?",
+    answer:
+      "Rekaman disimpan secara privat dan hanya kamu yang bisa memutarnya. Untuk dinilai, rekaman dikirim ke Google Gemini. Rekaman ikut terhapus saat tantangannya kamu hapus.",
+  },
+  {
     question: "Apakah gratis?",
     answer:
       "Ya. Kamu bisa langsung mencoba tanpa akun, atau daftar gratis. Ada batas pemakaian AI harian supaya layanan tetap berjalan untuk semua orang.",
-  },
-  {
-    question: "Ke mana rekamanku pergi?",
-    answer:
-      "Rekaman disimpan secara privat: hanya kamu yang bisa memutarnya. Untuk dinilai, rekaman dikirim ke Google Gemini. Rekaman ikut terhapus saat tantangannya kamu hapus.",
-  },
-  {
-    question: "Aku canggung bicara sendiri.",
-    answer:
-      "Tidak ada orang lain yang mendengar. Kamu bisa mendengarkan ulang sebelum mengirim, dan merekam ulang sesering yang kamu mau. Justru bagian yang terasa canggung biasanya bagian yang belum kamu pahami.",
   },
   {
     question: "Berapa lama satu kali latihan?",
@@ -94,76 +75,22 @@ const FAQ: { question: string; answer: string }[] = [
   },
 ];
 
-/**
- * A still of the chalk line the stage draws from the microphone: a few
- * syllables of speech, loud in the middle and quiet at the edges. Computed
- * once on the server, so the browser runs no script for it.
- */
-const WAVE_PATH = (() => {
-  const width = 240;
-  const mid = 24;
-  const points: string[] = [];
-  for (let i = 0; i <= 96; i++) {
-    const x = (i / 96) * width;
-    const t = i / 96;
-    const envelope = Math.sin(Math.PI * t) * (0.55 + 0.45 * Math.abs(Math.sin(t * 9)));
-    const y = mid + envelope * 18 * Math.sin(i * 1.7) * Math.cos(i * 0.37);
-    points.push(`${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`);
-  }
-  return points.join(" ");
-})();
-
-/**
- * The recording stage mid-explanation, drawn with the stage's own classes:
- * the recording dot, the clock, the chalk line, and the record button. It
- * has to say "you talk here" at a glance, so the hint chips, which need
- * context a first-time visitor does not have, are left out.
- */
-function BoardPreview() {
+/** The one action, phrased as its benefit. Signs up instead when the demo is off. */
+function PrimaryAction({ features }: { features: AuthFeatures }) {
   return (
-    <div
-      data-mood="board"
-      className="landing-board"
-      role="img"
-      aria-label="Layar rekam: papan tulis gelap saat kamu sedang menjelaskan, dengan jam hitung mundur, gelombang suaramu, dan tombol untuk selesai."
-    >
-      <p className="stage-status">
-        <span className="record-rec-dot" />
-        Merekam
-      </p>
-      <p className="landing-board-title">Jelaskan seperti ke teman</p>
-      <StageTimer totalSeconds={STAGE_SECONDS} elapsedSeconds={74} started />
-      <svg className="landing-wave" viewBox="0 0 240 48" preserveAspectRatio="none">
-        <path d={WAVE_PATH} />
-      </svg>
-      <span className="rec-button landing-rec" data-live>
-        <Square size={26} />
-      </span>
-      <p className="rec-button-label">Selesai</p>
-    </div>
-  );
-}
-
-function Actions({ features }: { features: AuthFeatures }) {
-  return (
-    <div className="landing-actions">
+    <div className="lp-action">
       {features.anonymous ? (
-        <>
-          <LandingDemoButton />
-          <ButtonLink href="/signup" variant="secondary" size="lg" icon={UserPlus}>
-            Daftar gratis
-          </ButtonLink>
-        </>
+        <LandingDemoButton label={CTA_LABEL} />
       ) : (
-        <>
-          <ButtonLink href="/signup" size="lg" icon={UserPlus}>
-            Daftar gratis
-          </ButtonLink>
-          <ButtonLink href="/login" variant="secondary" size="lg" icon={LogIn}>
-            Masuk
-          </ButtonLink>
-        </>
+        <ButtonLink href="/signup" size="lg">
+          {CTA_LABEL}
+        </ButtonLink>
       )}
+      <p className="lp-action-note">
+        {features.anonymous
+          ? "Tanpa akun · tanpa email · sekitar lima menit"
+          : "Daftar gratis · sekitar lima menit"}
+      </p>
     </div>
   );
 }
@@ -172,14 +99,12 @@ function Section({
   id,
   eyebrow,
   title,
-  lead,
   sunken = false,
   children,
 }: {
   id: string;
   eyebrow: string;
   title: string;
-  lead?: string;
   sunken?: boolean;
   children: ReactNode;
 }) {
@@ -194,7 +119,6 @@ function Section({
           <h2 id={id} className="lp-section-title">
             {title}
           </h2>
-          {lead && <p className="lp-section-lead">{lead}</p>}
         </header>
         {children}
       </div>
@@ -202,7 +126,64 @@ function Section({
   );
 }
 
-export function Landing({ features }: { features: AuthFeatures }) {
+/**
+ * A paragraph everyone has written in an exam, read the way the result page
+ * reads an explanation: the highlighter marks the quoted evidence, the
+ * dotted underline an unexplained term, and the notes use the page's own
+ * verdicts. No topic: "ini" is whatever the reader was sure they understood.
+ */
+function CorrectedPage() {
+  return (
+    <figure className="lp-sheet">
+      <figcaption className="lp-sheet-label">
+        Penjelasan yang terasa meyakinkan
+      </figcaption>
+      <p className="lp-sheet-text">
+        Aku sudah membaca materinya dua kali, jadi aku yakin paham. Intinya,{" "}
+        <mark className="legend-mark">
+          ini bekerja karena <span className="jargon-term">mekanismenya</span> memang
+          begitu
+        </mark>
+        . Pokoknya kalau sudah dipraktikkan pasti mengerti.
+      </p>
+      <ul className="lp-sheet-notes">
+        <li>
+          <CoverageMark status="partial" decorative />
+          <p>
+            <strong>Sebagian.</strong> Kamu menyebut ada cara kerjanya, tapi belum
+            menjelaskannya.
+          </p>
+        </li>
+        <li>
+          <CoverageMark status="missing" decorative />
+          <p>
+            <strong>Belum dibahas.</strong> Langkah-langkahnya sendiri.
+          </p>
+        </li>
+        <li>
+          <span className="lp-sheet-term" aria-hidden="true" />
+          <p>
+            <strong>Istilah yang belum kamu jelaskan.</strong> “Mekanismenya” itu nama,
+            bukan penjelasan.
+          </p>
+        </li>
+      </ul>
+      <p className="lp-sheet-focus">
+        <span>Fokus berikutnya</span>
+        Ganti “pokoknya” dengan langkah yang sebenarnya.
+      </p>
+    </figure>
+  );
+}
+
+export function Landing({
+  features,
+  question,
+}: {
+  features: AuthFeatures;
+  /** Chosen per visit (pickQuestion); pinned in the dev gallery. */
+  question: string;
+}) {
   return (
     <div className="lp">
       <a href="#lp-main" className="skip-link">
@@ -214,49 +195,91 @@ export function Landing({ features }: { features: AuthFeatures }) {
             <BrandMark size={28} />
             <span className="brand-name">Feynman Challenge</span>
           </Link>
-          <nav className="row gap-2" aria-label="Akun">
-            <ButtonLink href="/login" variant="ghost" size="sm">
-              Masuk
-            </ButtonLink>
-            <ButtonLink href="/signup" variant="secondary" size="sm">
-              Daftar
-            </ButtonLink>
-          </nav>
+          <ButtonLink href="/login" variant="ghost" size="sm">
+            Masuk
+          </ButtonLink>
         </div>
       </header>
 
       <main id="lp-main" tabIndex={-1}>
-        {/* Hero: the promise on the left, the stage on the right. */}
-        <section className="lp-hero" aria-labelledby="hero-title">
-          <div className="lp-inner lp-hero-grid">
-            <div className="lp-hero-copy">
-              <p className="lp-eyebrow">Teknik Feynman, dinilai AI</p>
-              <h1 id="hero-title" className="lp-hero-title">
-                Jelaskan dengan suaramu. Lihat bagian yang belum kamu pahami.
-              </h1>
-              <p className="lp-hero-lead">
-                Pilih topik apa pun, rekam penjelasanmu seperti menerangkan ke teman, lalu
-                dapatkan penilaian poin demi poin, lengkap dengan kutipan ucapanmu sendiri
-                sebagai bukti.
-              </p>
-              <Actions features={features} />
-              <p className="text-muted text-sm">
-                Gratis dan berbahasa Indonesia.
-                {features.anonymous
-                  ? " Bisa dicoba tanpa email, dengan topikmu sendiri."
-                  : ""}
+        {/* 1. The mirror: the visitor meets the problem in their own head. */}
+        <section className="lp-mirror" aria-labelledby="mirror-question">
+          <div className="lp-inner lp-mirror-inner">
+            <p className="lp-eyebrow">Tes sepuluh detik</p>
+            <h1 id="mirror-question" className="lp-mirror-question">
+              {question}
+            </h1>
+            <p className="lp-mirror-instruction">
+              Jawab dalam kepala. Jelaskan langkahnya, bukan namanya.
+            </p>
+            <div className="lp-mirror-timer" aria-hidden="true">
+              <span />
+            </div>
+            <div className="lp-mirror-reveal">
+              <p className="lp-mirror-relief">Tersendat? Kamu tidak sendirian.</p>
+              <p className="lp-mirror-reason">
+                Rasa paham sering bertahan sampai kita diminta menjelaskan. Feynman
+                Challenge membantumu menemukan bagian yang belum kamu pahami, dengan
+                suaramu sendiri.
               </p>
             </div>
-            <div className="lp-hero-visual">
-              <BoardPreview />
-            </div>
+            <PrimaryAction features={features} />
           </div>
         </section>
 
+        {/* 2. The name: shame becomes curiosity, with a source to check. */}
         <Section
-          id="how-title"
-          eyebrow="Cara kerjanya"
-          title="Tiga langkah, diulang sampai paham"
+          id="name-title"
+          eyebrow="Bukan cuma kamu"
+          title="Rasa paham dan bisa menjelaskan adalah dua hal berbeda"
+        >
+          <div className="lp-columns lp-prose">
+            <p>
+              Di Yale pada 2002, Leonid Rozenblit dan Frank Keil meminta orang menilai
+              seberapa paham mereka tentang benda sehari-hari seperti resleting dan
+              gembok, lalu menjelaskan cara kerjanya langkah demi langkah. Setelah
+              mencoba, mereka sendiri yang menurunkan penilaiannya. Fenomena ini disebut
+              ilusi kedalaman penjelasan.
+            </p>
+            <p>
+              Belajar pun begitu. Membaca ulang dan menonton membuat materi terasa akrab,
+              dan rasa akrab mudah disangka paham. Cara menguji bedanya dikenal sebagai
+              teknik Feynman, dinamai dari fisikawan Richard Feynman yang terkenal karena
+              menjelaskan hal rumit dengan sederhana: coba jelaskan dengan kata-katamu
+              sendiri.
+            </p>
+          </div>
+        </Section>
+
+        {/* 3. The corrected page: how the product reads an explanation. */}
+        <Section
+          id="read-title"
+          eyebrow="Cara penjelasanmu dibaca"
+          title="Membaca membuatmu merasa paham. Menjelaskan membuktikannya."
+          sunken
+        >
+          <div className="lp-split">
+            <div className="stack gap-4 lp-prose">
+              <p>
+                Rekam penjelasanmu tentang topik apa pun. Setiap poin yang perlu kamu
+                jelaskan dinilai dari ucapanmu sendiri, seperti guru yang teliti membaca
+                kertas ujianmu.
+              </p>
+              <p>
+                Kalimat yang jadi bukti ditandai stabilo. Istilah yang kamu pakai tapi
+                belum kamu jelaskan diberi garis titik-titik. Dan kamu selalu tahu satu
+                hal yang perlu diperbaiki berikutnya.
+              </p>
+            </div>
+            <CorrectedPage />
+          </div>
+        </Section>
+
+        {/* 4. The steps, short: by now the visitor knows why. */}
+        <Section
+          id="steps-title"
+          eyebrow="Caranya"
+          title="Pilih topik. Jelaskan dengan suaramu. Lihat celahmu."
         >
           <ol className="lp-steps">
             {STEPS.map((step, index) => (
@@ -269,128 +292,50 @@ export function Landing({ features }: { features: AuthFeatures }) {
               </li>
             ))}
           </ol>
+          <p className="lp-prose lp-steps-after">
+            Setelah itu, setiap topik punya jadwal ulangnya sendiri. Makin baik
+            penjelasanmu, makin jauh jaraknya, dari sehari sampai dua bulan.
+          </p>
         </Section>
 
-        {/* How a result reads, without an example: the verdicts and marks
-            the result page uses, each explained once. */}
+        {/* 5. Safety: the biggest hesitation, answered before the last button. */}
         <Section
-          id="grading-title"
-          eyebrow="Penilaian yang bisa diperiksa"
-          title="Setiap nilai punya bukti"
+          id="safe-title"
+          eyebrow="Tenang saja"
+          title="Tidak ada yang mendengar selain penilainya"
           sunken
         >
-          <div className="lp-split">
-            <div className="stack gap-4 lp-prose">
-              <p>
-                Rekamanmu diubah jadi transkrip, lalu setiap poin yang perlu kamu jelaskan
-                dinilai satu per satu. Pilih sebuah poin, dan kalimatmu yang jadi buktinya
-                menyala di transkrip.
-              </p>
-              <p>
-                Istilah yang kamu pakai tapi belum kamu jelaskan ikut ditandai, karena di
-                situlah pemahaman sering berhenti.
-              </p>
-              <p>
-                Skor 0 sampai 10 dihitung dengan rumus tetap dari kelengkapan, ketepatan,
-                dan kejelasan, dan selalu datang bersama satu kalimat ringkasan.
-              </p>
+          <div className="lp-split lp-split-top">
+            <ul className="lp-safety">
+              {SAFETY.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+            <div className="lp-faq">
+              {FAQ.map((item) => (
+                <details key={item.question} className="lp-faq-item">
+                  <summary className="lp-faq-question">
+                    {item.question}
+                    <Plus className="lp-faq-icon" size={20} aria-hidden="true" />
+                  </summary>
+                  <p className="lp-faq-answer">{item.answer}</p>
+                </details>
+              ))}
             </div>
-            <Sheet className="stack gap-5">
-              <ul className="lp-verdicts">
-                {VERDICTS.map((verdict) => (
-                  <li key={verdict.status} className="lp-verdict-row">
-                    <CoverageMark status={verdict.status} decorative />
-                    <div className="stack gap-1">
-                      <p className="font-semibold">
-                        {COVERAGE_STATUS_LABEL[verdict.status]}
-                      </p>
-                      <p className="text-secondary text-sm">{verdict.body}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <p className="lp-marks-legend text-sm">
-                <span className="legend-mark">Stabilo</span> kutipan yang jadi bukti.{" "}
-                <span className="jargon-term">Garis titik-titik</span> istilah yang belum
-                kamu jelaskan.
-              </p>
-            </Sheet>
           </div>
         </Section>
 
-        <Section
-          id="schedule-title"
-          eyebrow="Supaya tidak lupa lagi"
-          title="Diulang tepat pada waktunya"
-        >
-          <div className="lp-split">
-            <div className="stack gap-4 lp-prose">
-              <p>
-                Setiap topik punya jadwal ulangnya sendiri. Makin baik penjelasanmu, makin
-                jauh jarak ulangnya: dari sehari, sampai dua bulan.
-              </p>
-              <p>
-                Beranda selalu menunjukkan satu hal yang perlu kamu kerjakan hari ini, dan
-                tingkat penguasaanmu naik seiring penjelasan yang makin lengkap.
-              </p>
-            </div>
-            <Sheet className="stack gap-5">
-              <MasteryMeter state="developing" />
-              <LeitnerStrip box={1} />
-            </Sheet>
-          </div>
-        </Section>
-
-        <Section
-          id="why-title"
-          eyebrow="Kenapa cara ini"
-          title="Menjelaskan adalah cara paling jujur untuk menguji pemahaman"
-        >
-          <div className="lp-columns lp-prose">
-            <p>
-              Membaca ulang membuat materi terasa akrab, padahal belum tentu dipahami.
-              Menjelaskan memaksamu menyusunnya ulang sendiri, dan celahnya langsung
-              terasa di kalimat yang tersendat.
-            </p>
-            <p>
-              Teknik ini dinamai dari fisikawan Richard Feynman, yang terkenal karena
-              menjelaskan hal rumit dengan bahasa sederhana. Menguji ingatan secara aktif,
-              lalu mengulanginya dengan jarak yang makin lebar, termasuk cara belajar yang
-              paling kuat dukungan penelitiannya.
-            </p>
-          </div>
-        </Section>
-
-        <Section
-          id="faq-title"
-          eyebrow="Pertanyaan umum"
-          title="Sebelum kamu mencoba"
-          sunken
-        >
-          <div className="lp-faq">
-            {FAQ.map((item) => (
-              <details key={item.question} className="lp-faq-item">
-                <summary className="lp-faq-question">
-                  {item.question}
-                  <Plus className="lp-faq-icon" size={20} aria-hidden="true" />
-                </summary>
-                <p className="lp-faq-answer">{item.answer}</p>
-              </details>
-            ))}
-          </div>
-        </Section>
-
-        {/* Closing call, at the board: explaining happens in front of it. */}
+        {/* 6. The close, at the board: the opening question, answered with a way. */}
         <section className="lp-closing" data-mood="board" aria-labelledby="closing-title">
           <div className="lp-inner lp-closing-inner">
             <h2 id="closing-title" className="lp-closing-title">
-              Siap menjelaskan satu topik hari ini?
+              {closingQuestion(question)}
             </h2>
             <p className="lp-closing-lead">
-              Pilih topik yang ingin kamu pahami. Beberapa menit sudah cukup untuk tahu
-              seberapa paham kamu sebenarnya.
+              Sekarang kamu tahu cara mencari tahu. Jelaskan satu topik hari ini, dengan
+              suaramu, dan lihat bagian mana yang belum kamu pahami.
             </p>
-            <Actions features={features} />
+            <PrimaryAction features={features} />
           </div>
         </section>
       </main>
@@ -406,7 +351,7 @@ export function Landing({ features }: { features: AuthFeatures }) {
               Masuk
             </Link>
             <Link href="/signup" className="lp-footer-link">
-              Daftar
+              Daftar gratis
             </Link>
           </nav>
           <p className="text-muted text-xs">© 2026 Feynman Challenge</p>

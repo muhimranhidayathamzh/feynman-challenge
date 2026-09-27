@@ -16,6 +16,7 @@ import {
 import { FollowUpSection } from "@/components/evaluation/follow-up-section";
 import { AppShell } from "@/components/layout/app-shell";
 import { Landing } from "@/components/marketing/landing";
+import { pickQuestion } from "@/lib/utils/landing-questions";
 import { OfflineScreen } from "@/components/pwa/offline-screen";
 import {
   RecordingStage,
@@ -98,7 +99,13 @@ function content(id: string): ReactNode {
     case "komponen":
       return <ComponentSheet />;
     case "landing":
-      return <Landing features={{ google: true, anonymous: true }} />;
+      // Pinned to the first question so screenshots are identical on every run.
+      return (
+        <Landing
+          features={{ google: true, anonymous: true }}
+          question={pickQuestion(0)}
+        />
+      );
     case "login":
       return (
         <LoginForm
