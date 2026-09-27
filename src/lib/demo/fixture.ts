@@ -1,9 +1,16 @@
 // ============================================================================
 // Demo fixture: one fully worked example challenge for anonymous "Coba tanpa
-// akun" visitors. Seeded without calling Gemini, so trying the app costs no AI
-// quota. The attempt reads like a real first try: two points covered, one
-// partial, one missing, so every part of the results page has something to
-// show (coverage, "Pelajari lagi", jargon, follow-up questions).
+// akun" visitors, also shown on the public landing page. Seeded without
+// calling Gemini, so trying the app costs no AI quota. The attempt reads like
+// a real first try: two points covered, one partial, one missing, so every
+// part of the results page has something to show (coverage, "Pelajari lagi",
+// jargon, follow-up questions).
+//
+// The topic is deliberately adult and everyday (V.8): the first example a
+// visitor meets sets who the product is for.
+//
+// Every non-missing `evidence` must appear word for word in `transcript`,
+// or its highlight never shows. fixture.test.ts enforces that.
 // ============================================================================
 import type { FollowUpQuestion } from "@/lib/utils/followups";
 import type { Coverage, SourceType } from "@/types";
@@ -16,63 +23,65 @@ export interface DemoOutlineItem {
 }
 
 export const DEMO_CHALLENGE = {
-  title: "Fotosintesis",
+  title: "Bunga majemuk",
   recordingDurationSec: 180,
   deadlineInDays: 5,
 } as const;
 
 export const DEMO_OUTLINE: DemoOutlineItem[] = [
   {
-    title: "Apa itu fotosintesis",
+    title: "Apa itu bunga majemuk",
     description:
-      "Proses tumbuhan mengubah energi cahaya menjadi energi kimia yang tersimpan dalam gula.",
-    keywords: ["energi cahaya", "energi kimia", "glukosa", "autotrof"],
-    guiding_question: "Dari mana tumbuhan mendapatkan “makanannya”?",
+      "Bunga dihitung dari pokok ditambah bunga yang sudah terkumpul, sehingga bunga ikut berbunga.",
+    keywords: ["pokok", "bunga berbunga", "periode", "saldo"],
+    guiding_question: "Apa bedanya dengan bunga yang hanya dihitung dari pokok?",
   },
   {
-    title: "Bahan dan hasil",
+    title: "Bunga majemuk dan bunga tunggal",
     description:
-      "Karbon dioksida dan air, dengan bantuan cahaya, menjadi glukosa dan oksigen.",
-    keywords: ["karbon dioksida", "air", "oksigen", "persamaan reaksi"],
-    guiding_question: "Apa yang masuk ke daun, dan apa yang keluar?",
+      "Bunga tunggal hanya menghitung pokok. Selisih keduanya kecil di awal dan melebar seiring waktu.",
+    keywords: ["bunga tunggal", "pokok", "selisih"],
+    guiding_question:
+      "Dua orang menabung dengan suku bunga sama. Kenapa hasilnya bisa beda jauh?",
   },
   {
-    title: "Peran klorofil dan kloroplas",
+    title: "Peran waktu",
     description:
-      "Klorofil di dalam kloroplas menyerap cahaya merah dan biru, lalu memantulkan hijau.",
-    keywords: ["klorofil", "kloroplas", "spektrum cahaya"],
-    guiding_question: "Kenapa daun berwarna hijau?",
+      "Pertumbuhannya makin lama makin cepat, jadi mulai lebih awal sering lebih menentukan daripada besar setoran.",
+    keywords: ["eksponensial", "jangka panjang", "mulai lebih awal", "aturan 72"],
+    guiding_question:
+      "Kenapa uang yang mulai ditabung lebih awal bisa tumbuh jauh lebih besar?",
   },
   {
-    title: "Reaksi terang dan siklus Calvin",
+    title: "Dampaknya di kehidupan nyata",
     description:
-      "Reaksi terang menghasilkan ATP dan NADPH; siklus Calvin memakainya untuk mengikat CO₂ menjadi gula.",
-    keywords: ["reaksi terang", "ATP", "NADPH", "siklus Calvin"],
-    guiding_question: "Kenapa fotosintesis butuh dua tahap?",
+      "Menguntungkan untuk tabungan dan investasi, merugikan untuk utang yang bunganya ikut dibungakan.",
+    keywords: ["investasi", "kartu kredit", "utang", "pinjaman"],
+    guiding_question: "Di mana bunga majemuk justru bekerja melawanmu?",
   },
 ];
 
+// Both verified to exist (and a made-up page on the same site to 404).
 export const DEMO_SOURCES: { title: string; url: string; source_type: SourceType }[] = [
   {
-    title: "Fotosintesis — Wikipedia bahasa Indonesia",
-    url: "https://id.wikipedia.org/wiki/Fotosintesis",
+    title: "Bunga majemuk — Wikipedia bahasa Indonesia",
+    url: "https://id.wikipedia.org/wiki/Bunga_majemuk",
     source_type: "article",
   },
   {
-    title: "Photosynthesis — Khan Academy",
-    url: "https://www.khanacademy.org/science/biology/photosynthesis-in-plants",
-    source_type: "video",
+    title: "Compound interest — Wikipedia",
+    url: "https://en.wikipedia.org/wiki/Compound_interest",
+    source_type: "article",
   },
 ];
 
 export const DEMO_NOTES = `## Ringkasan
-- **Rumus**: 6CO₂ + 6H₂O + cahaya → C₆H₁₂O₆ + 6O₂
-- Terjadi di **kloroplas**; pigmen penyerap cahayanya **klorofil**.
-- Dua tahap: **reaksi terang** (di tilakoid) dan **siklus Calvin** (di stroma).
+- **Bunga tunggal**: bunga = pokok × suku bunga × waktu. Yang dibungakan hanya pokok.
+- **Bunga majemuk**: saldo akhir = pokok × (1 + suku bunga)ⁿ. Bunga tiap periode ikut dibungakan.
+- **Aturan 72**: 72 dibagi suku bunga tahunan kira-kira sama dengan berapa tahun sampai uang berlipat dua.
 
 ## Analogi
-Daun itu dapur bertenaga surya. Cahaya adalah kompornya, CO₂ dan air bahannya,
-gula masakannya, dan oksigen “asap” yang kebetulan kita butuhkan.
+Bola salju yang menggelinding: makin besar bolanya, makin banyak salju yang menempel di putaran berikutnya.
 
 > Ini tantangan contoh. Coba rekam penjelasanmu sendiri, lalu bandingkan hasilnya.
 `;
@@ -81,68 +90,70 @@ export const DEMO_ATTEMPT = {
   durationSeconds: 142,
   subScores: { comprehensiveness: 6, accuracy: 8, clarity: 7 },
   transcript:
-    "Oke, jadi fotosintesis itu cara tumbuhan bikin makanannya sendiri. Tumbuhan nggak makan kayak kita, " +
-    "dia pakai energi dari cahaya matahari terus diubah jadi energi kimia dalam bentuk gula, glukosa. " +
-    "Bahannya ada dua: karbon dioksida yang diambil dari udara lewat daun, sama air yang diserap dari akar. " +
-    "Hasilnya glukosa buat energi tumbuhan, dan oksigen yang dilepas ke udara, yang kita hirup. " +
-    "Jadi kayak dapur tenaga surya gitu. Terus kenapa daun hijau, itu karena ada klorofil di kloroplas. " +
-    "Klorofil itu yang menangkap cahaya. Hmm, ada tahap-tahapnya juga sih, tapi saya lupa detailnya.",
+    "Oke, jadi bunga majemuk itu bunga yang dihitung dari uang awal ditambah bunga yang sudah didapat sebelumnya. " +
+    "Jadi bunganya ikut berbunga, makanya sering disebut bunga berbunga. " +
+    "Beda sama bunga tunggal, yang cuma dihitung dari uang awal saja. " +
+    "Misalnya nabung sepuluh juta dengan bunga sepuluh persen setahun. Tahun pertama sama-sama dapat satu juta. " +
+    "Tapi tahun kedua, yang majemuk dapat bunga dari sebelas juta, jadi satu koma satu juta. " +
+    "Selisihnya kecil di awal, tapi makin lama makin jauh. " +
+    "Terus katanya pertumbuhannya eksponensial, jadi makin lama nabung hasilnya makin besar. " +
+    "Hmm, sebenarnya ada rumus buat ngitung kapan uangnya jadi dua kali lipat, tapi saya lupa.",
   feedback:
-    "Penjelasanmu tentang apa itu fotosintesis serta bahan dan hasilnya sudah jelas, dan analogi dapur " +
-    "tenaga surya sangat membantu. Bagian klorofil baru setengah: kamu menyebut klorofil menangkap cahaya, " +
-    "tapi belum menjelaskan kenapa daun terlihat hijau. Dua tahap fotosintesis belum dibahas sama sekali.",
+    "Penjelasanmu tentang apa itu bunga majemuk dan bedanya dengan bunga tunggal sudah jelas, dan contoh " +
+    "sepuluh juta membuatnya mudah diikuti. Bagian waktu baru setengah: kamu menyebut hasilnya makin besar, " +
+    "tapi belum menjelaskan kenapa mulai lebih awal begitu berpengaruh. Dampaknya di kehidupan nyata, " +
+    "termasuk pada utang, belum dibahas sama sekali.",
   strengths: [
-    "Membuka dengan gambaran besar yang mudah dipahami: tumbuhan membuat makanannya sendiri.",
-    "Bahan dan hasil disebut lengkap, termasuk dari mana tiap bahan berasal.",
-    "Analogi dapur tenaga surya membuat konsepnya terasa konkret.",
+    "Definisinya tepat, dan istilah “bunga berbunga” dijelaskan artinya.",
+    "Contoh sepuluh juta membuat perbedaan dengan bunga tunggal langsung terlihat.",
+    "Menyadari bahwa selisihnya kecil di awal lalu melebar seiring waktu.",
   ],
   improvements: [
-    "Jelaskan kenapa daun hijau: klorofil menyerap merah dan biru, lalu memantulkan hijau.",
-    "Tambahkan dua tahap: reaksi terang menghasilkan ATP dan NADPH, siklus Calvin memakainya untuk membuat gula.",
-    "Jelaskan “kloroplas” dengan kata sederhana, misalnya “dapur kecil di dalam sel daun”.",
+    "Jelaskan kenapa waktu begitu berpengaruh: bunga tahun ini ikut dibungakan tahun depan, jadi pertumbuhannya makin cepat, bukan sekadar makin banyak.",
+    "Tambahkan sisi sebaliknya: utang kartu kredit yang bunganya ikut dibungakan bisa membengkak dengan cara yang sama.",
+    "Jelaskan “eksponensial” dengan kata sederhana, misalnya “tumbuhnya makin lama makin cepat”.",
   ],
   coverage: [
     {
       outline_index: 1,
-      topic: "Apa itu fotosintesis",
+      topic: "Apa itu bunga majemuk",
       status: "covered",
-      note: "Tepat dan sederhana: energi cahaya diubah menjadi energi kimia berupa gula.",
+      note: "Tepat: bunga dihitung dari pokok ditambah bunga sebelumnya, dan istilah “bunga berbunga” dijelaskan.",
       evidence:
-        "dia pakai energi dari cahaya matahari terus diubah jadi energi kimia dalam bentuk gula",
+        "bunga yang dihitung dari uang awal ditambah bunga yang sudah didapat sebelumnya",
     },
     {
       outline_index: 2,
-      topic: "Bahan dan hasil",
+      topic: "Bunga majemuk dan bunga tunggal",
       status: "covered",
-      note: "Kedua bahan dan kedua hasil disebut, lengkap dengan asalnya.",
-      evidence:
-        "karbon dioksida yang diambil dari udara lewat daun, sama air yang diserap dari akar",
+      note: "Perbedaannya jelas, dan contoh angkanya membuat selisihnya konkret.",
+      evidence: "tahun kedua, yang majemuk dapat bunga dari sebelas juta",
     },
     {
       outline_index: 3,
-      topic: "Peran klorofil dan kloroplas",
+      topic: "Peran waktu",
       status: "partial",
-      note: "Klorofil disebut menangkap cahaya, tapi hubungannya dengan warna hijau belum dijelaskan.",
-      evidence: "kenapa daun hijau, itu karena ada klorofil di kloroplas",
+      note: "Kamu menyebut hasilnya makin besar seiring waktu, tapi belum menjelaskan kenapa mulai lebih awal begitu berpengaruh.",
+      evidence: "makin lama nabung hasilnya makin besar",
     },
     {
       outline_index: 4,
-      topic: "Reaksi terang dan siklus Calvin",
+      topic: "Dampaknya di kehidupan nyata",
       status: "missing",
-      note: "Tahapan fotosintesis belum dibahas.",
+      note: "Belum dibahas, termasuk bagaimana bunga majemuk bekerja melawanmu pada utang.",
       evidence: "",
     },
   ] satisfies Coverage[],
-  unexplainedJargon: ["kloroplas"],
+  unexplainedJargon: ["eksponensial"],
   followUpQuestions: [
     {
       question:
-        "Kalau klorofil menyerap cahaya merah dan biru, kenapa daun justru terlihat hijau?",
+        "Dengan suku bunga yang sama, kenapa uang yang mulai ditabung sepuluh tahun lebih awal bisa tumbuh jauh lebih besar?",
       outline_index: 3,
     },
     {
       question:
-        "Energi dari cahaya disimpan dulu dalam bentuk apa sebelum dipakai untuk membuat gula?",
+        "Kenapa utang kartu kredit yang tidak dilunasi bisa membengkak jauh lebih cepat dari perkiraan?",
       outline_index: 4,
     },
   ] satisfies FollowUpQuestion[],

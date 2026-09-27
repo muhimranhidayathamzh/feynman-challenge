@@ -233,14 +233,14 @@ Design rules live in [`docs/design/DESIGN.md`](docs/design/DESIGN.md), and the l
 
 ### Lighthouse
 
-Measured on the public pages against a local production build (`npm start`), Lighthouse 12 mobile:
+Measured on the public pages against a local production build (`npm start`), Lighthouse 12. Performance is the **median of three runs**: on the development machine a single mobile run varied by up to eight points, so one run is not a number worth publishing.
 
-| Page | Performance | Accessibility | Best Practices | SEO (indexing on) |
-|---|---|---|---|---|
-| Landing (`/`) | 85 | 100 | 100 | 91 |
-| Sign in (`/login`) | 85 | 100 | 100 | — |
+| Page | Performance (mobile) | Performance (desktop) | Accessibility | Best Practices | SEO (indexing on) |
+|---|---|---|---|---|---|
+| Landing (`/`) | 74 | 99 | 100 | 100 | 91 |
+| Sign in (`/login`) | 88 | — | 100 | 100 | — |
 
-Accessibility is 100 on both. Performance is the simulated-slow-4G score of a server-rendered page with the app's JavaScript; layout shift is 0.
+Accessibility is 100 on both. Mobile performance is the simulated-slow-4G score; layout shift is 0. The landing is the longer page by design: it renders the real recording stage and an interactive result from the demo data rather than pictures of them.
 
 SEO needs two readings. A default build scores **54**, on purpose: indexing is opt-in (see [Environment](#3-environment)), so every page says `noindex` and Lighthouse's heavily weighted "is crawlable" audit fails. With `NEXT_PUBLIC_ALLOW_INDEXING=1` the landing scores 91; the remaining point is lost because Next.js 15 streams `<meta name="description">` into the body for clients it does not recognise as crawlers, and Lighthouse 12 no longer identifies itself as one. Pages behind sign in were not measured.
 

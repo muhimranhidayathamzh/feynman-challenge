@@ -38,7 +38,9 @@ const files = (await walk(path.join(root, "src"))).filter(
 // ---------------------------------------------------------------------------
 // 1. Pattern rules
 // ---------------------------------------------------------------------------
-const EMOJI = /\p{Extended_Pictographic}/u;
+// © ® ™ are Extended_Pictographic in Unicode but render as ordinary text
+// unless followed by the emoji selector: typography, not emoji.
+const EMOJI = /(?![©®™])\p{Extended_Pictographic}/u;
 const GRADIENT = /(linear|radial|conic)-gradient[(]/;
 const PURPLE_HSL = /hsla?[(]\s*(2[4-7][0-9])[\s,]/;
 const GLOW_TOKEN = /--[a-z-]*glow/;

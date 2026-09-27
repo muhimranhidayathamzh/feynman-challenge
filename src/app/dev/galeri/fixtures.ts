@@ -3,7 +3,13 @@
 // identical on every run. "Today" is pinned; nothing here touches Supabase.
 // ============================================================================
 import type { FollowupAnswer } from "@/lib/api/contracts";
-import { DEMO_ATTEMPT, DEMO_NOTES, DEMO_OUTLINE, DEMO_SOURCES } from "@/lib/demo/fixture";
+import {
+  DEMO_ATTEMPT,
+  DEMO_CHALLENGE,
+  DEMO_NOTES,
+  DEMO_OUTLINE,
+  DEMO_SOURCES,
+} from "@/lib/demo/fixture";
 import type { CalendarDay } from "@/lib/utils/date";
 import {
   buildCoverageTrend,
@@ -28,7 +34,7 @@ export const DISPLAY_NAME = "Rani";
 const DASHBOARD_ROWS: DashboardRow[] = [
   {
     id: CHALLENGE_ID,
-    title: "Fotosintesis",
+    title: DEMO_CHALLENGE.title,
     deadline: "2026-09-20",
     mastery_state: "developing",
     latest_score: 7,
@@ -38,7 +44,7 @@ const DASHBOARD_ROWS: DashboardRow[] = [
   },
   {
     id: "00000000-0000-4000-8000-0000000000c2",
-    title: "Hukum Newton tentang gerak",
+    title: "Cara kerja HTTPS",
     deadline: "2026-09-16",
     mastery_state: "attempted",
     latest_score: 4,
@@ -58,7 +64,7 @@ const DASHBOARD_ROWS: DashboardRow[] = [
   },
   {
     id: "00000000-0000-4000-8000-0000000000c4",
-    title: "Inflasi dan suku bunga",
+    title: "Psikologi pengambilan keputusan",
     deadline: null,
     mastery_state: "not_started",
     latest_score: null,
@@ -123,7 +129,7 @@ export const notebookTrend = buildCoverageTrend(
 
 export const notebook = {
   id: CHALLENGE_ID,
-  title: "Fotosintesis",
+  title: DEMO_CHALLENGE.title,
   masteryState: "developing" as const,
   status: "active" as const,
   deadline: "2026-09-20",
@@ -170,7 +176,7 @@ const outlineIds = matchCoverageToOutline(SECOND_ATTEMPT_COVERAGE, OUTLINE);
 
 export const result = {
   challengeId: CHALLENGE_ID,
-  challengeTitle: "Fotosintesis",
+  challengeTitle: DEMO_CHALLENGE.title,
   attemptNumber: 2,
   previous: { score: 6, attemptNumber: 1 },
   maxScore: 10,
@@ -202,9 +208,10 @@ export const followUpAnswers: FollowupAnswer[] = [
   {
     question_index: 0,
     transcript:
-      "Karena klorofil menyerap cahaya merah sama biru, jadi yang dipantulkan itu hijau, makanya kelihatan hijau.",
+      "Karena bunganya ikut dibungakan lagi, jadi yang mulai duluan punya lebih banyak tahun buat bunga berbunga itu. Makin lama, tambahannya makin besar.",
     verdict: "tepat",
-    feedback: "Tepat. Kamu menghubungkan warna yang diserap dengan warna yang terlihat.",
+    feedback:
+      "Tepat. Kamu menghubungkan waktu dengan bunga yang ikut dibungakan setiap tahun.",
     hint: null,
   },
 ];

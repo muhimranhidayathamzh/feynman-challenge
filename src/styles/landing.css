@@ -1,0 +1,373 @@
+/* ---------------------------------------------------------------------------
+   Public landing page (V.8): a product page inside the Kertas & Kapur
+   system. Paper for reading, the chalkboard for the product and the closing
+   call, one accented action (the demo) repeated only at the top and the end.
+   ------------------------------------------------------------------------- */
+.lp {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.lp-inner {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .lp-inner {
+    padding-inline: var(--space-8);
+  }
+}
+
+/* --- Nav --- */
+.lp-nav {
+  border-bottom: 1px solid var(--line);
+}
+
+.lp-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 64px;
+}
+
+/* Small label above a heading. Ink, not vermilion: the accent is reserved
+   for the one action (DESIGN.md §4). */
+.lp-eyebrow {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-3);
+}
+
+/* --- Hero --- */
+.lp-hero {
+  padding-block: var(--space-12) var(--space-16);
+}
+
+.lp-hero-grid {
+  display: grid;
+  gap: var(--space-10);
+  align-items: center;
+}
+
+@media (min-width: 960px) {
+  .lp-hero {
+    padding-block: var(--space-20);
+  }
+
+  .lp-hero-grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: var(--space-16);
+  }
+}
+
+.lp-hero-copy {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-5);
+}
+
+.lp-hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.25rem, 1.6rem + 2.8vw, 3.75rem);
+  font-weight: var(--weight-medium);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  max-width: 16ch;
+}
+
+.lp-hero-lead {
+  font-family: var(--font-serif);
+  font-size: clamp(1.125rem, 1rem + 0.4vw, 1.3125rem);
+  line-height: var(--leading-normal);
+  color: var(--ink-2);
+  max-width: 36rem;
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* The chalkboard, through the stage's own palette (data-mood="board"). In
+   the dark theme board and page share one colour: the hairline keeps it a
+   board instead of a gap. */
+.landing-board {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-5);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xl);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: center;
+}
+
+.landing-board-eyebrow {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+
+.landing-board-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
+}
+
+.landing-board-hints {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+/* --- Sections --- */
+.lp-section {
+  padding-block: var(--space-16);
+}
+
+@media (min-width: 768px) {
+  .lp-section {
+    padding-block: var(--space-20);
+  }
+}
+
+.lp-section-sunken {
+  background: var(--sunken);
+}
+
+.lp-section-head {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 44rem;
+}
+
+.lp-section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.5rem);
+  font-weight: var(--weight-medium);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.lp-section-lead {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  line-height: var(--leading-normal);
+  color: var(--ink-2);
+}
+
+/* --- How it works: numbered columns under an ink rule, not cards (§12) --- */
+.lp-steps {
+  display: grid;
+  gap: var(--space-8);
+}
+
+@media (min-width: 768px) {
+  .lp-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-10);
+  }
+}
+
+.lp-step {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 2px solid var(--ink);
+}
+
+.lp-step-number {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.lp-step-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
+}
+
+/* --- Evidence demo --- */
+.lp-verdict {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .lp-verdict {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-8);
+  }
+}
+
+.lp-verdict-summary {
+  font-family: var(--font-serif);
+  font-size: clamp(1.1875rem, 1rem + 0.8vw, 1.5rem);
+  line-height: 1.35;
+  max-width: 40ch;
+}
+
+/* --- Prose sections --- */
+.lp-split {
+  display: grid;
+  gap: var(--space-8);
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .lp-split {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-12);
+  }
+}
+
+.lp-prose {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  line-height: var(--leading-normal);
+  color: var(--ink-2);
+}
+
+.lp-prose p {
+  max-width: 36rem;
+}
+
+.lp-columns {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 768px) {
+  .lp-columns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-12);
+  }
+}
+
+/* --- FAQ --- */
+.lp-faq {
+  display: grid;
+  max-width: 48rem;
+  border-top: 1px solid var(--line-strong);
+}
+
+.lp-faq-item {
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.lp-faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 56px;
+  padding-block: var(--space-4);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.lp-faq-icon {
+  flex: 0 0 auto;
+  color: var(--ink-3);
+  transition: transform var(--transition-base);
+}
+
+.lp-faq-item[open] .lp-faq-icon {
+  transform: rotate(45deg);
+}
+
+.lp-faq-answer {
+  max-width: 40rem;
+  padding-bottom: var(--space-5);
+  line-height: var(--leading-normal);
+  color: var(--ink-2);
+}
+
+/* --- Closing call, at the board --- */
+.lp-closing {
+  padding-block: var(--space-16);
+  border-top: 1px solid var(--line-strong);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+@media (min-width: 768px) {
+  .lp-closing {
+    padding-block: var(--space-20);
+  }
+}
+
+.lp-closing-inner {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.lp-closing-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.75rem);
+  font-weight: var(--weight-medium);
+  line-height: 1.15;
+  max-width: 22ch;
+}
+
+.lp-closing-lead {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  color: var(--ink-2);
+}
+
+.lp-closing .landing-actions {
+  justify-content: center;
+  padding-top: var(--space-2);
+}
+
+/* --- Footer --- */
+.lp-footer {
+  padding-block: var(--space-8);
+  border-top: 1px solid var(--line);
+}
+
+.lp-footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.lp-footer-name {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.lp-footer-link {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.lp-footer-link:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+/* The result page "inks" its marks and sweeps its highlighter once, as the
+   learner arrives. On the landing those sit below the fold, so the effect
+   would play before anyone scrolled there while still costing main-thread
+   work during load. Show them finished instead. */
+.lp .evidence-mark,
+.lp .result-mark {
+  animation: none;
+}

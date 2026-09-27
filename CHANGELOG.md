@@ -4,6 +4,14 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### A landing page for a product (V.8)
+
+- **The demo is about compound interest now, not photosynthesis.** The first example every visitor meets sets who the product is for, and a school biology topic said "for students". The demo challenge, its outline, sources (both checked to exist), notes, transcript, evaluation and follow-up questions are rewritten, and the landing, the "Coba tanpa akun" challenge and every gallery screen follow from the same fixture. `src/lib/demo/fixture.test.ts` now proves every quoted piece of evidence appears word for word in the transcript, so an edit can never silently break a highlight in public.
+- **The landing is rebuilt as a product page**: a top bar, a split hero (the promise and the call to action beside the chalkboard stage), how it works, an interactive evidence demo built from the result page's own component (choose a point and its quote lights up), the review schedule, why explaining works, questions that usually hold people back, and a closing call at the board. Every claim was checked against the code; nothing promises a feature that does not exist yet.
+- Below-the-fold load animations are skipped on the landing; they played before anyone could see them.
+- `design:check` no longer mistakes ©, ® and ™ for emoji. They are Extended_Pictographic in Unicode but render as text; real emoji are still rejected.
+- Lighthouse, median of three runs: landing mobile 74, desktop 99, accessibility 100.
+
 ### Second look at five screens (V.7)
 
 A fresh review of the redesigned app found five screens whose content was right but whose presentation was not. No database changes.
@@ -13,7 +21,7 @@ A fresh review of the redesigned app found five screens whose content was right 
 - **Notebook**: the header shows only title, mastery, deadline and next review. Review boxes, reschedule, park, complete, rename and delete fold into "Kelola tantangan".
 - **Landing and onboarding**: both used three identical illustrated cards, which DESIGN.md §12 bans. The landing now walks through the loop beside real fragments of the app rendered from the demo data: the outline, the chalkboard stage (built from the stage's own components), and a result with its highlighted evidence. Onboarding is a numbered list whose first action clears the bottom nav on common phones.
 - **Meja Belajar**: the header flame badge is gone (§10 says the week strip replaces it; both counted the same days), labels are sentence case, and the mastery meter in the list is large enough to read.
-- Lighthouse on the landing: performance 78 → 85, accessibility still 100.
+- Lighthouse on the landing: accessibility still 100. (An earlier version of this entry claimed performance rose from 78 to 85; both were single runs, and later medians of three runs showed a single mobile run varying by up to eight points, so the claim is withdrawn.)
 
 ### Getting ready for the public (Fase 5, in progress)
 

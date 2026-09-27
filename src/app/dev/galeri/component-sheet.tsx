@@ -57,8 +57,8 @@ export function ComponentSheet() {
 
       <Sheet className="stack gap-4">
         <SheetTitle>Formulir</SheetTitle>
-        <Field id="g-topik" label="Apa yang ingin kamu kuasai?" hint="Satu topik.">
-          <Input placeholder="mis. Fotosintesis" />
+        <Field id="g-topik" label="Apa yang ingin kamu pahami?" hint="Satu topik.">
+          <Input placeholder="mis. Kenapa bulan punya fase" />
         </Field>
         <Field id="g-salah" label="Email" error="Alamat email tidak valid.">
           <Input defaultValue="rani@" />

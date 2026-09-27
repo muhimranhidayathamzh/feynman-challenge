@@ -24,6 +24,7 @@ import {
 import { SettingsView } from "@/components/settings/settings-view";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/ui/toast";
+import { DEMO_CHALLENGE } from "@/lib/demo/fixture";
 import { DASHBOARD_TABS } from "@/lib/utils/challenge-status";
 import { formatDay } from "@/lib/utils/date";
 import { weekStrip } from "@/lib/utils/streak";
@@ -53,7 +54,7 @@ function Dashboard({ empty = false }: { empty?: boolean }) {
 function stage(overrides: Partial<RecordingStageProps>): ReactNode {
   const props: RecordingStageProps = {
     challengeId: fx.CHALLENGE_ID,
-    title: "Fotosintesis",
+    title: DEMO_CHALLENGE.title,
     durationSec: 180,
     elapsedSec: 0,
     status: "idle",
@@ -243,7 +244,7 @@ function content(id: string): ReactNode {
           <ConfirmDialog
             open
             title="Hapus tantangan ini?"
-            message="Outline, catatan, sumber, dan semua rekaman Fotosintesis akan dihapus permanen."
+            message={`Outline, catatan, sumber, dan semua rekaman untuk “${DEMO_CHALLENGE.title}” akan dihapus permanen.`}
             confirmLabel="Hapus"
             tone="danger"
             onConfirm={noop}
