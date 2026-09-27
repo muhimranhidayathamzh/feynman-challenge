@@ -1,13 +1,12 @@
 // ============================================================================
-// Demo fixture: one fully worked example challenge for anonymous "Coba tanpa
-// akun" visitors, also shown on the public landing page. Seeded without
-// calling Gemini, so trying the app costs no AI quota. The attempt reads like
-// a real first try: two points covered, one partial, one missing, so every
-// part of the results page has something to show (coverage, "Pelajari lagi",
-// jargon, follow-up questions).
+// Sample data for the dev screen gallery (/dev/galeri) and the screenshots
+// made from it. Visitors never see it: since V.9 the landing page shows no
+// example, and "Coba tanpa akun" opens an empty account on "Tantangan baru"
+// instead of a prepared challenge.
 //
-// The topic is deliberately adult and everyday (V.8): the first example a
-// visitor meets sets who the product is for.
+// The attempt reads like a real first try: two points covered, one partial,
+// one missing, so every part of the result page has something to show
+// (coverage, "Pelajari lagi", jargon, follow-up questions).
 //
 // Every non-missing `evidence` must appear word for word in `transcript`,
 // or its highlight never shows. fixture.test.ts enforces that.

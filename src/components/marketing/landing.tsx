@@ -4,37 +4,32 @@ import { LogIn, Plus, UserPlus } from "lucide-react";
 
 import { LeitnerStrip } from "@/components/challenge/leitner-strip";
 import { MasteryMeter } from "@/components/challenge/mastery-meter";
-import { ResultEvidence } from "@/components/evaluation/result-evidence";
-import { ScoreFigure } from "@/components/evaluation/score-figure";
+import { CoverageMark } from "@/components/evaluation/coverage-mark";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { HintChip } from "@/components/recording/hint-chip";
 import { StageTimer } from "@/components/recording/stage-timer";
 import { ButtonLink } from "@/components/ui/button";
 import { Sheet } from "@/components/ui/sheet";
 import type { AuthFeatures } from "@/lib/auth/auth-features";
-import { DEMO_ATTEMPT, DEMO_CHALLENGE } from "@/lib/demo/fixture";
 import { cx } from "@/lib/utils/cx";
-import { splitSummary } from "@/lib/utils/transcript";
+import { COVERAGE_STATUS_LABEL } from "@/lib/utils/labels";
+import type { CoverageStatus } from "@/types";
 
 import { LandingDemoButton } from "./landing-demo-button";
 
 // ---------------------------------------------------------------------------
-// The public front page (DV6; rebuilt as a product page in V.8).
+// The public front page (DV6; a product page since V.8, plain since V.9).
 //
-// Every picture of the product on this page is the product: the stage and
-// the result are rendered with the app's own components and the demo data,
-// so the page cannot promise a screen the app does not have. Nothing here
-// claims a feature that does not exist yet (no reminders, no testimonials,
-// no user counts).
+// No example topic anywhere: the owner wants visitors to meet the product on
+// their own topic, so "Coba tanpa akun" opens "Tantangan baru" directly. The
+// pictures of the product are the product's own components with no content
+// in them (the stage's clock and hints, the verdict marks), so the page can
+// neither drift from the app nor promise a screen it does not have. Nothing
+// here claims a feature that does not exist yet.
 // ---------------------------------------------------------------------------
 
-const SUMMARY = splitSummary(DEMO_ATTEMPT.feedback).summary ?? "";
-
-/** The demo attempt as the result page shows it, minus "Pelajari lagi" links. */
-const EVIDENCE_ROWS = DEMO_ATTEMPT.coverage.map((point) => ({
-  ...point,
-  outline_id: null,
-}));
+/** The stage's default length (see the record page). */
+const STAGE_SECONDS = 180;
 
 const STEPS = [
   {
@@ -48,6 +43,22 @@ const STEPS = [
   {
     title: "Lihat celahmu",
     body: "Setiap poin dinilai dari ucapanmu sendiri, lengkap dengan kalimat yang jadi buktinya.",
+  },
+];
+
+/** What each verdict means, in the words the result page uses. */
+const VERDICTS: { status: CoverageStatus; body: string }[] = [
+  {
+    status: "covered",
+    body: "Kamu menjelaskannya dengan benar. Kalimatmu yang jadi bukti ditandai stabilo.",
+  },
+  {
+    status: "partial",
+    body: "Sudah kamu singgung, tapi belum lengkap. Catatannya menyebut apa yang kurang.",
+  },
+  {
+    status: "missing",
+    body: "Belum muncul di penjelasanmu. “Pelajari lagi” membawamu langsung ke bagian itu.",
   },
 ];
 
@@ -84,22 +95,18 @@ const FAQ: { question: string; answer: string }[] = [
   },
 ];
 
-/** The recording stage, drawn with the stage's own components. */
+/** The recording stage, drawn with the stage's own components and no topic. */
 function BoardPreview() {
   return (
     <div
       data-mood="board"
       className="landing-board"
       role="img"
-      aria-label={`Layar rekam: papan tulis gelap untuk topik ${DEMO_CHALLENGE.title}, sisa waktu satu menit empat puluh enam detik, dan tiga bantuan yang masing-masing menurunkan skor maksimal.`}
+      aria-label="Layar rekam: papan tulis gelap dengan jam hitung mundur, dan tiga bantuan yang masing-masing menurunkan skor maksimal."
     >
-      <p className="landing-board-eyebrow">Jelaskan</p>
-      <p className="landing-board-title">{DEMO_CHALLENGE.title}</p>
-      <StageTimer
-        totalSeconds={DEMO_CHALLENGE.recordingDurationSec}
-        elapsedSeconds={74}
-        started
-      />
+      <p className="landing-board-eyebrow">Layar rekam</p>
+      <p className="landing-board-title">Jelaskan seperti ke teman</p>
+      <StageTimer totalSeconds={STAGE_SECONDS} elapsedSeconds={74} started />
       <div className="landing-board-hints">
         <HintChip label="Kata kunci" cap={9} revealed={false} />
         <HintChip label="Pertanyaan" cap={8} revealed={false} />
@@ -191,7 +198,7 @@ export function Landing({ features }: { features: AuthFeatures }) {
       </header>
 
       <main id="lp-main" tabIndex={-1}>
-        {/* Hero: the promise on the left, the product on the right. */}
+        {/* Hero: the promise on the left, the stage on the right. */}
         <section className="lp-hero" aria-labelledby="hero-title">
           <div className="lp-inner lp-hero-grid">
             <div className="lp-hero-copy">
@@ -207,7 +214,9 @@ export function Landing({ features }: { features: AuthFeatures }) {
               <Actions features={features} />
               <p className="text-muted text-sm">
                 Gratis dan berbahasa Indonesia.
-                {features.anonymous ? " Bisa dicoba tanpa email." : ""}
+                {features.anonymous
+                  ? " Bisa dicoba tanpa email, dengan topikmu sendiri."
+                  : ""}
               </p>
             </div>
             <div className="lp-hero-visual">
@@ -234,32 +243,50 @@ export function Landing({ features }: { features: AuthFeatures }) {
           </ol>
         </Section>
 
-        {/* The evidence, live: the result page's own component. */}
+        {/* How a result reads, without an example: the verdicts and marks
+            the result page uses, each explained once. */}
         <Section
-          id="evidence-title"
+          id="grading-title"
           eyebrow="Penilaian yang bisa diperiksa"
           title="Setiap nilai punya bukti"
-          lead="Pilih sebuah poin untuk melihat kalimat mana dari ucapanmu yang jadi buktinya. Istilah yang kamu pakai tapi belum kamu jelaskan ikut ditandai."
           sunken
         >
-          <div className="stack gap-6">
-            <Sheet className="lp-verdict">
-              <p className="lp-verdict-summary">{SUMMARY}</p>
-              <ScoreFigure score={7} max={10} />
+          <div className="lp-split">
+            <div className="stack gap-4 lp-prose">
+              <p>
+                Rekamanmu diubah jadi transkrip, lalu setiap poin yang perlu kamu jelaskan
+                dinilai satu per satu. Pilih sebuah poin, dan kalimatmu yang jadi buktinya
+                menyala di transkrip.
+              </p>
+              <p>
+                Istilah yang kamu pakai tapi belum kamu jelaskan ikut ditandai, karena di
+                situlah pemahaman sering berhenti.
+              </p>
+              <p>
+                Skor 0 sampai 10 dihitung dengan rumus tetap dari kelengkapan, ketepatan,
+                dan kejelasan, dan selalu datang bersama satu kalimat ringkasan.
+              </p>
+            </div>
+            <Sheet className="stack gap-5">
+              <ul className="lp-verdicts">
+                {VERDICTS.map((verdict) => (
+                  <li key={verdict.status} className="lp-verdict-row">
+                    <CoverageMark status={verdict.status} decorative />
+                    <div className="stack gap-1">
+                      <p className="font-semibold">
+                        {COVERAGE_STATUS_LABEL[verdict.status]}
+                      </p>
+                      <p className="text-secondary text-sm">{verdict.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <p className="lp-marks-legend text-sm">
+                <span className="legend-mark">Stabilo</span> kutipan yang jadi bukti.{" "}
+                <span className="jargon-term">Garis titik-titik</span> istilah yang belum
+                kamu jelaskan.
+              </p>
             </Sheet>
-            <ResultEvidence
-              challengeId="demo"
-              attemptNumber={1}
-              coverage={EVIDENCE_ROWS}
-              transcript={DEMO_ATTEMPT.transcript}
-              jargon={DEMO_ATTEMPT.unexplainedJargon}
-              audioUrl={null}
-              headingAs="h3"
-            />
-            <p className="text-muted text-sm">
-              Contoh dari tantangan demo “{DEMO_CHALLENGE.title}”, yang juga kamu buka
-              saat mencoba tanpa akun.
-            </p>
           </div>
         </Section>
 
@@ -332,7 +359,8 @@ export function Landing({ features }: { features: AuthFeatures }) {
               Siap menjelaskan satu topik hari ini?
             </h2>
             <p className="lp-closing-lead">
-              Beberapa menit sudah cukup untuk tahu seberapa paham kamu sebenarnya.
+              Pilih topik yang ingin kamu pahami. Beberapa menit sudah cukup untuk tahu
+              seberapa paham kamu sebenarnya.
             </p>
             <Actions features={features} />
           </div>

@@ -17,7 +17,7 @@
   <img src="docs/design/shots/after/hasil-selesai-390-light.png" alt="A result: summary, score, points and the annotated transcript" width="250" />
 </p>
 
-**Try it without an account:** the landing page has a **"Coba tanpa akun"** button (demo mode) that opens a fully worked example challenge, including an evaluated attempt, without spending any AI quota.
+**Try it without an account:** the landing page has a **"Coba tanpa akun"** button (demo mode) that signs you in anonymously and takes you straight to creating a challenge on a topic of your own. No email needed; these accounts get a tighter AI quota.
 
 ---
 
@@ -35,7 +35,7 @@ You pick a topic. AI drafts a learning outline and sources. You study, then **re
 - **Socratic coach**: 1–2 follow-up questions aimed at your weakest point, answered by voice and graded (tepat / sebagian / keliru). Answers never change your score.
 - **Spaced repetition**: Leitner boxes (1, 3, 7, 14, 30, 60 days) decide when each topic comes back. Mastery climbs `not_started → attempted → developing → proficient → mastered → solidified` and slips a level if a review is badly overdue.
 - **Gentle accountability**: deadlines are calendar days in your timezone, missed ones auto-extend once, and streaks count real completed evaluations.
-- **Demo mode**: anonymous sign-in with a seeded example, stricter AI quota, and a one-step path to keep the account (link an email, then set a password).
+- **Demo mode**: anonymous sign-in straight into creating a challenge on your own topic, a stricter AI quota, and a one-step path to keep the account (link an email, then set a password).
 - **Four layers of cost control**: a per-user AI quota enforced atomically in SQL, tighter limits for demo accounts, an app-wide daily ceiling, and a kill switch — the last two flipped from the SQL editor with no redeploy.
 - **Installable PWA**: maskable icons, shortcuts, an offline page, and a service worker that never caches private pages.
 - **"Kertas & Kapur" interface**: a warm paper light theme for studying and a chalkboard dark theme for the recording stage, in Newsreader and Plus Jakarta Sans. One action per screen, evidence before numbers, and never red for a learning gap. The rules live in [`docs/design/DESIGN.md`](docs/design/DESIGN.md) and are enforced by `npm run design:check`.
@@ -88,7 +88,7 @@ src/
 │   ├── (app)/                  # dashboard, notebook, results, settings
 │   ├── challenge/[id]/record/  # full-screen recorder
 │   ├── offline/                # service-worker fallback (static, no user data)
-│   └── api/                    # challenge CRUD, generate, evaluate, follow-ups, demo seed
+│   └── api/                    # challenge CRUD, generate, evaluate, follow-ups
 ├── components/                 # ui, layout, auth, challenge, recording, evaluation, dashboard
 ├── lib/                        # supabase/, gemini/, ai/, auth/, demo/, pwa/, storage/, utils/
 ├── styles/                     # design tokens + feature stylesheets (vanilla CSS)
@@ -237,10 +237,10 @@ Measured on the public pages against a local production build (`npm start`), Lig
 
 | Page | Performance (mobile) | Performance (desktop) | Accessibility | Best Practices | SEO (indexing on) |
 |---|---|---|---|---|---|
-| Landing (`/`) | 74 | 99 | 100 | 100 | 91 |
+| Landing (`/`) | 84 | 100 | 100 | 100 | 91 |
 | Sign in (`/login`) | 88 | — | 100 | 100 | — |
 
-Accessibility is 100 on both. Mobile performance is the simulated-slow-4G score; layout shift is 0. The landing is the longer page by design: it renders the real recording stage and an interactive result from the demo data rather than pictures of them.
+Accessibility is 100 on both. Mobile performance is the simulated-slow-4G score; layout shift is 0. The landing shows no example content; its picture of the recording stage is drawn with the stage's own components rather than a screenshot.
 
 SEO needs two readings. A default build scores **54**, on purpose: indexing is opt-in (see [Environment](#3-environment)), so every page says `noindex` and Lighthouse's heavily weighted "is crawlable" audit fails. With `NEXT_PUBLIC_ALLOW_INDEXING=1` the landing scores 91; the remaining point is lost because Next.js 15 streams `<meta name="description">` into the body for clients it does not recognise as crawlers, and Lighthouse 12 no longer identifies itself as one. Pages behind sign in were not measured.
 

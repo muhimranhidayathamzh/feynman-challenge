@@ -218,15 +218,3 @@ export const EVALUATION_ERROR_MESSAGES: Record<string, string> = {
 export function describeEvaluationError(code: string | null | undefined): string {
   return (code && EVALUATION_ERROR_MESSAGES[code]) || EVALUATION_ERROR_MESSAGES.unknown!;
 }
-
-// ---------------------------------------------------------------------------
-// POST /api/demo/seed
-// ---------------------------------------------------------------------------
-export const DemoSeedResponseSchema = z.object({
-  challengeId: z.uuid(),
-  /** The example evaluated attempt; null when nothing new was seeded. */
-  attemptId: z.uuid().nullable(),
-  /** false when the demo account already had a challenge (idempotent). */
-  seeded: z.boolean(),
-});
-export type DemoSeedResponse = z.infer<typeof DemoSeedResponseSchema>;

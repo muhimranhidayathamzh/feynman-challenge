@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { DemoSeedResponseSchema } from "@/lib/api/contracts";
-import { fetchJson } from "@/lib/api/fetch-json";
 import { authErrorMessage } from "@/lib/auth/errors";
 import { createClient } from "@/lib/supabase/client";
 
@@ -22,8 +20,9 @@ interface Props {
 
 /**
  * "Coba tanpa akun": signs in anonymously (needs Anonymous Sign-Ins enabled in
- * Supabase, see README), seeds the example challenge, and lands on its
- * evaluated attempt. The account can later be kept from Pengaturan.
+ * Supabase, see README) and goes straight to "Tantangan baru", so the visitor
+ * tries the product on a topic of their own rather than reading a prepared
+ * example (V.9). The account can later be kept from Pengaturan.
  */
 export function DemoButton({ onError, variant = "ghost" }: Props) {
   const router = useRouter();
@@ -46,16 +45,7 @@ export function DemoButton({ onError, variant = "ghost" }: Props) {
       return;
     }
 
-    const result = await fetchJson("/api/demo/seed", DemoSeedResponseSchema, {
-      method: "POST",
-    });
-    // The demo account works even if seeding failed: fall back to the dashboard.
-    const target = !result.ok
-      ? "/"
-      : result.data.attemptId
-        ? `/challenge/${result.data.challengeId}/result/${result.data.attemptId}`
-        : `/challenge/${result.data.challengeId}`;
-    router.replace(target);
+    router.replace("/challenge/new");
     router.refresh();
   }
 

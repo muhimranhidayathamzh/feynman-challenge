@@ -197,25 +197,31 @@
   font-weight: var(--weight-semibold);
 }
 
-/* --- Evidence demo --- */
-.lp-verdict {
+/* --- How a result reads: the verdicts, with no example content --- */
+.lp-verdicts {
   display: grid;
-  gap: var(--space-4);
 }
 
-@media (min-width: 768px) {
-  .lp-verdict {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: var(--space-8);
-  }
+.lp-verdict-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+  border-bottom: 1px dashed var(--line);
 }
 
-.lp-verdict-summary {
-  font-family: var(--font-serif);
-  font-size: clamp(1.1875rem, 1rem + 0.8vw, 1.5rem);
-  line-height: 1.35;
-  max-width: 40ch;
+.lp-verdict-row:first-child {
+  padding-top: 0;
+}
+
+.lp-verdict-row svg {
+  flex: 0 0 auto;
+  margin-top: 0.15em;
+}
+
+.lp-marks-legend {
+  line-height: 1.9;
+  color: var(--ink-2);
 }
 
 /* --- Prose sections --- */
@@ -361,13 +367,4 @@
 .lp-footer-link:hover {
   color: var(--ink);
   text-decoration: underline;
-}
-
-/* The result page "inks" its marks and sweeps its highlighter once, as the
-   learner arrives. On the landing those sit below the fold, so the effect
-   would play before anyone scrolled there while still costing main-thread
-   work during load. Show them finished instead. */
-.lp .evidence-mark,
-.lp .result-mark {
-  animation: none;
 }

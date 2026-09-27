@@ -24,8 +24,6 @@ interface Props {
   transcript: string | null;
   jargon: string[];
   audioUrl: string | null;
-  /** h2 on the result page; h3 where it sits under a section title (landing). */
-  headingAs?: "h2" | "h3";
 }
 
 /**
@@ -40,7 +38,6 @@ export function ResultEvidence({
   transcript,
   jargon,
   audioUrl,
-  headingAs = "h2",
 }: Props) {
   const [active, setActive] = useState<number | null>(null);
   const pointRefs = useRef<(HTMLLIElement | null)[]>([]);
@@ -78,9 +75,7 @@ export function ResultEvidence({
   return (
     <div className="result-evidence">
       <Sheet as="section" className="stack gap-4" aria-labelledby="points-title">
-        <SheetTitle id="points-title" as={headingAs}>
-          Yang kamu jelaskan
-        </SheetTitle>
+        <SheetTitle id="points-title">Yang kamu jelaskan</SheetTitle>
         <ol className="point-list">
           {coverage.map((item, index) => (
             <li
@@ -137,9 +132,7 @@ export function ResultEvidence({
         className="stack gap-4 result-transcript"
         aria-labelledby="transcript-title"
       >
-        <SheetTitle id="transcript-title" as={headingAs}>
-          Transkripmu
-        </SheetTitle>
+        <SheetTitle id="transcript-title">Transkripmu</SheetTitle>
         {audioUrl && (
           <AudioPlayer src={audioUrl} label={`Rekaman percobaan #${attemptNumber}`} />
         )}
