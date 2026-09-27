@@ -1,0 +1,1364 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Konsep Landing Feynman Challenge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Tokens: the Kertas and Papan Tulis palettes from src/styles/tokens.css. */
+      :root {
+        --paper: #f4efe4;
+        --surface: #fffcf5;
+        --sunken: #eae3d4;
+        --line: #ddd3c1;
+        --line-strong: #bfb4a0;
+        --ink: #1e2230;
+        --ink-2: #4e5566;
+        --ink-3: #5f6474;
+        --accent: #c8431b;
+        --accent-press: #9f3413;
+        --accent-ink: #ffffff;
+        --covered: #2b7148;
+        --partial: #8f5e05;
+        --highlight: #fbe38e;
+        --serif: "Newsreader", Georgia, serif;
+        --sans: "Plus Jakarta Sans", system-ui, sans-serif;
+      }
+      .board {
+        --paper: #141b19;
+        --surface: #1b2421;
+        --line: #2c3833;
+        --line-strong: #43524b;
+        --ink: #ece8df;
+        --ink-2: #b9beb5;
+        --ink-3: #949b92;
+        --accent: #ee7a52;
+        --accent-press: #b85a38;
+        --accent-ink: #1a120e;
+        background: var(--paper);
+        color: var(--ink);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .doc {
+        max-width: 68rem;
+        margin: 0 auto;
+        padding: 3.5rem 1rem 6rem;
+      }
+      @media (min-width: 768px) {
+        .doc {
+          padding-inline: 2rem;
+        }
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: var(--serif);
+        font-weight: 500;
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+      }
+      .doc > header h1 {
+        font-size: clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
+        max-width: 20ch;
+      }
+      .lede {
+        font-family: var(--serif);
+        font-size: 1.2rem;
+        color: var(--ink-2);
+        max-width: 40rem;
+        margin-top: 1rem;
+      }
+      .part {
+        margin-top: 5rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--ink);
+      }
+      .part > .num {
+        font-family: var(--serif);
+        color: var(--ink-3);
+        font-size: 1rem;
+      }
+      .part > h2 {
+        font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.25rem);
+        margin: 0.25rem 0 1rem;
+        max-width: 26ch;
+      }
+      .prose {
+        font-family: var(--serif);
+        font-size: 1.1rem;
+        color: var(--ink-2);
+        max-width: 40rem;
+      }
+      .prose p + p {
+        margin-top: 0.9rem;
+      }
+      .prose strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .insight {
+        margin-top: 1.5rem;
+        padding: 1.5rem 1.5rem 1.5rem 1.25rem;
+        border-left: 3px solid var(--ink);
+        font-family: var(--serif);
+        font-size: clamp(1.3rem, 1.1rem + 0.9vw, 1.75rem);
+        line-height: 1.35;
+        max-width: 40rem;
+      }
+      .small {
+        font-size: 0.875rem;
+        color: var(--ink-3);
+      }
+      .grid2 {
+        display: grid;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+      }
+      @media (min-width: 820px) {
+        .grid2 {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 1.25rem 1.4rem;
+      }
+      .card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.4rem;
+      }
+      .card ul {
+        padding-left: 1.1rem;
+        color: var(--ink-2);
+      }
+      .card li + li {
+        margin-top: 0.35rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5rem;
+        font-size: 0.95rem;
+      }
+      th,
+      td {
+        text-align: left;
+        vertical-align: top;
+        padding: 0.8rem 0.75rem 0.8rem 0;
+        border-bottom: 1px solid var(--line);
+      }
+      th {
+        font-size: 0.8rem;
+        color: var(--ink-3);
+        font-weight: 600;
+      }
+      td:first-child {
+        font-weight: 600;
+        min-width: 9rem;
+      }
+      @media (max-width: 600px) {
+        table {
+          font-size: 0.875rem;
+        }
+        td:first-child {
+          min-width: 0;
+        }
+      }
+      td .small {
+        display: block;
+        margin-top: 0.25rem;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      /* ---------- Concept frames ---------- */
+      .concept {
+        margin-top: 3rem;
+      }
+      .concept-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.5rem 1rem;
+      }
+      .concept-head h3 {
+        font-size: 1.6rem;
+      }
+      .tag {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.2rem 0.6rem;
+        border-radius: 8px;
+        background: var(--sunken);
+        color: var(--ink-2);
+      }
+      .tag.pick {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      .frames {
+        display: grid;
+        gap: 1.25rem;
+        margin-top: 1.25rem;
+        align-items: start;
+      }
+      @media (min-width: 980px) {
+        .frames {
+          grid-template-columns: minmax(0, 1fr) 20rem;
+        }
+      }
+      .frame,
+      .phone {
+        container-type: inline-size;
+      }
+      .frame {
+        border: 1px solid var(--line-strong);
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--paper);
+      }
+      .frame-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.55rem 0.8rem;
+        border-bottom: 1px solid var(--line);
+        background: var(--sunken);
+        font-size: 0.75rem;
+        color: var(--ink-3);
+      }
+      .frame-bar i {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        background: var(--line-strong);
+      }
+      .frame-bar span {
+        margin-left: 0.5rem;
+      }
+      .phone {
+        width: 100%;
+        max-width: 20rem;
+        border: 1px solid var(--line-strong);
+        border-radius: 28px;
+        overflow: hidden;
+        background: var(--paper);
+        justify-self: center;
+      }
+      .why {
+        display: grid;
+        gap: 1rem;
+        margin-top: 1.25rem;
+      }
+      @media (min-width: 820px) {
+        .why {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+      .why h4 {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--ink-3);
+        margin-bottom: 0.3rem;
+      }
+      .why p,
+      .why li {
+        font-size: 0.95rem;
+        color: var(--ink-2);
+      }
+      .why ul {
+        padding-left: 1rem;
+      }
+
+      /* ---------- Mock landing parts ---------- */
+      .m-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.9rem 1.5rem;
+        border-bottom: 1px solid var(--line);
+      }
+      .m-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: 1.05rem;
+      }
+      .m-brand svg {
+        width: 1.3rem;
+        height: 1.3rem;
+      }
+      .m-links {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--ink-2);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 3rem;
+        padding: 0.7rem 1.4rem;
+        border-radius: 12px;
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 1rem;
+        border: 0;
+        cursor: default;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: var(--accent-ink);
+        box-shadow: 0 3px 0 var(--accent-press);
+      }
+      .btn-quiet {
+        background: transparent;
+        color: var(--ink);
+        border: 1.5px solid var(--ink);
+      }
+
+      /* Concept A: the mirror */
+      .a-hero {
+        padding: 4.5rem 1.5rem 4rem;
+        max-width: 46rem;
+        margin: 0 auto;
+      }
+      .a-eyebrow {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--ink-3);
+      }
+      .a-question {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(2.2rem, 7.5cqi, 4.25rem);
+        line-height: 1.05;
+        letter-spacing: -0.025em;
+        margin-top: 0.6rem;
+      }
+      .a-instruction {
+        font-family: var(--serif);
+        font-size: 1.2rem;
+        color: var(--ink-2);
+        margin-top: 1rem;
+      }
+      .a-timer {
+        height: 2px;
+        background: var(--line);
+        margin-top: 2rem;
+        overflow: hidden;
+      }
+      .a-timer span {
+        display: block;
+        height: 100%;
+        background: var(--ink);
+        transform-origin: left;
+        animation: fill 10s linear both;
+      }
+      .a-reveal {
+        margin-top: 1.5rem;
+        animation: appear 600ms ease-out 10s both;
+      }
+      .a-reveal p:first-child {
+        font-family: var(--serif);
+        font-size: 1.45rem;
+        line-height: 1.3;
+      }
+      .a-reveal p + p {
+        margin-top: 0.5rem;
+        color: var(--ink-2);
+        max-width: 34rem;
+      }
+      .a-cta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem 1rem;
+        margin-top: 2rem;
+      }
+      @keyframes fill {
+        from {
+          transform: scaleX(0);
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+      @keyframes appear {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .replay {
+        margin-top: 0.75rem;
+        font: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--ink-2);
+        background: none;
+        border: 0;
+        border-bottom: 1px solid var(--line-strong);
+        cursor: pointer;
+        padding: 0;
+      }
+
+      /* Concept B: the corrected page */
+      .b-hero {
+        display: grid;
+        gap: 2.5rem;
+        padding: 3.5rem 1.5rem;
+        align-items: center;
+      }
+      @container (min-width: 720px) {
+        .b-hero {
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+          padding: 4rem 2.5rem;
+        }
+      }
+      .b-title,
+      .a-question,
+      .c-title {
+        overflow-wrap: break-word;
+      }
+      .b-title {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(1.75rem, 4.4cqi, 2.9rem);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+      .b-lead {
+        font-family: var(--serif);
+        font-size: 1.15rem;
+        color: var(--ink-2);
+        margin-top: 1rem;
+      }
+      .sheet {
+        position: relative;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 1.75rem 1.5rem 1.5rem 1.75rem;
+      }
+      .sheet-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--ink-3);
+        margin-bottom: 0.75rem;
+      }
+      .sheet-text {
+        font-family: var(--serif);
+        font-size: 1.15rem;
+        line-height: 1.9;
+      }
+      .mark {
+        background: linear-gradient(
+          transparent 30%,
+          var(--highlight) 30%,
+          var(--highlight) 92%,
+          transparent 92%
+        );
+      }
+      .dotted {
+        text-decoration: underline dotted var(--ink-3);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 4px;
+      }
+      .notes {
+        display: grid;
+        gap: 0.6rem;
+        margin-top: 1.25rem;
+        padding-top: 1rem;
+        border-top: 1px dashed var(--line);
+      }
+      .note {
+        display: flex;
+        gap: 0.6rem;
+        align-items: flex-start;
+        font-size: 0.9rem;
+        color: var(--ink-2);
+      }
+      .note svg {
+        flex: 0 0 auto;
+        width: 1.1rem;
+        height: 1.1rem;
+        margin-top: 0.15rem;
+      }
+
+      /* Concept C: the stage */
+      .c-hero {
+        display: grid;
+        justify-items: center;
+        gap: 1.25rem;
+        text-align: center;
+        padding: 5rem 1.5rem 4.5rem;
+      }
+      .c-title {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(2rem, 6cqi, 3.6rem);
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+        max-width: 18ch;
+      }
+      .c-rec {
+        display: grid;
+        place-items: center;
+        width: 6.5rem;
+        height: 6.5rem;
+        border-radius: 50%;
+        background: var(--accent);
+        color: var(--accent-ink);
+        box-shadow: 0 5px 0 var(--accent-press);
+        margin-top: 1rem;
+      }
+      .c-rec svg {
+        width: 2.2rem;
+        height: 2.2rem;
+      }
+      .c-label {
+        font-weight: 600;
+      }
+
+      /* Recommended page flow */
+      .flow {
+        margin-top: 1.5rem;
+        border: 1px solid var(--line-strong);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .flow-step {
+        display: grid;
+        gap: 1rem;
+        padding: 1.75rem 1.5rem;
+        border-top: 1px solid var(--line);
+      }
+      .flow-step:first-child {
+        border-top: 0;
+      }
+      @media (min-width: 820px) {
+        .flow-step {
+          grid-template-columns: 13rem minmax(0, 1fr);
+          gap: 2rem;
+        }
+      }
+      .flow-meta b {
+        display: block;
+        font-family: var(--serif);
+        font-size: 1.15rem;
+        font-weight: 600;
+      }
+      .flow-meta span {
+        font-size: 0.85rem;
+        color: var(--ink-3);
+      }
+      .flow-copy h4 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 1.45rem;
+        line-height: 1.2;
+      }
+      .flow-copy p {
+        color: var(--ink-2);
+        margin-top: 0.4rem;
+        max-width: 38rem;
+      }
+      .flow-copy .why-line {
+        font-size: 0.875rem;
+        color: var(--ink-3);
+        margin-top: 0.75rem;
+        padding-top: 0.6rem;
+        border-top: 1px dashed var(--line);
+      }
+      .flow-step.dark {
+        background: var(--paper);
+      }
+      .qlist {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+      }
+      .qlist span {
+        font-size: 0.85rem;
+        padding: 0.3rem 0.65rem;
+        border: 1px solid var(--line-strong);
+        border-radius: 8px;
+        color: var(--ink-2);
+      }
+      .decide {
+        display: grid;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      .decide .card b {
+        font-family: var(--serif);
+        font-size: 1.15rem;
+        font-weight: 600;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .a-timer span,
+        .a-reveal {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="doc">
+      <header>
+        <p class="small">Feynman Challenge · docs/design · 2026-09-27</p>
+        <h1>Landing yang membuat orang merasakan masalahnya sendiri</h1>
+        <p class="lede">
+          Brainstorming strategis sebelum membangun apa pun. Isinya: kenapa landing
+          sekarang belum bekerja, siapa yang datang, tuas psikologis yang jujur, tiga arah
+          visual yang bisa dibandingkan, dan satu rekomendasi lengkap sampai ke isi tiap
+          bagiannya.
+        </p>
+      </header>
+
+      <!-- ================================================================ -->
+      <section class="part">
+        <p class="num">01</p>
+        <h2>Kenapa landing sekarang belum bekerja</h2>
+        <div class="prose">
+          <p>
+            <strong>Ia menjelaskan produk, bukan masalah pengunjung.</strong> Tidak ada
+            yang mencari "penilaian AI poin demi poin". Orang datang membawa perasaan: aku
+            sudah belajar, kenapa tetap blank waktu harus menjelaskan?
+          </p>
+          <p>
+            <strong
+              >Ia meminta pengunjung membayangkan produk dari potongan antarmuka.</strong
+            >
+            Setiap potongan butuh konteks yang belum mereka punya. Itu sebabnya setiap
+            gambar memancing pertanyaan "ini maksudnya apa", dan itu sebabnya revisi terus
+            berulang: yang diperbaiki kepingannya, padahal masalahnya ada di
+            pendekatannya.
+          </p>
+          <p>
+            <strong>Ia meminta komitmen sebelum memberi apa pun.</strong> Tombol "Coba
+            tanpa akun" adalah permintaan pertama, padahal pengunjung belum merasakan satu
+            alasan pun untuk menekannya.
+          </p>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="part">
+        <p class="num">02</p>
+        <h2>Siapa yang datang, dan apa yang mereka rasakan</h2>
+        <div class="grid2">
+          <div class="card">
+            <h3>Konteks kedatangan</h3>
+            <ul>
+              <li>
+                Dari tautan yang dibagikan: WhatsApp, X, LinkedIn, bio media sosial.
+              </li>
+              <li>Hampir selalu di ponsel, dengan perhatian beberapa detik.</li>
+              <li>
+                Mahasiswa, pekerja yang mempelajari hal baru, orang yang bersiap ujian
+                atau wawancara, pembelajar mandiri.
+              </li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Kebiasaan belajar mereka</h3>
+            <ul>
+              <li>Menonton video, membaca ulang, menandai, bertanya ke chatbot.</li>
+              <li>
+                Semuanya terasa produktif. Justru di situ masalahnya: terasa akrab bukan
+                berarti paham.
+              </li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Yang membuat mereka ragu</h3>
+            <ul>
+              <li>Canggung bicara sendiri, takut terdengar bodoh.</li>
+              <li>Tidak yakin penilaian AI itu adil.</li>
+              <li>Malas mendaftar untuk sesuatu yang belum jelas manfaatnya.</li>
+              <li>Tidak tahu harus mulai dari topik apa.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Yang sebenarnya mereka inginkan</h3>
+            <ul>
+              <li>
+                Tahu bagian mana yang belum dipahami, sebelum ujian atau rapat yang
+                membukanya.
+              </li>
+              <li>Cara belajar yang terasa jujur, bukan sekadar sibuk.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="part">
+        <p class="num">03</p>
+        <h2>Wawasan inti</h2>
+        <p class="insight">
+          Orang tidak perlu diyakinkan bahwa mereka belum paham. Mereka perlu merasakannya
+          sendiri, sekali, dalam sepuluh detik.
+        </p>
+        <div class="prose" style="margin-top: 1.5rem">
+          <p>
+            Fenomena ini nyata dan terukur. Dalam studi Rozenblit dan Keil di Yale (2002),
+            orang menilai seberapa paham mereka tentang cara kerja benda sehari-hari
+            seperti resleting dan gembok, lalu diminta menjelaskannya langkah demi
+            langkah. Setelah mencoba, mereka menurunkan sendiri penilaian pemahamannya.
+            Peneliti menamainya
+            <strong>ilusi kedalaman penjelasan</strong>.
+          </p>
+          <p>
+            Itu persis masalah yang diselesaikan produk ini. Jadi landing terbaik bukan
+            yang mengklaim "kamu belum paham", tapi yang membuat pengunjung mengalaminya
+            sendiri, tanpa AI, tanpa mendaftar, sebelum tombol apa pun. Pemahaman yang
+            ditemukan sendiri jauh lebih meyakinkan daripada klaim siapa pun.
+          </p>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="part">
+        <p class="num">04</p>
+        <h2>Tuas psikologis, dipakai dengan jujur</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tuas</th>
+                <th>Artinya</th>
+                <th>Cara landing memakainya</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ilusi kedalaman penjelasan</td>
+                <td>
+                  Merasa paham sampai diminta menjelaskan.
+                  <span class="small">Rozenblit dan Keil, 2002</span>
+                </td>
+                <td>
+                  Hero berupa satu pertanyaan tentang benda sehari-hari yang dijawab dalam
+                  kepala.
+                </td>
+              </tr>
+              <tr>
+                <td>Persuasi diri</td>
+                <td>
+                  Kesimpulan yang dicapai sendiri lebih meyakinkan daripada yang
+                  diberitahukan.
+                </td>
+                <td>
+                  Landing tidak pernah bilang "kamu belum paham". Pengunjung yang
+                  menyadarinya.
+                </td>
+              </tr>
+              <tr>
+                <td>Celah rasa ingin tahu</td>
+                <td>
+                  Pertanyaan terbuka menimbulkan dorongan untuk menutupnya.
+                  <span class="small">Loewenstein, 1994</span>
+                </td>
+                <td>
+                  Pertanyaan di atas dibiarkan terbuka, lalu ditutup di bagian akhir
+                  halaman.
+                </td>
+              </tr>
+              <tr>
+                <td>Menormalkan, bukan mempermalukan</td>
+                <td>
+                  Rasa malu membuat orang pergi. Rasa "bukan cuma aku" membuat mereka
+                  bertahan.
+                </td>
+                <td>
+                  Langsung setelah tersendat: "Kamu tidak sendirian", dengan nama
+                  fenomenanya.
+                </td>
+              </tr>
+              <tr>
+                <td>Otoritas yang bisa dicek</td>
+                <td>Kepercayaan dari sumber nyata, bukan angka pengguna karangan.</td>
+                <td>
+                  Menyebut penelitian yang bisa dicari. Tanpa testimoni atau "dipercaya
+                  10.000 pelajar".
+                </td>
+              </tr>
+              <tr>
+                <td>Satu pilihan</td>
+                <td>Makin banyak pilihan, makin lama orang memutuskan.</td>
+                <td>
+                  Satu aksi utama di setiap layar. "Daftar" hanya sebagai tautan pelan.
+                </td>
+              </tr>
+              <tr>
+                <td>Komitmen yang kecil dulu</td>
+                <td>
+                  Langkah pertama yang ringan membuat langkah berikutnya lebih mudah.
+                </td>
+                <td>
+                  "Tanpa akun, tanpa email, sekitar lima menit." Mikrofon baru diminta
+                  saat siap.
+                </td>
+              </tr>
+              <tr>
+                <td>Akhir yang kuat</td>
+                <td>Orang mengingat puncak dan akhir sebuah pengalaman.</td>
+                <td>
+                  Halaman ditutup dengan pertanyaan yang sama, kini dengan jalan
+                  keluarnya.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small" style="margin-top: 1rem">
+          Batas yang tidak dilanggar: tidak ada hitung mundur palsu, kelangkaan palsu,
+          testimoni, atau angka yang tidak bisa dibuktikan. Tuas di atas bekerja karena
+          jujur.
+        </p>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="part">
+        <p class="num">05</p>
+        <h2>Tiga arah visual</h2>
+        <div class="prose">
+          <p>
+            Ketiganya tetap di dalam sistem Kertas dan Kapur, jadi landing terasa satu
+            keluarga dengan aplikasinya. Yang berbeda adalah cara halaman menarik orang
+            masuk.
+          </p>
+        </div>
+
+        <!-- Concept A -->
+        <article class="concept">
+          <div class="concept-head">
+            <h3>A. Cermin</h3>
+            <span class="tag pick">Direkomendasikan untuk hero</span>
+            <span class="tag">Tipografis, minimalis, interaktif tanpa klik</span>
+          </div>
+          <div class="frames">
+            <div class="frame">
+              <div class="frame-bar">
+                <i></i><i></i><i></i><span>feynmanchallenge.id</span>
+              </div>
+              <div class="m-nav">
+                <span class="m-brand">
+                  <svg
+                    viewBox="0 0 48 48"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M10 40 L24 27 L38 40"
+                      stroke="currentColor"
+                      stroke-width="4.5"
+                    />
+                    <path
+                      d="M24 27 q-4.8 -2.5 0 -5 q4.8 -2.5 0 -5 q-4.8 -2.5 0 -5 q4.8 -2.5 0 -5"
+                      stroke="var(--accent)"
+                      stroke-width="3.8"
+                    />
+                    <circle cx="24" cy="27" r="3.4" fill="currentColor" stroke="none" />
+                  </svg>
+                  Feynman Challenge
+                </span>
+                <span class="m-links"><span>Masuk</span></span>
+              </div>
+              <div class="a-hero" id="mirror">
+                <p class="a-eyebrow">Tes sepuluh detik</p>
+                <p class="a-question">Bagaimana resleting bekerja?</p>
+                <p class="a-instruction">
+                  Jawab dalam kepala. Jelaskan langkahnya, bukan namanya.
+                </p>
+                <div class="a-timer" aria-hidden="true"><span></span></div>
+                <div class="a-reveal">
+                  <p>Tersendat? Kamu tidak sendirian.</p>
+                  <p>
+                    Orang merasa paham cara kerja benda sehari-hari, sampai diminta
+                    menjelaskannya. Peneliti menyebutnya ilusi kedalaman penjelasan.
+                    Belajar pun begitu.
+                  </p>
+                </div>
+                <div class="a-cta">
+                  <span class="btn btn-primary">Temukan celahmu</span>
+                  <span class="small">Tanpa akun · tanpa email · sekitar lima menit</span>
+                </div>
+                <button class="replay" type="button" onclick="replay()">
+                  Ulangi sepuluh detiknya
+                </button>
+              </div>
+            </div>
+            <div class="phone">
+              <div class="a-hero" style="padding: 2.5rem 1.25rem 2rem">
+                <p class="a-eyebrow">Tes sepuluh detik</p>
+                <p class="a-question" style="font-size: 2.35rem">
+                  Bagaimana resleting bekerja?
+                </p>
+                <p class="a-instruction" style="font-size: 1.05rem">
+                  Jawab dalam kepala. Jelaskan langkahnya, bukan namanya.
+                </p>
+                <div class="a-timer" aria-hidden="true"><span></span></div>
+                <div class="a-reveal">
+                  <p style="font-size: 1.2rem">Tersendat? Kamu tidak sendirian.</p>
+                </div>
+                <div class="a-cta" style="margin-top: 1.25rem">
+                  <span class="btn btn-primary" style="width: 100%">Temukan celahmu</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="why">
+            <div>
+              <h4>Kenapa bekerja</h4>
+              <p>
+                Pengunjung menjadi peserta dalam sepuluh detik pertama. Mereka mengalami
+                masalah yang diselesaikan produk ini, dengan otak mereka sendiri, sebelum
+                membaca satu klaim pun.
+              </p>
+            </div>
+            <div>
+              <h4>Detail yang disengaja</h4>
+              <ul>
+                <li>Garis tinta mengisi selama sepuluh detik, sekali, tidak berulang.</li>
+                <li>Tombol utama tidak pernah menunggu: ia terlihat sejak awal.</li>
+                <li>Pertanyaan berganti tiap kunjungan, semuanya benda sehari-hari.</li>
+                <li>Mati total saat pengguna memilih kurangi gerak.</li>
+              </ul>
+            </div>
+            <div>
+              <h4>Risiko dan jawabannya</h4>
+              <p>
+                Menyebut satu benda. Tapi ini pertanyaan untuk pengunjung, bukan contoh
+                hasil, dan resleting tidak mengikat produk ke pelajaran sekolah atau
+                bidang tertentu.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Concept B -->
+        <article class="concept">
+          <div class="concept-head">
+            <h3>B. Kertas koreksi</h3>
+            <span class="tag pick">Direkomendasikan untuk bagian kedua</span>
+            <span class="tag">Editorial, hangat, jenaka</span>
+          </div>
+          <div class="frames">
+            <div class="frame">
+              <div class="frame-bar">
+                <i></i><i></i><i></i><span>feynmanchallenge.id</span>
+              </div>
+              <div class="b-hero">
+                <div>
+                  <p class="b-title">
+                    Membaca membuatmu merasa paham. Menjelaskan membuktikannya.
+                  </p>
+                  <p class="b-lead">
+                    Rekam penjelasanmu tentang topik apa pun. Setiap kalimatnya dibaca
+                    seperti guru yang teliti membaca kertas ujianmu.
+                  </p>
+                  <div class="a-cta">
+                    <span class="btn btn-primary">Temukan celahmu</span>
+                  </div>
+                </div>
+                <div class="sheet">
+                  <p class="sheet-label">Penjelasan yang terasa meyakinkan</p>
+                  <p class="sheet-text">
+                    Aku sudah membaca materinya dua kali, jadi aku yakin paham. Intinya,
+                    ini bekerja karena <span class="dotted">mekanismenya</span> memang
+                    begitu. <span class="mark">Pokoknya</span> kalau sudah dipraktikkan
+                    pasti mengerti.
+                  </p>
+                  <div class="notes">
+                    <p class="note">
+                      <svg
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="#5f6474"
+                        stroke-width="1.6"
+                        stroke-dasharray="3 2.4"
+                      >
+                        <circle cx="10" cy="10" r="7.5" />
+                      </svg>
+                      "Mekanismenya" itu nama, bukan penjelasan. Langkahnya belum ada.
+                    </p>
+                    <p class="note">
+                      <svg viewBox="0 0 20 20">
+                        <circle
+                          cx="10"
+                          cy="10"
+                          r="7.5"
+                          fill="none"
+                          stroke="#8f5e05"
+                          stroke-width="1.6"
+                        />
+                        <path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="#8f5e05" />
+                      </svg>
+                      "Pokoknya" menandai bagian yang kamu lompati.
+                    </p>
+                    <p class="note">
+                      <svg viewBox="0 0 20 20">
+                        <circle cx="10" cy="10" r="8.3" fill="#2b7148" />
+                        <path
+                          d="M6.4 10.2l2.4 2.4 4.8-5"
+                          fill="none"
+                          stroke="#fff"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                      Jujur soal membaca dua kali. Sayangnya itu belum membuktikan paham.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="phone">
+              <div style="padding: 2rem 1.25rem">
+                <p class="b-title" style="font-size: 1.8rem">
+                  Membaca membuatmu merasa paham. Menjelaskan membuktikannya.
+                </p>
+                <div class="sheet" style="margin-top: 1.25rem; padding: 1.25rem">
+                  <p class="sheet-text" style="font-size: 1rem">
+                    Intinya, ini bekerja karena
+                    <span class="dotted">mekanismenya</span> memang begitu.
+                    <span class="mark">Pokoknya</span> pasti mengerti.
+                  </p>
+                  <p class="note" style="margin-top: 0.75rem">
+                    "Mekanismenya" itu nama, bukan penjelasan.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="why">
+            <div>
+              <h4>Kenapa bekerja</h4>
+              <p>
+                Semua orang pernah menulis "pokoknya" di jawaban ujian. Pengakuan kecil
+                itu membuat orang tersenyum dan merasa dimengerti, lalu memperlihatkan
+                cara produk membaca penjelasan tanpa satu pun topik contoh.
+              </p>
+            </div>
+            <div>
+              <h4>Detail yang disengaja</h4>
+              <ul>
+                <li>
+                  Tulisannya tentang rasa paham itu sendiri, bukan tentang materi apa pun.
+                </li>
+                <li>Tanda koreksinya sama persis dengan tanda di halaman hasil.</li>
+                <li>Catatan pinggir memakai suara guru yang baik, tidak menghakimi.</li>
+              </ul>
+            </div>
+            <div>
+              <h4>Risiko dan jawabannya</h4>
+              <p>
+                Sebagai hero ia masih meminta pengunjung membaca dulu. Karena itu
+                posisinya lebih kuat sebagai bagian kedua, tepat setelah pengunjung
+                merasakan tes sepuluh detik.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Concept C -->
+        <article class="concept">
+          <div class="concept-head">
+            <h3>C. Panggung</h3>
+            <span class="tag">Dipertimbangkan, tidak direkomendasikan</span>
+            <span class="tag">Berani, gelap, satu tombol</span>
+          </div>
+          <div class="frames">
+            <div class="frame board">
+              <div
+                class="frame-bar"
+                style="background: #1b2421; border-color: #2c3833; color: #949b92"
+              >
+                <i style="background: #43524b"></i><i style="background: #43524b"></i
+                ><i style="background: #43524b"></i><span>feynmanchallenge.id</span>
+              </div>
+              <div class="c-hero">
+                <p class="c-title">
+                  Jelaskan apa saja. Kami tunjukkan yang belum kamu pahami.
+                </p>
+                <span class="c-rec" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  >
+                    <rect x="9" y="2" width="6" height="12" rx="3" />
+                    <path d="M5 11a7 7 0 0 0 14 0M12 18v4" />
+                  </svg>
+                </span>
+                <p class="c-label">Mulai tanpa akun</p>
+                <p class="small" style="color: #949b92">
+                  Mikrofon baru diminta saat kamu siap merekam.
+                </p>
+              </div>
+            </div>
+            <div class="phone board">
+              <div class="c-hero" style="padding: 3rem 1.25rem">
+                <p class="c-title" style="font-size: 1.9rem">Jelaskan apa saja.</p>
+                <span class="c-rec" aria-hidden="true" style="width: 5rem; height: 5rem">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  >
+                    <rect x="9" y="2" width="6" height="12" rx="3" />
+                    <path d="M5 11a7 7 0 0 0 14 0M12 18v4" />
+                  </svg>
+                </span>
+                <p class="c-label">Mulai tanpa akun</p>
+              </div>
+            </div>
+          </div>
+          <div class="why">
+            <div>
+              <h4>Kekuatannya</h4>
+              <p>
+                Paling mudah diingat. Satu keputusan di layar, dan tombolnya sendiri
+                mengatakan "ini produk suara".
+              </p>
+            </div>
+            <div>
+              <h4>Kenapa tidak dipilih</h4>
+              <ul>
+                <li>
+                  Tombol mikrofon raksasa di detik pertama menakutkan bagi orang yang
+                  canggung bicara, dan itu hambatan terbesar audiens ini.
+                </li>
+                <li>Ia meminta tindakan sebelum memberi alasan.</li>
+              </ul>
+            </div>
+            <div>
+              <h4>Yang tetap dipakai</h4>
+              <p>
+                Papan tulis gelap tetap muncul, di akhir halaman, sebagai tempat ajakan
+                penutup: momen tampil setelah pengunjung sudah punya alasan.
+              </p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="part">
+        <p class="num">06</p>
+        <h2>Rekomendasi: satu halaman, satu cerita</h2>
+        <div class="prose">
+          <p>
+            Cermin sebagai pembuka, kertas koreksi sebagai penjelasan, papan tulis sebagai
+            penutup. Halaman ini bercerita: kamu mengalami masalahnya, kamu tahu namanya,
+            kamu melihat cara keluarnya, kamu merasa aman mencobanya, lalu pertanyaan
+            pembuka ditutup.
+          </p>
+        </div>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-meta"><b>1. Cermin</b><span>Mengalami</span></div>
+            <div class="flow-copy">
+              <h4>Bagaimana resleting bekerja?</h4>
+              <p>
+                Jawab dalam kepala. Jelaskan langkahnya, bukan namanya. Lalu: "Tersendat?
+                Kamu tidak sendirian." Tombol "Temukan celahmu" terlihat sejak awal.
+              </p>
+              <div class="qlist">
+                <span>Bagaimana resleting bekerja?</span>
+                <span>Bagaimana gembok tahu kuncimu yang benar?</span>
+                <span>Kenapa es mengapung di air?</span>
+                <span>Bagaimana kulkas membuat dingin?</span>
+                <span>Kenapa langit berwarna biru?</span>
+              </div>
+              <p class="why-line">
+                Pertanyaan dipilih acak tiap kunjungan dari benda dan kejadian
+                sehari-hari, termasuk benda dari studi aslinya.
+              </p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-meta"><b>2. Namanya</b><span>Dimengerti</span></div>
+            <div class="flow-copy">
+              <h4>Rasa paham dan bisa menjelaskan adalah dua hal berbeda</h4>
+              <p>
+                Satu paragraf tentang ilusi kedalaman penjelasan dan studi Yale 2002,
+                ditambah satu kalimat tentang kebiasaan belajar yang terasa produktif:
+                membaca ulang dan menandai membuat materi terasa akrab, belum tentu
+                dipahami.
+              </p>
+              <p class="why-line">
+                Mengubah rasa malu menjadi rasa ingin tahu, dengan otoritas yang bisa
+                dicek.
+              </p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-meta">
+              <b>3. Kertas koreksi</b><span>Melihat jalan keluar</span>
+            </div>
+            <div class="flow-copy">
+              <h4>Membaca membuatmu merasa paham. Menjelaskan membuktikannya.</h4>
+              <p>
+                Paragraf "pokoknya" dengan tanda koreksi yang sama persis dengan halaman
+                hasil: istilah yang belum dijelaskan, bagian yang dilompati, dan catatan
+                pinggir dari suara guru yang baik.
+              </p>
+              <p class="why-line">
+                Memperlihatkan cara produk membaca penjelasan, tanpa topik contoh apa pun.
+              </p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-meta"><b>4. Caranya</b><span>Tahu langkahnya</span></div>
+            <div class="flow-copy">
+              <h4>Pilih topik. Jelaskan dengan suaramu. Lihat celahmu.</h4>
+              <p>
+                Tiga langkah sebagai satu baris bernomor, lalu satu kalimat tentang jadwal
+                ulang: topik kembali tepat sebelum kamu lupa.
+              </p>
+              <p class="why-line">
+                Pendek, karena pengunjung sudah paham kenapa. Sekarang mereka hanya perlu
+                tahu bagaimana.
+              </p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-meta"><b>5. Aman</b><span>Merasa tenang</span></div>
+            <div class="flow-copy">
+              <h4>Tidak ada yang mendengar selain penilainya</h4>
+              <p>
+                Rekaman privat dan bisa dihapus, bisa didengar ulang sebelum dikirim,
+                gratis, tanpa email. Lalu pertanyaan umum yang tersisa.
+              </p>
+              <p class="why-line">
+                Menjawab hambatan terbesar, canggung bicara, sebelum tombol terakhir.
+              </p>
+            </div>
+          </div>
+          <div class="flow-step board">
+            <div class="flow-meta">
+              <b>6. Penutup</b><span style="color: #949b92">Bertindak</span>
+            </div>
+            <div class="flow-copy">
+              <h4>Jadi, bagaimana resleting bekerja?</h4>
+              <p>
+                Sekarang kamu tahu caranya mencari tahu. Jelaskan satu topik hari ini,
+                dengan suaramu, dan lihat bagian mana yang belum kamu pahami.
+              </p>
+              <p class="why-line" style="border-color: #2c3833">
+                Pertanyaan pembuka ditutup di sini. Akhir yang kuat, di atas papan tulis,
+                satu tombol.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="part">
+        <p class="num">07</p>
+        <h2>Yang sengaja tidak dipakai</h2>
+        <div class="grid2">
+          <div class="card">
+            <h3>Pola landing generik</h3>
+            <ul>
+              <li>Judul "Revolusi cara belajar dengan AI".</li>
+              <li>Deretan kartu fitur dengan ikon di atasnya.</li>
+              <li>Mockup ponsel melayang dan gambar ilustrasi AI.</li>
+              <li>Testimoni, foto orang tersenyum, "dipercaya ribuan pelajar".</li>
+              <li>Gradien, kilau, dan animasi yang berulang terus.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Kata yang dihindari</h3>
+            <ul>
+              <li>
+                "Revolusioner", "maksimalkan potensimu", "tingkatkan produktivitas".
+              </li>
+              <li>"Berbasis AI" sebagai judul. AI adalah alatnya, bukan janjinya.</li>
+              <li>
+                Pujian berlebihan, dan apa pun yang membuat pengunjung merasa bodoh.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="part">
+        <p class="num">08</p>
+        <h2>Yang perlu kamu putuskan</h2>
+        <div class="decide">
+          <div class="card">
+            <b>1. Arah halaman</b>
+            <p class="small" style="margin-top: 0.3rem">
+              Rekomendasi: Cermin untuk pembuka, Kertas koreksi di tengah, Papan tulis
+              untuk penutup. Atau pilih satu konsep saja.
+            </p>
+          </div>
+          <div class="card">
+            <b>2. Pertanyaan di hero</b>
+            <p class="small" style="margin-top: 0.3rem">
+              Rekomendasi: benda sehari-hari seperti resleting, karena paling kuat memicu
+              efeknya. Alternatif tanpa topik apa pun: "Pikirkan satu hal yang kamu yakin
+              sudah paham. Sekarang jelaskan kenapa, bukan apa." Lebih netral, tapi
+              efeknya lebih lemah.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>
+      // Restarts the ten-second fill and reveal in the mockups.
+      function replay() {
+        document.querySelectorAll(".a-timer span, .a-reveal").forEach((el) => {
+          el.style.animation = "none";
+          void el.offsetWidth;
+          el.style.animation = "";
+        });
+      }
+    </script>
+  </body>
+</html>
