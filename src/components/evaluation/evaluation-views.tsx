@@ -11,6 +11,7 @@ import { Icon } from "@/components/ui/icon";
 import { Sheet } from "@/components/ui/sheet";
 import { AUDIO_ISSUE_MESSAGES } from "@/lib/api/contracts";
 import type { CoverageComparison as Comparison } from "@/lib/utils/coverage-progress";
+import { nextFocus } from "@/lib/utils/result-digest";
 import { splitSummary } from "@/lib/utils/transcript";
 import type { AudioIssue } from "@/types";
 
@@ -146,8 +147,10 @@ export function EvaluationStatusView(props: StatusProps) {
 }
 
 // ---------------------------------------------------------------------------
-// Completed with a score (DESIGN.md §11): summary, score, points beside the
-// annotated transcript, notes, follow-ups, comparison, next action.
+// Completed with a score (DESIGN.md §11, reordered in V.7): summary, score,
+// the one thing to focus on next, points beside the annotated transcript,
+// follow-ups, then the folded notes and comparison. "Jelaskan lagi" sticks
+// to the bottom of a phone screen instead of waiting ten screens down.
 // ---------------------------------------------------------------------------
 export interface CompletedProps {
   challengeId: string;
@@ -173,6 +176,7 @@ export interface CompletedProps {
 export function EvaluationCompletedView(props: CompletedProps) {
   const links = hrefs(props.challengeId);
   const { summary, rest } = splitSummary(props.feedback);
+  const focus = nextFocus(props.improvements, props.coverage);
 
   return (
     <section className="page result-page">
@@ -214,6 +218,15 @@ export function EvaluationCompletedView(props: CompletedProps) {
         </div>
       </Sheet>
 
+      {focus && (
+        <section className="next-focus" aria-labelledby="focus-title">
+          <h2 id="focus-title" className="next-focus-label">
+            Fokus berikutnya
+          </h2>
+          <p className="next-focus-text">{focus}</p>
+        </section>
+      )}
+
       {props.coverage.length > 0 && (
         <ResultEvidence
           challengeId={props.challengeId}
@@ -225,14 +238,15 @@ export function EvaluationCompletedView(props: CompletedProps) {
         />
       )}
 
+      {props.followUp}
+
+      {/* Secondary material, folded so nobody has to scroll past it (V.7). */}
       <FeedbackNotes
         rest={rest}
         strengths={props.strengths}
         improvements={props.improvements}
         jargon={props.unexplainedJargon}
       />
-
-      {props.followUp}
 
       {props.comparison && (
         <CoverageComparison
@@ -243,11 +257,15 @@ export function EvaluationCompletedView(props: CompletedProps) {
       )}
 
       <div className="result-actions">
-        <ButtonLink href={links.record} size="lg" icon={RotateCcw}>
-          Jelaskan lagi
-        </ButtonLink>
         <ButtonLink href={links.notebook} variant="secondary" size="lg" icon={BookOpen}>
           Buka catatan belajar
+        </ButtonLink>
+      </div>
+
+      {/* The one next step, always within reach on a phone (V.7). */}
+      <div className="sticky-cta">
+        <ButtonLink href={links.record} size="lg" block icon={RotateCcw}>
+          Jelaskan lagi
         </ButtonLink>
       </div>
     </section>

@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Flame, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { Icon } from "@/components/ui/icon";
 
 import { BrandMark } from "./brand-mark";
 import { useAuth } from "@/lib/auth/auth-provider";
@@ -15,13 +14,15 @@ import { useAuth } from "@/lib/auth/auth-provider";
 interface Props {
   /** From profiles.display_name (server), not from auth metadata. */
   displayName: string;
-  /** Live streak: already 0 when the streak is broken. */
-  streakCount: number;
   /** Demo account: logging out loses its data for good, so confirm first. */
   isAnonymous: boolean;
 }
 
-export function Header({ displayName, streakCount, isAnonymous }: Props) {
+/**
+ * The app bar. No streak badge here: the week strip on Meja Belajar replaced
+ * it (DESIGN.md §10), and showing both counted the same days twice (V.7).
+ */
+export function Header({ displayName, isAnonymous }: Props) {
   const { signOut } = useAuth();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -42,18 +43,6 @@ export function Header({ displayName, streakCount, isAnonymous }: Props) {
       </Link>
 
       <div className="row gap-3">
-        {streakCount > 0 && (
-          <Link
-            href="/"
-            className="badge"
-            title="Streak harian"
-            aria-label={`Streak harian: ${streakCount} hari`}
-          >
-            <Icon icon={Flame} size={14} />
-            {streakCount}
-          </Link>
-        )}
-
         <span className="text-secondary text-sm show-from-sm">{displayName}</span>
 
         <Button

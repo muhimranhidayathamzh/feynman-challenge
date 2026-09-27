@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Pencil, Trash2 } from "lucide-react";
+import { Check, ChevronDown, Pencil, Settings2, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button, IconButton } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import { ChallengePatchResponseSchema, OkResponseSchema } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
@@ -54,6 +55,14 @@ export function NotebookHeader({
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const manageRef = useRef<HTMLDetailsElement>(null);
+
+  /** The title field unmounts on save or cancel: return focus where it came from. */
+  function leaveEditing() {
+    setEditing(false);
+    manageRef.current?.querySelector("summary")?.focus();
+  }
+
   // Only nag when the review is actually due; the strip shows the schedule.
   const reviewDue =
     nextReview !== null &&
@@ -66,7 +75,7 @@ export function NotebookHeader({
       return;
     }
     if (trimmed === title) {
-      setEditing(false);
+      leaveEditing();
       return;
     }
     setBusy(true);
@@ -81,7 +90,7 @@ export function NotebookHeader({
       return;
     }
     setTitle(result.data.challenge.title);
-    setEditing(false);
+    leaveEditing();
     toast.show({ message: "Judul disimpan.", tone: "success" });
   }
 
@@ -110,66 +119,44 @@ export function NotebookHeader({
         </div>
       )}
 
-      <div className="row-between items-start gap-3">
-        {editing ? (
-          <div className="stack flex-1 gap-2">
-            <Input
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
-              maxLength={200}
-              aria-label="Judul tantangan"
-              autoFocus
-            />
-            <div className="row gap-2">
-              <Button size="sm" icon={Check} onClick={saveTitle} loading={busy}>
-                Simpan
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setDraft(title);
-                  setEditing(false);
-                  setError(null);
-                }}
-                disabled={busy}
-              >
-                Batal
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="stack gap-1 flex-1">
-            <p className="notebook-eyebrow">Catatan belajar</p>
-            <h1 className="notebook-title">{title}</h1>
-          </div>
-        )}
-
-        <div className="row gap-0">
-          {!editing && (
-            <IconButton
-              icon={Pencil}
-              label="Edit judul"
+      {editing ? (
+        <div className="stack gap-2">
+          <Input
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            maxLength={200}
+            aria-label="Judul tantangan"
+            autoFocus
+          />
+          <div className="row gap-2">
+            <Button size="sm" icon={Check} onClick={saveTitle} loading={busy}>
+              Simpan
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 setDraft(title);
-                setEditing(true);
+                setError(null);
+                leaveEditing();
               }}
               disabled={busy}
-            />
-          )}
-          <IconButton
-            icon={Trash2}
-            label="Hapus tantangan"
-            danger
-            onClick={() => setConfirmingDelete(true)}
-            disabled={busy}
-          />
+            >
+              Batal
+            </Button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="stack gap-1">
+          <p className="notebook-eyebrow">Catatan belajar</p>
+          <h1 className="notebook-title">{title}</h1>
+        </div>
+      )}
 
+      {/* What matters at a glance: how well, and when it comes back. */}
       <div className="notebook-meta">
         <MasteryMeter state={masteryState} />
-        <div className="row flex-wrap gap-2">
+        <div className="row flex-wrap items-center gap-2">
           {status !== "active" ? (
             <Badge tone={status === "completed" ? "success" : "neutral"}>
               {STATUS_LABEL[status]}
@@ -177,13 +164,52 @@ export function NotebookHeader({
           ) : (
             <DeadlineBadge info={deadlineInfo} />
           )}
-          {reviewDue && <Badge tone="warning">{nextReview}</Badge>}
+          {reviewDue ? (
+            <Badge tone="warning">{nextReview}</Badge>
+          ) : (
+            nextReview && <span className="text-muted text-sm">{nextReview}</span>
+          )}
         </div>
       </div>
 
-      {nextReview && <LeitnerStrip box={reviewBox} nextReview={nextReview} />}
-
-      <ChallengeActions challengeId={id} status={status} deadline={deadline} />
+      {/* The machinery, folded (V.7): review boxes and every way to change
+          this challenge, instead of ten controls above its first line. */}
+      <details className="notebook-manage" ref={manageRef}>
+        <summary className="notebook-manage-summary">
+          <Icon icon={Settings2} size={16} />
+          Kelola tantangan
+          <ChevronDown className="notebook-manage-chevron" size={16} aria-hidden="true" />
+        </summary>
+        <div className="notebook-manage-body">
+          {nextReview && <LeitnerStrip box={reviewBox} nextReview={nextReview} />}
+          <ChallengeActions challengeId={id} status={status} deadline={deadline} />
+          <div className="row flex-wrap gap-2 notebook-manage-danger">
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={Pencil}
+              onClick={() => {
+                setDraft(title);
+                setEditing(true);
+                if (manageRef.current) manageRef.current.open = false;
+              }}
+              disabled={busy || editing}
+            >
+              Ubah judul
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={Trash2}
+              className="manage-delete"
+              onClick={() => setConfirmingDelete(true)}
+              disabled={busy}
+            >
+              Hapus tantangan
+            </Button>
+          </div>
+        </div>
+      </details>
 
       <ConfirmDialog
         open={confirmingDelete}

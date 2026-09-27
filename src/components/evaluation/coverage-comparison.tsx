@@ -1,7 +1,7 @@
 import { ArrowRight, BookOpen } from "lucide-react";
 import Link from "next/link";
 
-import { Sheet, SheetTitle } from "@/components/ui/sheet";
+import { Disclosure } from "@/components/ui/disclosure";
 import { Icon } from "@/components/ui/icon";
 import {
   isEmptyComparison,
@@ -10,6 +10,7 @@ import {
   type CoverageComparison as Comparison,
 } from "@/lib/utils/coverage-progress";
 import { COVERAGE_STATUS_LABEL } from "@/lib/utils/labels";
+import { comparisonSummary } from "@/lib/utils/result-digest";
 
 import { CoverageMark } from "./coverage-mark";
 
@@ -69,7 +70,10 @@ function ChangeList({
   );
 }
 
-/** Point-by-point progress against the previous scored attempt. */
+/**
+ * Point-by-point progress against the previous scored attempt. Folded by
+ * default (Prompt V.7); the summary line keeps the verdict visible.
+ */
 export function CoverageComparison({
   challengeId,
   previousAttemptNumber,
@@ -77,25 +81,13 @@ export function CoverageComparison({
 }: Props) {
   if (isEmptyComparison(comparison)) return null;
 
-  const { improved, declined, stillWeak, steadyCount } = comparison;
-  const summary = [
-    improved.length > 0 && `${improved.length} membaik`,
-    declined.length > 0 && `${declined.length} menurun`,
-    stillWeak.length > 0 && `${stillWeak.length} masih kurang`,
-    steadyCount > 0 && `${steadyCount} tetap tercakup`,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const { improved, declined, stillWeak } = comparison;
 
   return (
-    <Sheet as="section" className="stack gap-4" aria-labelledby="compare-title">
-      <div className="stack gap-1">
-        <SheetTitle>
-          <span id="compare-title">Dibanding Percobaan #{previousAttemptNumber}</span>
-        </SheetTitle>
-        <p className="text-secondary text-sm">{summary}</p>
-      </div>
-
+    <Disclosure
+      title={`Dibanding percobaan #${previousAttemptNumber}`}
+      summary={comparisonSummary(comparison)}
+    >
       <ChangeList
         title="Membaik"
         changes={improved}
@@ -118,6 +110,6 @@ export function CoverageComparison({
       {improved.length === 0 && declined.length === 0 && stillWeak.length === 0 && (
         <p className="text-sm">Semua poin tetap tercakup. Pertahankan!</p>
       )}
-    </Sheet>
+    </Disclosure>
   );
 }

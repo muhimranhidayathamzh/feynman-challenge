@@ -7,8 +7,8 @@ export function NewChallengeView() {
       <div className="stack gap-2">
         <h1>Tantangan baru</h1>
         <p className="text-secondary">
-          Pilih topik apa pun. AI akan menyusun outline materi, sumber belajar, dan
-          perkiraan durasi rekaman.
+          Tulis apa saja yang ingin kamu pahami. AI menyusun poin yang perlu kamu
+          jelaskan, sumber belajarnya, dan berapa lama kamu perlu merekam.
         </p>
       </div>
 

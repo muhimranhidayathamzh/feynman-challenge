@@ -126,37 +126,63 @@
   font-size: var(--text-base);
 }
 
-/* --- Onboarding and landing steps --- */
-.onboarding-steps {
+/* --- Onboarding: a numbered list, then straight to work (V.7) --- */
+.onboarding-intro {
   display: grid;
   gap: var(--space-4);
-  counter-reset: step;
+  align-items: center;
 }
 
-@media (min-width: 768px) {
-  .onboarding-steps {
-    grid-template-columns: repeat(3, 1fr);
+/* Small on phones, so the first action clears the bottom nav. */
+.onboarding-intro .illustration {
+  width: 4.5rem;
+}
+
+/* Decorative: on the narrowest phones the first action matters more. */
+@media (max-width: 379px) {
+  .onboarding-intro .illustration {
+    display: none;
   }
 }
 
-.onboarding-step {
+@media (min-width: 768px) {
+  .onboarding-intro {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+
+  .onboarding-intro .illustration {
+    width: 7rem;
+  }
+}
+
+.onboarding-list {
   display: grid;
-  justify-items: start;
-  gap: var(--space-2);
-  height: 100%;
+  max-width: 40rem;
 }
 
-.onboarding-step .illustration {
-  width: 7.5rem;
-}
-
-.onboarding-step-title {
+.onboarding-item {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+  border-bottom: 1px dashed var(--line);
+}
+
+.onboarding-item:first-child {
+  padding-top: 0;
+}
+
+.onboarding-item .onboarding-step-number {
+  flex: 0 0 auto;
+  margin-top: 0.15em;
+}
+
+.onboarding-item-title {
   font-family: var(--font-serif);
   font-size: var(--text-h2);
   font-weight: var(--weight-semibold);
+  line-height: 1.2;
 }
 
 .onboarding-step-number {
@@ -210,12 +236,6 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-3);
-}
-
-.landing-steps,
-.landing-sample {
-  display: grid;
-  gap: var(--space-4);
 }
 
 .landing-footer {
@@ -273,4 +293,123 @@
   line-height: var(--leading-normal);
   color: var(--ink-2);
   max-width: 44ch;
+}
+
+/* --- Landing: the loop, shown with the app's real screens (V.7) --- */
+.landing-flow {
+  display: grid;
+  gap: var(--space-10);
+}
+
+.landing-flow-step {
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .landing-flow-step {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: var(--space-10);
+  }
+}
+
+.landing-flow-text {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 34rem;
+}
+
+.landing-flow-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
+}
+
+.landing-flow-body {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  line-height: var(--leading-normal);
+  color: var(--ink-2);
+}
+
+.landing-preview-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-3);
+}
+
+.landing-outline {
+  display: grid;
+}
+
+.landing-outline li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding-block: var(--space-2);
+  border-bottom: 1px dashed var(--line);
+  font-weight: var(--weight-medium);
+}
+
+.landing-outline li:last-child {
+  border-bottom: 0;
+}
+
+.landing-outline-number {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  min-width: 1ch;
+}
+
+/* The chalkboard: the stage's own palette through data-mood=board. */
+.landing-board {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-4);
+  border-radius: var(--radius-lg);
+  /* In the dark theme the board and the page share one colour: the
+     hairline is what keeps it a board instead of a gap. */
+  border: 1px solid var(--line-strong);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: center;
+}
+
+.landing-board-eyebrow {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+
+.landing-board-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
+}
+
+.landing-board-hints {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.landing-result-summary {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  line-height: var(--leading-snug);
+}
+
+.landing-quote {
+  display: grid;
+  gap: var(--space-1);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--line);
 }

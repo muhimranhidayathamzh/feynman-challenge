@@ -1,4 +1,5 @@
-import { Sheet, SheetTitle } from "@/components/ui/sheet";
+import { Disclosure } from "@/components/ui/disclosure";
+import { notesSummary } from "@/lib/utils/result-digest";
 
 interface Props {
   /** Feedback after the first sentence (the first one is the page summary). */
@@ -11,6 +12,10 @@ interface Props {
 /**
  * The evaluator's notes, written like a teacher's margin notes: what is
  * already strong, what could be better, and terms still to explain.
+ *
+ * Folded by default (Prompt V.7): the one note that matters most is already
+ * pulled up as "Fokus berikutnya", so the full list is there for whoever
+ * wants it without every learner scrolling past it.
  */
 export function FeedbackNotes({ rest, strengths, improvements, jargon }: Props) {
   if (
@@ -22,32 +27,36 @@ export function FeedbackNotes({ rest, strengths, improvements, jargon }: Props) 
     return null;
   }
   return (
-    <Sheet as="section" className="stack gap-5" aria-labelledby="notes-title">
-      <SheetTitle id="notes-title">Catatan penilai</SheetTitle>
+    <Disclosure
+      title="Catatan lengkap penilai"
+      summary={notesSummary(strengths.length, improvements.length, jargon.length) || null}
+    >
       {rest && <p className="reading">{rest}</p>}
 
-      <div className="notes-columns">
-        {strengths.length > 0 && (
-          <div className="stack gap-2">
-            <h3 className="notes-heading">Sudah kuat</h3>
-            <ul className="notes-list">
-              {strengths.map((item, index) => (
-                <li key={`${index}-${item}`}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {improvements.length > 0 && (
-          <div className="stack gap-2">
-            <h3 className="notes-heading">Bisa lebih baik</h3>
-            <ul className="notes-list">
-              {improvements.map((item, index) => (
-                <li key={`${index}-${item}`}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
+      {(strengths.length > 0 || improvements.length > 0) && (
+        <div className="notes-columns">
+          {strengths.length > 0 && (
+            <div className="stack gap-2">
+              <h3 className="notes-heading">Sudah kuat</h3>
+              <ul className="notes-list">
+                {strengths.map((item, index) => (
+                  <li key={`${index}-${item}`}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {improvements.length > 0 && (
+            <div className="stack gap-2">
+              <h3 className="notes-heading">Bisa lebih baik</h3>
+              <ul className="notes-list">
+                {improvements.map((item, index) => (
+                  <li key={`${index}-${item}`}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
 
       {jargon.length > 0 && (
         <div className="stack gap-2">
@@ -65,6 +74,6 @@ export function FeedbackNotes({ rest, strengths, improvements, jargon }: Props) 
           </ul>
         </div>
       )}
-    </Sheet>
+    </Disclosure>
   );
 }

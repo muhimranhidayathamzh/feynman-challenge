@@ -21,6 +21,20 @@ import { SOURCE_TYPE_META, formatDuration } from "@/lib/utils/labels";
 
 type Status = "idle" | "generating" | "preview" | "creating";
 
+/**
+ * Starting points for someone facing an empty box (V.7). Everyday topics an
+ * adult half-understands, so the first try feels possible, not intimidating.
+ */
+const TOPIC_SUGGESTIONS = [
+  "Kenapa langit berwarna biru",
+  "Cara kerja bunga majemuk",
+  "Kenapa pesawat bisa terbang",
+  "Hukum permintaan dan penawaran",
+  "Cara kerja internet",
+] as const;
+
+const MIN_TOPIC = 3;
+
 export function CreateForm() {
   const router = useRouter();
   const [topic, setTopic] = useState("");
@@ -28,6 +42,7 @@ export function CreateForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [plan, setPlan] = useState<GeneratedPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [topicError, setTopicError] = useState<string | null>(null);
 
   // Local calendar day for the picker's minimum (en-CA formats as YYYY-MM-DD).
   const today = new Date().toLocaleDateString("en-CA");
@@ -36,10 +51,15 @@ export function CreateForm() {
 
   async function handleGenerate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (topic.trim().length < 3) {
-      setError("Topik minimal 3 karakter.");
+    if (topic.trim().length < MIN_TOPIC) {
+      setTopicError(
+        topic.trim().length === 0
+          ? "Tulis topiknya dulu, atau pilih salah satu contoh."
+          : `Topik minimal ${MIN_TOPIC} karakter.`,
+      );
       return;
     }
+    setTopicError(null);
     setError(null);
     setStatus("generating");
 
@@ -95,22 +115,62 @@ export function CreateForm() {
 
       {editing && (
         <Sheet as="section" className="stack gap-5">
-          <form className="stack gap-5" onSubmit={handleGenerate}>
-            <Field id="topic" label="Apa yang ingin kamu kuasai?">
-              <Input
-                type="text"
-                placeholder="mis. Quantum Entanglement"
-                value={topic}
-                onChange={(event) => setTopic(event.target.value)}
-                disabled={busy}
-                minLength={3}
-                maxLength={200}
-                required
-                autoFocus
-              />
-            </Field>
+          {/* noValidate: the message below the field explains itself better
+              than the browser's own bubble. */}
+          <form className="stack gap-5" onSubmit={handleGenerate} noValidate>
+            <div className="stack gap-3">
+              <Field id="topic" label="Apa yang ingin kamu pahami?" error={topicError}>
+                <Input
+                  type="text"
+                  placeholder="mis. Kenapa bulan punya fase"
+                  value={topic}
+                  onChange={(event) => {
+                    setTopic(event.target.value);
+                    if (topicError) setTopicError(null);
+                  }}
+                  disabled={busy}
+                  maxLength={200}
+                  autoFocus
+                />
+              </Field>
 
-            <Field id="deadline" label="Tenggat" optional>
+              {topic.trim() === "" && !busy && (
+                <div className="stack gap-2">
+                  <p id="topic-suggestions-label" className="text-muted text-sm">
+                    Atau mulai dari salah satu ini:
+                  </p>
+                  <ul
+                    className="suggestion-list"
+                    aria-labelledby="topic-suggestions-label"
+                  >
+                    {TOPIC_SUGGESTIONS.map((suggestion) => (
+                      <li key={suggestion}>
+                        <button
+                          type="button"
+                          className="suggestion-chip"
+                          onClick={() => {
+                            setTopic(suggestion);
+                            setTopicError(null);
+                            // The chips unmount once the field has text, which
+                            // would drop keyboard focus onto <body>.
+                            document.getElementById("topic")?.focus();
+                          }}
+                        >
+                          {suggestion}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <Field
+              id="deadline"
+              label="Tenggat"
+              optional
+              hint="Kosongkan kalau mau belajar santai. Tenggat yang terlewat diperpanjang sekali, tanpa hukuman."
+            >
               <Input
                 type="date"
                 value={deadline}
@@ -120,16 +180,23 @@ export function CreateForm() {
               />
             </Field>
 
-            <Button
-              type="submit"
-              size="lg"
-              block
-              icon={Sparkles}
-              loading={status === "generating"}
-              disabled={busy || topic.trim().length < 3}
-            >
-              {status === "generating" ? "AI sedang menyusun…" : "Susun rencana belajar"}
-            </Button>
+            <div className="stack gap-2">
+              <Button
+                type="submit"
+                size="lg"
+                block
+                icon={Sparkles}
+                loading={status === "generating"}
+                disabled={busy}
+              >
+                {status === "generating"
+                  ? "AI sedang menyusun…"
+                  : "Susun rencana belajar"}
+              </Button>
+              <p className="text-muted text-sm text-center">
+                Kamu bisa meninjau rencananya dulu sebelum disimpan.
+              </p>
+            </div>
           </form>
         </Sheet>
       )}
@@ -139,14 +206,14 @@ export function CreateForm() {
       {(status === "preview" || status === "creating") && plan && (
         <Sheet as="section" className="stack gap-5 animate-fade-in-up">
           <div className="row-between">
-            <h3>Rencana belajar</h3>
+            <h2 className="sheet-title">Rencana belajar</h2>
             <Badge icon={Timer} title="Estimasi durasi rekaman">
               {formatDuration(plan.estimated_duration_sec)}
             </Badge>
           </div>
 
           <div className="stack gap-3">
-            <h4 className="text-secondary text-sm">Poin yang perlu dijelaskan</h4>
+            <h3 className="text-secondary text-sm">Poin yang perlu dijelaskan</h3>
             <ol className="stack gap-3">
               {plan.outline.map((item, index) => (
                 <li key={`${index}-${item.title}`} className="row items-start gap-3">
@@ -166,7 +233,7 @@ export function CreateForm() {
 
           {plan.sources.length > 0 && (
             <div className="stack gap-3">
-              <h4 className="text-secondary text-sm">Sumber belajar</h4>
+              <h3 className="text-secondary text-sm">Sumber belajar</h3>
               <ul className="stack gap-2">
                 {plan.sources.map((source, index) => (
                   <li key={`${index}-${source.title}`} className="row gap-2">
@@ -202,7 +269,7 @@ export function CreateForm() {
               onClick={handleCreate}
               loading={status === "creating"}
             >
-              Buat Tantangan
+              Simpan tantangan
             </Button>
             <Button
               variant="ghost"

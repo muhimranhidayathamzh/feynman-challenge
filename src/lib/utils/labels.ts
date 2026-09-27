@@ -13,7 +13,7 @@ export const SOURCE_TYPE_META: Record<SourceType, { icon: LucideIcon; label: str
 
 /** Display metadata for each mastery state (label + CSS color variable). */
 export const MASTERY_META: Record<MasteryState, { label: string; color: string }> = {
-  not_started: { label: "Belum Mulai", color: "var(--mastery-not-started)" },
+  not_started: { label: "Belum mulai", color: "var(--mastery-not-started)" },
   attempted: { label: "Dicoba", color: "var(--mastery-attempted)" },
   developing: { label: "Berkembang", color: "var(--mastery-developing)" },
   proficient: { label: "Cakap", color: "var(--mastery-proficient)" },
@@ -48,19 +48,19 @@ export const HINT_TIERS: HintTier[] = [
   {
     level: "keywords",
     cap: 9,
-    label: "Kata Kunci",
+    label: "Kata kunci",
     description: "Daftar istilah inti dari outline.",
   },
   {
     level: "guiding_questions",
     cap: 8,
-    label: "Pertanyaan Pemandu",
+    label: "Pertanyaan pemandu",
     description: "Pertanyaan yang memandu penjelasanmu.",
   },
   {
     level: "outline",
     cap: 7,
-    label: "Outline Lengkap",
+    label: "Outline lengkap",
     description: "Seluruh poin outline beserta deskripsinya.",
   },
 ];

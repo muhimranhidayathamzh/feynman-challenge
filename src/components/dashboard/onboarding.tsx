@@ -1,50 +1,52 @@
 import { Plus } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
-import { Sheet } from "@/components/ui/sheet";
-import { Illustration, type IllustrationName } from "@/components/ui/illustration";
+import { Illustration } from "@/components/ui/illustration";
 
-const STEPS: { illustration: IllustrationName; title: string; body: string }[] = [
+const STEPS: { title: string; body: string }[] = [
   {
-    illustration: "catatan-kosong",
     title: "Pelajari",
     body: "Pilih topik. AI menyusun poin-poin yang perlu kamu kuasai, plus sumber belajarnya.",
   },
   {
-    illustration: "mendengarkan",
     title: "Jelaskan",
     body: "Rekam penjelasanmu sendiri, seperti menerangkan ke teman. Tidak perlu sempurna.",
   },
   {
-    illustration: "hasil",
     title: "Lihat celahmu",
     body: "AI menandai poin yang sudah jelas dan yang belum, lengkap dengan kutipan ucapanmu.",
   },
 ];
 
-/** First run (DESIGN.md §11): the loop in three steps, then straight to work. */
+/**
+ * First run (DESIGN.md §11): the loop in three steps, then straight to work.
+ * A numbered list, not three identical illustrated cards (§12 bans those,
+ * reworked in V.7), so the first action stays within one screen.
+ */
 export function Onboarding({ displayName }: { displayName: string }) {
   return (
     <div className="stack gap-6">
-      <div className="stack gap-2">
-        <h1>Selamat datang, {displayName}</h1>
-        <p className="reading text-secondary">
-          Cara tercepat tahu kamu benar-benar paham adalah mencoba menjelaskannya. Tiga
-          langkah ini yang akan kamu ulang terus.
-        </p>
+      <div className="onboarding-intro">
+        <Illustration name="catatan-kosong" />
+        <div className="stack gap-2">
+          <h1>Selamat datang, {displayName}</h1>
+          <p className="reading text-secondary">
+            Cara tercepat tahu kamu benar-benar paham adalah mencoba menjelaskannya. Tiga
+            langkah ini yang akan kamu ulang terus.
+          </p>
+        </div>
       </div>
 
-      <ol className="onboarding-steps">
+      <ol className="onboarding-list">
         {STEPS.map((step, index) => (
-          <li key={step.title}>
-            <Sheet className="onboarding-step">
-              <Illustration name={step.illustration} />
-              <h2 className="onboarding-step-title">
-                <span className="onboarding-step-number">{index + 1}</span>
-                {step.title}
-              </h2>
-              <p className="text-secondary text-sm">{step.body}</p>
-            </Sheet>
+          <li key={step.title} className="onboarding-item">
+            <span className="onboarding-step-number" aria-hidden="true">
+              {index + 1}
+            </span>
+            <div className="stack gap-1">
+              <h2 className="onboarding-item-title">{step.title}</h2>
+              <p className="text-secondary">{step.body}</p>
+            </div>
           </li>
         ))}
       </ol>

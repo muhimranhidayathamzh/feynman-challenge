@@ -330,3 +330,117 @@
   height: 1.1rem;
   flex-shrink: 0;
 }
+
+/* ---------------------------------------------------------------------------
+   Disclosure: a sheet that folds (Prompt V.7). Secondary material only.
+   ------------------------------------------------------------------------- */
+.disclosure {
+  padding: 0;
+}
+
+.disclosure-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 44px;
+  padding: var(--space-5);
+  border-radius: inherit;
+  transition: background var(--transition-fast);
+}
+
+.disclosure-summary:hover {
+  background: var(--sunken);
+}
+
+.disclosure-text {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.disclosure-hint {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.disclosure-chevron {
+  flex: 0 0 auto;
+  color: var(--ink-3);
+  transition: transform var(--transition-base);
+}
+
+.disclosure[open] > .disclosure-summary .disclosure-chevron {
+  transform: rotate(180deg);
+}
+
+.disclosure[open] > .disclosure-summary {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.disclosure-body {
+  display: grid;
+  gap: var(--space-5);
+  padding: 0 var(--space-5) var(--space-5);
+}
+
+@media (min-width: 768px) {
+  .disclosure-summary {
+    padding: var(--space-6);
+  }
+
+  .disclosure-body {
+    padding: 0 var(--space-6) var(--space-6);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Sticky primary action: the screen's one next step, always within reach
+   above the phone's bottom nav (audit #13; shared by the notebook and the
+   result page since V.7).
+   ------------------------------------------------------------------------- */
+.sticky-cta {
+  position: sticky;
+  bottom: calc(72px + var(--space-3));
+  z-index: var(--z-dropdown);
+}
+
+@media (min-width: 768px) {
+  .sticky-cta {
+    bottom: var(--space-4);
+    max-width: 22rem;
+    margin-inline-start: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Suggestion chips: a starting point for an empty field (V.7).
+   Quiet by design: the screen's one accent stays on its primary button.
+   ------------------------------------------------------------------------- */
+.suggestion-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.suggestion-chip {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-align: start;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.suggestion-chip:hover {
+  background: var(--sunken);
+  border-color: var(--ink-3);
+}

@@ -66,7 +66,7 @@ export function NotebookView(props: Props) {
       </Sheet>
 
       {/* Always within reach: sticks above the bottom nav on phones (audit #13). */}
-      <div className="notebook-cta">
+      <div className="sticky-cta">
         <ButtonLink href={`/challenge/${props.id}/record`} size="lg" block icon={Mic}>
           Jelaskan sekarang
         </ButtonLink>

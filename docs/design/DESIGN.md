@@ -196,21 +196,23 @@ Kata untuk skor (ringkasan satu frasa, selalu bersama angka): 0–3 "Baru mulai"
 | `SubScoreBars` | Tiga bar tipis berwarna tinta, angka di kanan. |
 | `ResultEvidence` | Daftar poin (CoverageMark, catatan, "Pelajari lagi") berdampingan dengan transkrip Newsreader. Kutipan bukti diberi stabilo dan saling terhubung dengan poinnya (klik atau Enter). Istilah yang belum dijelaskan digaris bawah titik-titik. Logika di `src/lib/utils/transcript.ts`. |
 | `MasteryMeter` | Lima segmen tinta hijau + label level ("Cakap · level 3 dari 5"). |
-| `LeitnerStrip` | Enam kotak berlabel interval, kotak aktif terisi tinta. Menjelaskan kapan topik kembali. |
+| `LeitnerStrip` | Enam kotak berlabel interval, kotak aktif terisi tinta. Menjelaskan kapan topik kembali. Tinggal di panel "Kelola tantangan", bukan di kepala halaman (V.7). |
 | `WeekStrip` | Tujuh kotak hari untuk streak, menggantikan badge api. |
 | `HintChip` | Garis putus-putus dengan harga di dalamnya: "Kata kunci · maks 9". |
 | `EmptyState` | Ilustrasi garis, satu kalimat, satu aksi. |
+| `Disclosure` | Lembar yang bisa dilipat, berbasis `<details>` bawaan. Judul Newsreader plus satu baris ringkasan yang tetap terbaca saat tertutup, jadi melipat tidak pernah menyembunyikan kesimpulan. Hanya untuk materi sekunder. |
+| Tombol menempel | Satu aksi utama layar menempel di atas nav bawah ponsel (`.sticky-cta`). Dipakai di catatan belajar dan hasil. |
 
 ---
 
 ## 11. Layar kunci
 
-- **Landing publik** (baru): apa Feynman Technique dalam 3 langkah bergambar, contoh hasil evaluasi asli dari demo, tombol "Coba tanpa akun" dan "Daftar". Pengunjung tidak lagi langsung dilempar ke form login.
-- **Onboarding pertama kali**: 3 layar singkat (pelajari, jelaskan, lihat celahmu), lalu langsung buat tantangan pertama.
+- **Landing publik**: kalimat Feynman, tombol "Coba tanpa akun" (aksi utama) dan "Daftar", lalu tiga langkah yang masing-masing ditemani **potongan layar asli** dengan data demo: outline, papan tulis (dirender dengan komponen panggung sendiri), dan hasil dengan stabilo bukti. Bukan tiga kartu ikon identik (§12). Pengunjung tidak lagi langsung dilempar ke form login.
+- **Onboarding pertama kali**: satu ilustrasi kecil, tiga langkah sebagai daftar bernomor (pelajari, jelaskan, lihat celahmu), lalu langsung buat tantangan pertama. Tombolnya harus terlihat tanpa scroll di ponsel umum.
 - **Meja Belajar** (dashboard): kartu "Hari ini" dengan satu aksi, WeekStrip, lalu daftar tantangan seperti indeks buku: judul, meter penguasaan, review berikutnya.
-- **Catatan belajar**: lembar kertas. Outline bernomor di margin dengan tren coverage, sumber seperti daftar pustaka, catatan dalam serif. Tombol "Jelaskan sekarang" menempel di bawah pada ponsel.
+- **Catatan belajar**: lembar kertas. Kepala halaman hanya memuat judul, meter penguasaan, tenggat, dan review berikutnya. Kotak Leitner, ubah tenggat, istirahatkan, tandai selesai, ubah judul, dan hapus dilipat di panel "Kelola tantangan". Outline bernomor di margin dengan tren coverage, sumber seperti daftar pustaka, catatan dalam serif. Tombol "Jelaskan sekarang" menempel di bawah pada ponsel.
 - **Panggung rekam**: papan tulis penuh. Judul topik, timer besar, gelombang suara seperti goresan kapur, HintChip, tombol rekam vermilion. Tidak ada navigasi lain.
-- **Hasil**: ringkasan satu kalimat (serif) paling atas, ScoreFigure, poin yang dijelaskan dengan CoverageMark dan "Pelajari lagi", AnnotatedTranscript, pertanyaan lanjutan, lalu aksi "Jelaskan lagi".
+- **Hasil**: ringkasan satu kalimat (serif) paling atas, ScoreFigure, **"Fokus berikutnya"** (satu hal terpenting dari penilai, gaya catatan pinggir), poin yang dijelaskan dengan CoverageMark dan "Pelajari lagi" di samping AnnotatedTranscript, pertanyaan lanjutan, lalu catatan lengkap penilai dan perbandingan dengan percobaan sebelumnya sebagai `Disclosure` yang terlipat. "Jelaskan lagi" menempel di bawah pada ponsel.
 
 ---
 

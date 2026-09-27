@@ -275,7 +275,6 @@ export function GalleryFrame({ id }: { id: string }) {
         displayName={
           id === "dashboard-demo" || id === "pengaturan-demo" ? "Tamu" : fx.DISPLAY_NAME
         }
-        streakCount={id === "dashboard-kosong" ? 0 : 4}
         isAnonymous={id === "dashboard-demo" || id === "pengaturan-demo"}
         currentPath={meta.path}
       >

@@ -131,13 +131,14 @@
   font-size: var(--text-xs);
 }
 
+/* Big enough to read at a glance in a list (V.7: was 52 px with 6 px segments). */
 .mastery-meter-compact .mastery-meter-track {
-  width: 3.25rem;
-  gap: 2px;
+  width: 5rem;
+  gap: 3px;
 }
 
 .mastery-meter-compact .mastery-meter-segment {
-  height: 6px;
+  height: 8px;
 }
 
 /* --- Leitner strip --- */

@@ -4,6 +4,17 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Second look at five screens (V.7)
+
+A fresh review of the redesigned app found five screens whose content was right but whose presentation was not. No database changes.
+
+- **Result page**: 4,051 px on a phone, with "Jelaskan lagi" at the very bottom. The one thing to work on next is now pulled up under the score as "Fokus berikutnya", the full evaluator notes and the comparison with the previous attempt fold into sheets whose summary line stays readable while closed, and "Jelaskan lagi" sticks above the bottom nav. The points beside the highlighted transcript are unchanged.
+- **New challenge**: topic suggestions for an empty field, an everyday example instead of "Quantum Entanglement", an honest note that a missed deadline is extended once, a primary button that is never a dead grey block, and validation shown under the field. Keyboard focus returns to the field after a suggestion is chosen.
+- **Notebook**: the header shows only title, mastery, deadline and next review. Review boxes, reschedule, park, complete, rename and delete fold into "Kelola tantangan".
+- **Landing and onboarding**: both used three identical illustrated cards, which DESIGN.md §12 bans. The landing now walks through the loop beside real fragments of the app rendered from the demo data: the outline, the chalkboard stage (built from the stage's own components), and a result with its highlighted evidence. Onboarding is a numbered list whose first action clears the bottom nav on common phones.
+- **Meja Belajar**: the header flame badge is gone (§10 says the week strip replaces it; both counted the same days), labels are sentence case, and the mastery meter in the list is large enough to read.
+- Lighthouse on the landing: performance 78 → 85, accessibility still 100.
+
 ### Getting ready for the public (Fase 5, in progress)
 
 - **Cost brakes that need no deployment**: migration 007 adds `app_settings` with an app-wide AI kill switch and a daily ceiling, both checked inside `consume_ai_quota`. Per-user quota was the wrong unit for a public site, where anonymous accounts are free to mint. The four AI routes now answer 503 for an app-wide brake and 429 only when a learner hit their own limit.
