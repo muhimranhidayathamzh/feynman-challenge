@@ -8,6 +8,7 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 - **No example topic anywhere a visitor looks.** The owner wants people to meet the product on their own topic. The landing keeps the recording stage as its picture of the product, drawn from the stage's own components with no content in it, and the interactive evidence demo gives way to an explanation of how a result reads: the three verdicts, the highlighter, the dotted underline for unexplained terms, and how the score is computed.
 - **"Coba tanpa akun" opens "Tantangan baru"** after the anonymous sign-in, instead of a prepared challenge. The seeding endpoint (`/api/demo/seed`), its code and its schema are removed rather than left idle: an unused endpoint that writes to the database is attack surface for nothing.
+- The hero's stage now shows a recording in progress: the recording dot, the clock, the chalk line and the record button. The three hint chips it showed before ("maks 9, maks 8, maks 7") needed context a first-time visitor does not have, and without the record button the picture never said "you talk here".
 - Trying the demo now makes real AI calls, bounded by the anonymous quota and the app-wide daily ceiling.
 - The sample data stays, but only for the dev screen gallery and the screenshots made from it.
 - Lighthouse on the landing, median of three runs: mobile 84 (was 74 with the interactive demo), desktop 100, accessibility 100.

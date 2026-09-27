@@ -1,12 +1,11 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { LogIn, Plus, UserPlus } from "lucide-react";
+import { LogIn, Plus, Square, UserPlus } from "lucide-react";
 
 import { LeitnerStrip } from "@/components/challenge/leitner-strip";
 import { MasteryMeter } from "@/components/challenge/mastery-meter";
 import { CoverageMark } from "@/components/evaluation/coverage-mark";
 import { BrandMark } from "@/components/layout/brand-mark";
-import { HintChip } from "@/components/recording/hint-chip";
 import { StageTimer } from "@/components/recording/stage-timer";
 import { ButtonLink } from "@/components/ui/button";
 import { Sheet } from "@/components/ui/sheet";
@@ -95,23 +94,52 @@ const FAQ: { question: string; answer: string }[] = [
   },
 ];
 
-/** The recording stage, drawn with the stage's own components and no topic. */
+/**
+ * A still of the chalk line the stage draws from the microphone: a few
+ * syllables of speech, loud in the middle and quiet at the edges. Computed
+ * once on the server, so the browser runs no script for it.
+ */
+const WAVE_PATH = (() => {
+  const width = 240;
+  const mid = 24;
+  const points: string[] = [];
+  for (let i = 0; i <= 96; i++) {
+    const x = (i / 96) * width;
+    const t = i / 96;
+    const envelope = Math.sin(Math.PI * t) * (0.55 + 0.45 * Math.abs(Math.sin(t * 9)));
+    const y = mid + envelope * 18 * Math.sin(i * 1.7) * Math.cos(i * 0.37);
+    points.push(`${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`);
+  }
+  return points.join(" ");
+})();
+
+/**
+ * The recording stage mid-explanation, drawn with the stage's own classes:
+ * the recording dot, the clock, the chalk line, and the record button. It
+ * has to say "you talk here" at a glance, so the hint chips, which need
+ * context a first-time visitor does not have, are left out.
+ */
 function BoardPreview() {
   return (
     <div
       data-mood="board"
       className="landing-board"
       role="img"
-      aria-label="Layar rekam: papan tulis gelap dengan jam hitung mundur, dan tiga bantuan yang masing-masing menurunkan skor maksimal."
+      aria-label="Layar rekam: papan tulis gelap saat kamu sedang menjelaskan, dengan jam hitung mundur, gelombang suaramu, dan tombol untuk selesai."
     >
-      <p className="landing-board-eyebrow">Layar rekam</p>
+      <p className="stage-status">
+        <span className="record-rec-dot" />
+        Merekam
+      </p>
       <p className="landing-board-title">Jelaskan seperti ke teman</p>
       <StageTimer totalSeconds={STAGE_SECONDS} elapsedSeconds={74} started />
-      <div className="landing-board-hints">
-        <HintChip label="Kata kunci" cap={9} revealed={false} />
-        <HintChip label="Pertanyaan" cap={8} revealed={false} />
-        <HintChip label="Outline" cap={7} revealed={false} />
-      </div>
+      <svg className="landing-wave" viewBox="0 0 240 48" preserveAspectRatio="none">
+        <path d={WAVE_PATH} />
+      </svg>
+      <span className="rec-button landing-rec" data-live>
+        <Square size={26} />
+      </span>
+      <p className="rec-button-label">Selesai</p>
     </div>
   );
 }
