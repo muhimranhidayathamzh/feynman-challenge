@@ -436,6 +436,21 @@ Prompt V.6 — Kesan pertama dan kesan setiap hari. Ikuti "Aturan Umum" dan bagi
 6. npm run shots dengan label "after". Ganti screenshot manifest dan README dengan layar aplikasi yang asli. Tambahkan perbandingan sebelum dan sesudah di README.
 ```
 
+### Prompt V.7 — Tinjauan Ulang Lima Layar
+
+```
+Prompt V.7 — Isinya sudah benar, penyajiannya belum. Ikuti "Aturan Umum" dan DESIGN.md.
+
+Ditambahkan 2026-09-27 setelah pemilik proyek merasa visual dan fiturnya belum pas, dan tinjauan segar menemukan lima layar yang bermasalah.
+
+1. Hasil: "Fokus berikutnya" di bawah skor; catatan lengkap penilai dan perbandingan dilipat (Disclosure) dengan ringkasan yang tetap terbaca; "Jelaskan lagi" menempel di atas nav bawah. Poin dan transkrip beserta tautan dua arahnya tidak diubah.
+2. Buat tantangan: saran topik, contoh yang tidak mengintimidasi, keterangan tenggat yang jujur, validasi di bawah kolom, tombol utama yang tidak pernah mati, fokus kembali ke kolom setelah memilih saran.
+3. Catatan belajar: kepala halaman hanya fakta penting; mesinnya (kotak Leitner dan semua aksi kelola) dilipat di "Kelola tantangan".
+4. Landing dan onboarding: hapus kartu identik (DESIGN.md §12). Landing memakai potongan layar asli dari data demo; onboarding jadi daftar bernomor.
+5. Beranda: hapus badge api di header (§10), sentence case, meter penguasaan yang terbaca.
+6. Logika murni di src/lib/utils dengan unit test. Uji interaksi di browser sungguhan, termasuk keyboard. DESIGN.md §10 dan §11 diperbarui di commit yang sama.
+```
+
 ### ✅ Checkpoint Fase V
 - `npm run design:check` hijau: tidak ada gradient dekoratif, glow, blur, Inter, emoji, atau kontras di bawah AA.
 - Setiap layar di galeri punya screenshot sebelum dan sesudah di kedua tema.
@@ -527,6 +542,7 @@ Prompt 4.4 — Buktikan skor AI stabil dan adil. Ikuti "Aturan Umum" di prompts/
 
 | Urutan | Prompt | Alasan posisinya |
 |---|---|---|
+| 0 | V.7 Tinjauan ulang lima layar | Dikerjakan lebih dulu (2026-09-27): pemilik proyek belum sreg dengan visualnya |
 | 1 | 4.1 Riwayat percobaan | Lubang yang paling terasa: hasil lama sulit dibuka lagi |
 | 2 | 4.2 Hapus akun & pembersihan storage | Hak atas data; 5.2 menautkan ke fitur ini |
 | 3 | 5.2 Halaman legal & keterbukaan AI | Menjelaskan apa yang terjadi pada rekaman, termasuk cara menghapusnya |
@@ -729,6 +745,7 @@ Pengingat review naik dari backlog ke Prompt 5.4: itu bukan fitur tambahan, mela
 | V.4 | Layar hasil evaluasi | ✅ |
 | V.5 | Panggung rekam & catatan belajar | ✅ |
 | V.6 | Meja Belajar, onboarding, landing & polish | ✅ |
+| V.7 | Tinjauan ulang lima layar | ✅ |
 | U.1 | Ukur biaya, perbaiki plafon | ✅ |
 | U.2 | Monitoring error (Sentry) | ⬜ |
 | U.3 | Deploy ke Vercel | ⬜ |
