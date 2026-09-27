@@ -465,6 +465,20 @@ Ditambahkan 2026-09-27 atas permintaan pemilik proyek: tanpa Fotosintesis, dan t
 5. Ukur Lighthouse sebagai median tiga run; jangan terbitkan angka run tunggal.
 ```
 
+### Prompt V.9 — Landing Polos, Coba dengan Topik Sendiri
+
+```
+Prompt V.9 — Tanpa contoh apa pun. Ikuti "Aturan Umum" dan DESIGN.md.
+
+Ditambahkan 2026-09-27 atas keputusan pemilik proyek: pengunjung sebaiknya langsung mencoba dengan topiknya sendiri, bukan membaca contoh. Menggantikan bagian D5 yang menyiapkan tantangan contoh; mode demo tetap ada.
+
+1. Landing tanpa topik contoh. Papan tulis tetap sebagai gambaran produk tanpa isi; demo bukti diganti penjelasan cara membaca hasil.
+2. "Coba tanpa akun" langsung ke /challenge/new setelah masuk anonim.
+3. Hapus endpoint penyiapan contoh beserta kode dan skemanya; jangan tinggalkan endpoint yang menulis ke database tanpa pemakai.
+4. Data contoh tetap ada, hanya untuk galeri pengembang.
+5. Ukur ulang Lighthouse (median tiga run) dan perbarui README.
+```
+
 ### ✅ Checkpoint Fase V
 - `npm run design:check` hijau: tidak ada gradient dekoratif, glow, blur, Inter, emoji, atau kontras di bawah AA.
 - Setiap layar di galeri punya screenshot sebelum dan sesudah di kedua tema.
@@ -556,6 +570,7 @@ Prompt 4.4 — Buktikan skor AI stabil dan adil. Ikuti "Aturan Umum" di prompts/
 
 | Urutan | Prompt | Alasan posisinya |
 |---|---|---|
+| 0 | V.9 Landing polos, coba dengan topik sendiri | Dikerjakan lebih dulu (2026-09-27): pemilik proyek tidak ingin ada contoh di landing |
 | 0 | V.8 Landing untuk sebuah produk | Dikerjakan lebih dulu (2026-09-27): pemilik proyek ingin landing yang profesional, tanpa Fotosintesis |
 | 0 | V.7 Tinjauan ulang lima layar | Dikerjakan lebih dulu (2026-09-27): pemilik proyek belum sreg dengan visualnya |
 | 1 | 4.1 Riwayat percobaan | Lubang yang paling terasa: hasil lama sulit dibuka lagi |
@@ -762,6 +777,7 @@ Pengingat review naik dari backlog ke Prompt 5.4: itu bukan fitur tambahan, mela
 | V.6 | Meja Belajar, onboarding, landing & polish | ✅ |
 | V.7 | Tinjauan ulang lima layar | ✅ |
 | V.8 | Landing untuk sebuah produk | ✅ |
+| V.9 | Landing polos, coba dengan topik sendiri | ✅ |
 | U.1 | Ukur biaya, perbaiki plafon | ✅ |
 | U.2 | Monitoring error (Sentry) | ⬜ |
 | U.3 | Deploy ke Vercel | ⬜ |
