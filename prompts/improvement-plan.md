@@ -479,6 +479,20 @@ Ditambahkan 2026-09-27 atas keputusan pemilik proyek: pengunjung sebaiknya langs
 5. Ukur ulang Lighthouse (median tiga run) dan perbarui README.
 ```
 
+### Prompt V.10 — Landing yang Membuat Orang Merasakan Masalahnya
+
+```
+Prompt V.10 — Bangun rekomendasi dari docs/design/landing-konsep.html. Ikuti "Aturan Umum" dan DESIGN.md.
+
+Ditambahkan 2026-09-27 setelah tiga putaran revisi landing yang memperbaiki kepingan, bukan pendekatannya. Pemilik proyek menyetujui rekomendasi kajian konsep.
+
+1. Cermin: tes sepuluh detik dengan pertanyaan benda sehari-hari yang berganti tiap kunjungan (logika pemilihan murni dengan unit test), garis tinta sekali jalan, kalimat lega setelah sepuluh detik, tombol utama tidak pernah menunggu, dan mode kurangi gerak menampilkan semuanya seketika.
+2. Nama fenomenanya dengan sumber yang bisa dicek (Rozenblit dan Keil, 2002).
+3. Kertas koreksi tanpa topik, memakai tanda dan makna yang sama persis dengan halaman hasil.
+4. Tiga langkah, rasa aman dan pertanyaan umum, penutup di papan tulis yang mengulang pertanyaan pembuka.
+5. Verifikasi semua pertanyaan di semua ukuran layar dan kedua tema, termasuk waktu animasi. Lighthouse sebagai median tiga run.
+```
+
 ### ✅ Checkpoint Fase V
 - `npm run design:check` hijau: tidak ada gradient dekoratif, glow, blur, Inter, emoji, atau kontras di bawah AA.
 - Setiap layar di galeri punya screenshot sebelum dan sesudah di kedua tema.
@@ -570,6 +584,7 @@ Prompt 4.4 — Buktikan skor AI stabil dan adil. Ikuti "Aturan Umum" di prompts/
 
 | Urutan | Prompt | Alasan posisinya |
 |---|---|---|
+| 0 | V.10 Landing yang membuat orang merasakan masalahnya | Dikerjakan lebih dulu (2026-09-27): dibangun dari kajian konsep yang disetujui |
 | 0 | V.9 Landing polos, coba dengan topik sendiri | Dikerjakan lebih dulu (2026-09-27): pemilik proyek tidak ingin ada contoh di landing |
 | 0 | V.8 Landing untuk sebuah produk | Dikerjakan lebih dulu (2026-09-27): pemilik proyek ingin landing yang profesional, tanpa Fotosintesis |
 | 0 | V.7 Tinjauan ulang lima layar | Dikerjakan lebih dulu (2026-09-27): pemilik proyek belum sreg dengan visualnya |
@@ -778,6 +793,7 @@ Pengingat review naik dari backlog ke Prompt 5.4: itu bukan fitur tambahan, mela
 | V.7 | Tinjauan ulang lima layar | ✅ |
 | V.8 | Landing untuk sebuah produk | ✅ |
 | V.9 | Landing polos, coba dengan topik sendiri | ✅ |
+| V.10 | Landing yang membuat orang merasakan masalahnya | ✅ |
 | U.1 | Ukur biaya, perbaiki plafon | ✅ |
 | U.2 | Monitoring error (Sentry) | ⬜ |
 | U.3 | Deploy ke Vercel | ⬜ |
