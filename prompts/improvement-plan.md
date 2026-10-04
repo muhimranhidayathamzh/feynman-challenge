@@ -799,7 +799,7 @@ Pengingat review naik dari backlog ke Prompt 5.4: itu bukan fitur tambahan, mela
 | U.3 | Deploy ke Vercel | ⬜ |
 | 5.1 | Gerbang penyalahgunaan (rate limit, CAPTCHA, konfirmasi email) | ✅ |
 | 5.2 | Halaman legal & keterbukaan AI | ✅ |
-| 5.4 | Pengingat review | ⬜ |
+| 5.4 | Pengingat review | ✅ |
 | 5.3 | Peluncuran | ⬜ |
 | 4.1 | Riwayat percobaan | ✅ |
 | 4.2 | Hapus akun & pembersihan storage | ✅ |
