@@ -4,6 +4,13 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Privacy and terms in plain language (5.2)
+
+- **`/privasi`** says what is stored and why, that recordings and topics go to Google Gemini, who else processes data (Supabase, Vercel, Google), how long each thing is kept, the rights under Indonesia's personal data law (UU 27/2022), and how to delete everything. **`/syarat`** is short: AI scoring can be wrong and is not for important decisions, your content stays yours, fair use, and Indonesian law.
+- **The Gemini paragraph follows the facts of the deployment.** On the free tier Google may use what is sent to improve its products and human reviewers may read it; on a billed key it does not. `GEMINI_PAID_TIER=1` switches the page to the paid-tier wording; until then it states the free-tier terms and asks people not to say personal details in their recordings.
+- **One honest sentence where it matters**: before every recording ("Rekamanmu dikirim ke Google Gemini untuk dinilai, dan bisa kamu hapus kapan saja") and on the sign-up form. The recording screen used to say recordings were "only used to judge your explanation", which the free tier does not guarantee.
+- Linked from the landing footer, sign-up, and Pengaturan; public without signing in and listed in the sitemap. `CONTACT_EMAIL` sets where privacy requests go.
+
 ### Delete your account, and storage that stays clean (4.2)
 
 - **"Zona berbahaya" in Pengaturan deletes the account.** Type HAPUS, plus the password for email accounts (Google and demo accounts have none to give). Every recording is removed first and the account second, so if the files cannot be removed the account stays and the learner can try again. Afterwards the app clears its caches and lands on the sign-in page with a confirmation.

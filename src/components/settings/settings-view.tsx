@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Sheet, SheetTitle } from "@/components/ui/sheet";
 import type { ThemePreference } from "@/lib/theme";
 
@@ -72,10 +74,20 @@ export function SettingsView(props: Props) {
         </Sheet>
       )}
 
-      <Sheet as="section" className="stack gap-3" aria-labelledby="danger-title">
+      <Sheet
+        as="section"
+        id="hapus-akun"
+        className="stack gap-3"
+        aria-labelledby="danger-title"
+      >
         <SheetTitle id="danger-title">Zona berbahaya</SheetTitle>
         <DeleteAccount needsPassword={props.hasPassword} isDemo={props.isDemo} />
       </Sheet>
+
+      <nav className="settings-legal row gap-4 text-sm" aria-label="Halaman legal">
+        <Link href="/privasi">Kebijakan Privasi</Link>
+        <Link href="/syarat">Syarat Penggunaan</Link>
+      </nav>
     </section>
   );
 }

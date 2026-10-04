@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 interface Props {
   pointCount: number;
   durationSec: number;
@@ -26,9 +28,19 @@ export function StagePrep({ pointCount, durationSec }: Props) {
           sebelum dikirim.
         </li>
       </ul>
+      {/* Prompt 5.2: an honest line before every take, the first included. */}
       <p className="stage-prep-note">
-        Browser akan meminta izin mikrofon. Rekaman hanya dipakai untuk menilai
-        penjelasanmu.
+        Browser akan meminta izin mikrofon. Rekamanmu dikirim ke Google Gemini untuk
+        dinilai, dan bisa kamu hapus kapan saja.{" "}
+        <Link
+          href="/privasi"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-link"
+        >
+          Privasi
+          <span className="visually-hidden"> (membuka tab baru)</span>
+        </Link>
       </p>
     </div>
   );

@@ -353,6 +353,12 @@ export function Landing({
             <Link href="/signup" className="lp-footer-link">
               Daftar gratis
             </Link>
+            <Link href="/privasi" className="lp-footer-link">
+              Privasi
+            </Link>
+            <Link href="/syarat" className="lp-footer-link">
+              Syarat
+            </Link>
           </nav>
           <p className="text-muted text-xs">© 2026 Feynman Challenge</p>
         </div>

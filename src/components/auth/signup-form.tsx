@@ -176,6 +176,19 @@ export function SignupForm({ googleEnabled }: Props) {
         </Button>
       </form>
 
+      <p className="text-muted text-xs">
+        Dengan mendaftar, kamu menyetujui{" "}
+        <Link href="/syarat" className="text-link">
+          Syarat Penggunaan
+        </Link>{" "}
+        dan{" "}
+        <Link href="/privasi" className="text-link">
+          Kebijakan Privasi
+        </Link>
+        . Rekamanmu dikirim ke Google Gemini untuk dinilai, dan bisa kamu hapus kapan
+        saja.
+      </p>
+
       <p className="text-secondary text-sm text-center">
         Sudah punya akun?{" "}
         <Link href="/login" className="link-accent">

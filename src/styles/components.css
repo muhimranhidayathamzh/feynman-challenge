@@ -230,6 +230,19 @@
   color: var(--accent-hover);
 }
 
+/* A quiet link inside running text: the text colour, underlined. Vermilion
+   stays reserved for the one primary action (DESIGN.md §4). */
+.text-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.text-link:hover {
+  color: var(--ink);
+}
+
 /* --- Inline alerts --- */
 .alert {
   padding: var(--space-3) var(--space-4);

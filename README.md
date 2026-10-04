@@ -37,6 +37,7 @@ You pick a topic. AI drafts a learning outline and sources. You study, then **re
 - **Gentle accountability**: deadlines are calendar days in your timezone, missed ones auto-extend once, and streaks count real completed evaluations.
 - **Demo mode**: anonymous sign-in straight into creating a challenge on your own topic, a stricter AI quota, and a one-step path to keep the account (link an email, then set a password).
 - **Four layers of cost control**: a per-user AI quota enforced atomically in SQL, tighter limits for demo accounts, an app-wide daily ceiling, and a kill switch — the last two flipped from the SQL editor with no redeploy.
+- **Plain-language privacy and terms**: `/privasi` and `/syarat` say what is stored, that recordings go to Google Gemini, how long things are kept, and how to delete them. The recording screen and the sign-up form repeat the one sentence that matters.
 - **Your data, deletable**: deleting the account removes every recording first and then the account, whose rows follow by cascade. A maintenance job clears recordings nothing points at and demo accounts idle for a week.
 - **Installable PWA**: maskable icons, shortcuts, an offline page, and a service worker that never caches private pages.
 - **"Kertas & Kapur" interface**: a warm paper light theme for studying and a chalkboard dark theme for the recording stage, in Newsreader and Plus Jakarta Sans. One action per screen, evidence before numbers, and never red for a learning gap. The rules live in [`docs/design/DESIGN.md`](docs/design/DESIGN.md) and are enforced by `npm run design:check`.
@@ -134,10 +135,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...      # server-only: account deletion and maintenance
 GEMINI_API_KEY=...                 # server-only
 CRON_SECRET=...                    # server-only, optional: guards /api/cron/*
+GEMINI_PAID_TIER=                  # "1" only once the Gemini key is billed (see below)
+CONTACT_EMAIL=...                  # shown on /privasi and /syarat for privacy requests
 
 NEXT_PUBLIC_SITE_URL=...           # canonical origin, for Open Graph and the sitemap
 NEXT_PUBLIC_ALLOW_INDEXING=        # leave empty; "1" only for the real launch
 ```
+
+`GEMINI_PAID_TIER` changes what `/privasi` promises. On Gemini's free tier Google may use what is sent, recordings included, to improve its products, and human reviewers may read it; on a billed key it does not. Until the variable is `1` the page states the free-tier terms and asks people not to say personal details in their recordings.
 
 Indexing is opt-in. While `NEXT_PUBLIC_ALLOW_INDEXING` is empty, `robots.txt` serves `Disallow: /` and every page carries `noindex`, so a test deployment cannot end up in search results.
 

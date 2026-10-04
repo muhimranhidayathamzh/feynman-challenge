@@ -14,6 +14,8 @@ const PUBLIC_PATHS = [
   "/signup",
   "/lupa-password",
   "/offline",
+  "/privasi",
+  "/syarat",
   "/api/auth/callback",
   // Scheduled jobs carry no session; each route checks CRON_SECRET itself.
   "/api/cron",

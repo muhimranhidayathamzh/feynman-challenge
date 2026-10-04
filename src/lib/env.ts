@@ -36,3 +36,28 @@ export function serverEnv(): z.infer<typeof ServerEnvSchema> {
   if (!cached) cached = loadServerEnv();
   return cached;
 }
+
+const LegalEnvSchema = z.object({
+  // "1" once the Gemini key is on a billed plan. The privacy page then says
+  // Google does not use recordings to improve its products; until then it
+  // says what the free tier allows, which is the honest default.
+  GEMINI_PAID_TIER: z.literal("1").optional(),
+  // Where people send privacy requests. Shown on /privasi and /syarat.
+  CONTACT_EMAIL: z.email().optional(),
+});
+
+/**
+ * Facts the legal pages state about this deployment. Read without the rest
+ * of serverEnv(), so the pages build even where GEMINI_API_KEY is absent;
+ * an invalid value counts as unset.
+ */
+export function legalEnv(): { geminiPaidTier: boolean; contactEmail: string | null } {
+  const parsed = LegalEnvSchema.safeParse({
+    GEMINI_PAID_TIER: process.env.GEMINI_PAID_TIER || undefined,
+    CONTACT_EMAIL: process.env.CONTACT_EMAIL || undefined,
+  });
+  return {
+    geminiPaidTier: parsed.success && parsed.data.GEMINI_PAID_TIER === "1",
+    contactEmail: (parsed.success && parsed.data.CONTACT_EMAIL) || null,
+  };
+}
