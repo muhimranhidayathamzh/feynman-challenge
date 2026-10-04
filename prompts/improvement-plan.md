@@ -795,7 +795,7 @@ Pengingat review naik dari backlog ke Prompt 5.4: itu bukan fitur tambahan, mela
 | V.9 | Landing polos, coba dengan topik sendiri | ✅ |
 | V.10 | Landing yang membuat orang merasakan masalahnya | ✅ |
 | U.1 | Ukur biaya, perbaiki plafon | ✅ |
-| U.2 | Monitoring error (Sentry) | ⬜ |
+| U.2 | Monitoring error (Sentry) | ✅ |
 | U.3 | Deploy ke Vercel | ⬜ |
 | 5.1 | Gerbang penyalahgunaan (rate limit, CAPTCHA, konfirmasi email) | ✅ |
 | 5.2 | Halaman legal & keterbukaan AI | ✅ |
