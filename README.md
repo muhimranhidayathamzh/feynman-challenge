@@ -258,6 +258,24 @@ Other scripts: `npm run icons` regenerates the app icons after changing the mark
   The runner refuses to start without them, and refuses if the URL matches the project in `.env.local`.
 - **In CI** the `e2e` job runs only when those three are set as repository secrets; until then it is skipped, not failed.
 
+### How consistent is the scoring?
+
+A grader that gives the same explanation 6 one time and 8 the next is useless, so the grader is measured, not trusted. `npm run eval:golden` evaluates five fixed recordings three times each through the real Gemini, with the exact core `/api/evaluate` uses (`src/lib/ai/evaluate.ts`), and writes a report to `eval/reports/`.
+
+| Fixture | What is said | Must |
+|---|---|---|
+| `bagus` | All three points of "why the sky is blue", with the mechanism | score 7–10, every point covered |
+| `sebagian` | The colours, a vague "the air spreads blue", nothing on violet or sunsets | score 3–6, covered / partial / missing |
+| `buruk` | "The sky reflects the sea" | score 0–3, every point missing |
+| `hening` | Eight seconds of room tone | be rejected, every time |
+| `topik-lain` | How to cook rice | be rejected, every time |
+
+**Targets**: the overall score varies by at most 1 point across runs, coverage verdicts agree with the expected ones at least 80% of the time, and silence and other topics are always rejected. The scoring rules are pure and tested (`src/lib/utils/eval-report.ts`).
+
+**Latest result: provisional.** Two runs were cut short by the Gemini free tier (5 requests a minute, 20 a day for `gemini-2.5-flash`). In the 20 evaluations that completed (on the 24 kHz originals, before the fixtures were resampled to 16 kHz), `bagus` scored 10, 10, 10, 10, 10, 9 with every point covered; `buruk` 1, 2, 1, 2, 1, 1 with every point missing; `sebagian` 6, 6, 6 as covered / partial / missing; `hening` was rejected as silent five times out of five. `topik-lain` has not run yet. Run `npm run eval:golden` again after the quota resets (it resumes) and the full report replaces this paragraph.
+
+The recordings are synthetic: Gemini's own text-to-speech reading the scripts in each fixture folder (`npm run eval:audio`), because real voices were not available yet (decision D14). Synthetic speech is cleaner than a person thinking aloud, so this measures consistency more than robustness to real recordings. Dropping a real `audio.wav` into a fixture folder replaces the synthetic one.
+
 ### Screen gallery (design work)
 
 In development, `/dev/galeri` renders every screen and state (dashboard, notebook, recording, results, settings, dialogs) with fixed sample data, without Supabase. It returns 404 in production builds.

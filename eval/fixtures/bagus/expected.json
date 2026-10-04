@@ -1,0 +1,5 @@
+{
+  "overall": [7, 10],
+  "coverage": ["covered", "covered", "covered"],
+  "rejected": false
+}

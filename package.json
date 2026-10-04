@@ -16,7 +16,9 @@
     "design:check": "node scripts/check-design.mjs",
     "og": "node scripts/og-image.mjs",
     "maintenance": "tsx scripts/maintenance.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "eval:audio": "tsx eval/make-audio.ts",
+    "eval:golden": "tsx --conditions=react-server eval/golden.ts"
   },
   "dependencies": {
     "@google/genai": "^2.9.0",

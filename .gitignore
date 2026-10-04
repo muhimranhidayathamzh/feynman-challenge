@@ -49,3 +49,6 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /blob-report/
+
+# eval-golden runs in progress (Prompt 4.4)
+/eval/.cache/

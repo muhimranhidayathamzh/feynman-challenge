@@ -4,6 +4,14 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Measuring how consistent the AI grader is (4.4)
+
+- **The evaluation core moved into `src/lib/ai/evaluate.ts`** (prompt, Gemini call, coverage normalised to our outline, server-side score) without changing behaviour; `/api/evaluate` calls it, and so does the new runner, so the report measures what learners get.
+- **`npm run eval:golden`** evaluates five fixtures (good, partial, poor, silence, another topic) three times each through the real Gemini and writes `eval/reports/<date>.md`. Targets: score spread at most 1, coverage agreement at least 80%, silence and other topics always rejected. It resumes after an interruption and writes the report only when every run is in.
+- **Fixtures are synthetic for now**: Gemini text-to-speech reading the scripts in each folder (`npm run eval:audio`), stored at 16 kHz. Real recordings can replace them file by file.
+- **Provisional result**: 20 evaluations completed before the free-tier quota stopped the run; the grader was very stable (good: 10 ×5 and 9 once; poor: 1–2; partial: 6 ×3 with the expected per-point verdicts; silence rejected 5 of 5). The off-topic fixture and the full report are pending the quota reset.
+- **Found on the way: Gemini's free tier allows 20 requests a day for `gemini-2.5-flash`.** One learning session uses about four, so the whole app would serve roughly five sessions a day. Billing on the Gemini key is a requirement before real use, not a nice-to-have; the deploy checklist says so.
+
 ### End-to-end tests, ready for a test project (4.3)
 
 - **`AI_MOCK=1`** returns fixed Gemini answers that pass the real Zod schemas, from the one function every AI call goes through. It refuses to run in production (tested), since a mocked score must never reach a learner.

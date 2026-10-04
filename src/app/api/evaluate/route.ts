@@ -1,28 +1,19 @@
 import { NextResponse, after } from "next/server";
-import { createPartFromBase64 } from "@google/genai";
 import { z } from "zod";
 
+import { evaluateExplanation } from "@/lib/ai/evaluate";
 import { consumeAiQuota, recordAiUsage } from "@/lib/ai/quota";
 import type { AiCallUsage } from "@/lib/ai/usage";
 import type { EvaluateResponse } from "@/lib/api/contracts";
-import { THINKING_BUDGET, generateJson } from "@/lib/gemini/generate";
-import {
-  EVALUATION_SYSTEM_INSTRUCTION,
-  buildEvaluationPrompt,
-} from "@/lib/gemini/prompts";
 import {
   GEMINI_ERROR_RESPONSE,
   GeminiError,
   type GeminiErrorCode,
 } from "@/lib/gemini/retry";
-import { EVALUATION_RESPONSE_SCHEMA, EvaluationResultSchema } from "@/lib/gemini/schemas";
 import { RECORDINGS_BUCKET, contentTypeForPath } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
-import { normalizeCoverage, normalizeJargon } from "@/lib/utils/coverage";
-import { normalizeFollowUpQuestions } from "@/lib/utils/followups";
 import { computeMasteryAfterAttempt, effectiveMasteryState } from "@/lib/utils/mastery";
 import { computeReviewAfterAttempt } from "@/lib/utils/review";
-import { computeOverallScore, normalizeSubScores } from "@/lib/utils/scoring";
 import { computeStreakOnActivity } from "@/lib/utils/streak";
 import { getUserClock } from "@/lib/utils/user-day";
 import { rateLimit } from "@/lib/api/rate-limit";
@@ -35,8 +26,6 @@ export const maxDuration = 60;
 
 /** Everything (retries included) must finish inside maxDuration. */
 const ROUTE_BUDGET_MS = 55_000;
-/** One Gemini attempt on a few minutes of audio. */
-const GEMINI_TIMEOUT_MS = 45_000;
 
 const RequestSchema = z.object({ attemptId: z.uuid() });
 
@@ -180,46 +169,36 @@ export async function POST(request: Request) {
     }
     const base64 = Buffer.from(await audioFile.arrayBuffer()).toString("base64");
 
-    // --- Gemini (multimodal) with timeout, retry, and Zod validation ---
+    // --- Gemini (multimodal): prompt, call, coverage, server-side scores ---
+    // The same core the eval-golden runner measures (src/lib/ai/evaluate.ts).
     const maxScore = attempt.max_possible_score ?? 10;
-    const prompt = buildEvaluationPrompt({
-      outline: outline ?? [],
-      notes: note?.content ?? null,
-      hintLevel: attempt.hint_level_used,
-      maxScore,
-    });
 
     // Accounting only: recorded after the response, never in the hot path.
     let usage: AiCallUsage | null = null;
 
-    const result = await generateJson({
+    const outcome = await evaluateExplanation({
+      audioBase64: base64,
+      mimeType: contentTypeForPath(audioPath),
+      outline: outline ?? [],
+      notes: note?.content ?? null,
+      hintLevel: attempt.hint_level_used,
+      maxScore,
+      budgetMs: ROUTE_BUDGET_MS - (Date.now() - started),
       onUsage: (value) => {
         usage = value;
       },
-      label: "evaluate",
-      contents: [
-        { text: prompt },
-        createPartFromBase64(base64, contentTypeForPath(audioPath)),
-      ],
-      systemInstruction: EVALUATION_SYSTEM_INSTRUCTION,
-      responseSchema: EVALUATION_RESPONSE_SCHEMA,
-      zodSchema: EvaluationResultSchema,
-      // Low temperature: the same explanation should get the same score.
-      temperature: 0.2,
-      thinkingBudget: THINKING_BUDGET.evaluation,
-      timeoutMs: GEMINI_TIMEOUT_MS,
-      budgetMs: ROUTE_BUDGET_MS - (Date.now() - started),
     });
+    const { result } = outcome;
 
     after(() => recordAiUsage(supabase, quota.usageId, usage));
 
     // --- Audio could not be judged: complete WITHOUT scores ---
     // No mastery, latest_score, last_attempt_at, or streak change.
-    if (result.audio_issue !== "none") {
+    if (outcome.kind === "rejected") {
       const { error: rejectError } = await supabase.rpc("finalize_attempt_rejected", {
         p_attempt_id: attemptId,
         p_transcript: result.transcript,
-        p_audio_issue: result.audio_issue,
+        p_audio_issue: outcome.audioIssue,
         p_feedback: result.feedback,
       });
       if (rejectError) {
@@ -229,25 +208,12 @@ export async function POST(request: Request) {
       const rejected: EvaluateResponse = {
         evaluation_status: "completed",
         overall_score: null,
-        audio_issue: result.audio_issue,
+        audio_issue: outcome.audioIssue,
       };
       return NextResponse.json(rejected);
     }
 
-    // --- Coverage: one entry per OUR outline point; jargon cleaned ---
-    const coverage = normalizeCoverage(
-      result.coverage,
-      (outline ?? []).map((item) => item.title),
-    );
-    const jargon = normalizeJargon(result.unexplained_jargon);
-    const followUps = normalizeFollowUpQuestions(
-      result.follow_up_questions,
-      (outline ?? []).length,
-    );
-
-    // --- Scores: computed by the server, never by the model ---
-    const subScores = normalizeSubScores(result.sub_scores);
-    const overall = computeOverallScore(subScores, maxScore);
+    const { coverage, jargon, followUps, subScores, overall } = outcome;
 
     // --- Mastery ---
     const { data: prevAttempts } = await supabase
