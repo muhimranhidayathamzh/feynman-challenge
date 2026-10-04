@@ -18,6 +18,7 @@ import {
 } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
 import { SOURCE_TYPE_META, formatDuration } from "@/lib/utils/labels";
+import { sourceLink } from "@/lib/utils/source-link";
 
 type Status = "idle" | "generating" | "preview" | "creating";
 
@@ -243,19 +244,25 @@ export function CreateForm() {
                       label={SOURCE_TYPE_META[source.type].label}
                       className="source-type-icon"
                     />
-                    {source.url ? (
+                    {/* Same rule as the notebook: a title always opens something. */}
+                    <span className="stack gap-0">
                       <a
-                        href={source.url}
+                        href={sourceLink(source).href}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="link-accent text-sm"
                       >
                         {source.title}
-                        <span className="visually-hidden"> (membuka tab baru)</span>
+                        <span className="visually-hidden">
+                          {sourceLink(source).kind === "search"
+                            ? " (membuka pencarian di tab baru)"
+                            : " (membuka tab baru)"}
+                        </span>
                       </a>
-                    ) : (
-                      <span className="text-sm">{source.title}</span>
-                    )}
+                      <span className="text-muted text-xs">
+                        {sourceLink(source).label}
+                      </span>
+                    </span>
                   </li>
                 ))}
               </ul>

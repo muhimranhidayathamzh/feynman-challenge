@@ -138,12 +138,21 @@ export const notebook = {
   reviewBox: 1,
   outline: OUTLINE,
   trend: notebookTrend,
-  sources: DEMO_SOURCES.map((source, index) => ({
-    id: `00000000-0000-4000-8000-00000000020${index}`,
-    title: source.title,
-    url: source.url,
-    type: source.source_type,
-  })),
+  sources: [
+    ...DEMO_SOURCES.map((source, index) => ({
+      id: `00000000-0000-4000-8000-00000000020${index}`,
+      title: source.title,
+      url: source.url,
+      type: source.source_type,
+    })),
+    // The common case for AI suggestions: no URL, so the title opens a search.
+    {
+      id: "00000000-0000-4000-8000-000000000209",
+      title: "The power of compound interest",
+      url: null,
+      type: "video" as const,
+    },
+  ],
   notes: DEMO_NOTES,
 };
 

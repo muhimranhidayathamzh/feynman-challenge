@@ -4,6 +4,10 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Every learning source opens something
+
+- **Source titles are always clickable.** The AI is told never to invent a URL, so most suggested sources arrived without one and their titles could not be opened, which looked like a bug. A title now opens the source's own page when it has a real http(s) URL, and otherwise a search for that title: YouTube for videos, Google Scholar for papers, Google for the rest. The small print says which ("Video · cari di YouTube"), so a search is never passed off as the page itself, and screen readers hear "membuka pencarian". Applied in the notebook and in the plan preview when creating a challenge (`src/lib/utils/source-link.ts`, tested).
+
 ### A landing that lets visitors feel the problem (V.10)
 
 Three rounds of landing revisions each fixed a fragment while the approach stayed wrong: the page explained the product instead of the visitor's problem. A concept study ([`docs/design/landing-konsep.html`](docs/design/landing-konsep.html)) started from the visitor instead, and this rebuild follows its recommendation.

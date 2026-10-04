@@ -2,6 +2,7 @@ import { Trash2 } from "lucide-react";
 
 import { IconButton } from "@/components/ui/button";
 import { SOURCE_TYPE_META } from "@/lib/utils/labels";
+import { sourceLink } from "@/lib/utils/source-link";
 import type { SourceType } from "@/types";
 
 export interface SourceData {
@@ -17,38 +18,33 @@ interface Props {
   onRemove: (id: string) => void;
 }
 
-function hostname(url: string): string | null {
-  try {
-    return new URL(url).hostname.replace(/^www[.]/, "");
-  } catch {
-    return null;
-  }
-}
-
-/** One entry of the bibliography: title, then type and site in small print. */
+/**
+ * One entry of the bibliography: the title, then its type and where it leads.
+ * The title always opens something (V.11): the source's own page when it has
+ * a URL, otherwise a search for it, and the small print says which.
+ */
 export function SourceItem({ source, disabled, onRemove }: Props) {
   const meta = SOURCE_TYPE_META[source.type];
-  const site = source.url ? hostname(source.url) : null;
+  const link = sourceLink(source);
 
   return (
     <li className="source-entry">
       <div className="stack gap-1 flex-1">
-        {source.url ? (
-          <a
-            href={source.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="source-title link-accent"
-          >
-            {source.title}
-            <span className="visually-hidden"> (membuka tab baru)</span>
-          </a>
-        ) : (
-          <span className="source-title">{source.title}</span>
-        )}
+        <a
+          href={link.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="source-title link-accent"
+        >
+          {source.title}
+          <span className="visually-hidden">
+            {link.kind === "search"
+              ? " (membuka pencarian di tab baru)"
+              : " (membuka tab baru)"}
+          </span>
+        </a>
         <span className="source-meta">
-          {meta.label}
-          {site ? ` · ${site}` : ""}
+          {meta.label} · {link.label}
         </span>
       </div>
       <IconButton
