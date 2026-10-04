@@ -4,6 +4,12 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### More sources open the page itself
+
+- **The AI may now give a link whenever it knows the address**, instead of only when certain. The server opens every suggested link for up to 2.5 seconds, all at once, and drops the dead ones; their titles open a search as before. Checked against live sites: real Wikipedia, Khan Academy and YouTube pages pass, an invented Wikipedia article, an invented YouTube video (caught through YouTube's oEmbed, since YouTube answers 200 for any video URL) and an invented domain are dropped. Eight links took 1.8 s.
+- **Only public https addresses are requested**, never IP literals or local names, and redirects are not followed: the URLs come from model output, which a typed topic can steer. Rules in `src/lib/utils/link-check.ts`, tested.
+- Not yet tried with a real generated plan: the day's Gemini quota had run out.
+
 ### Measuring how consistent the AI grader is (4.4)
 
 - **The evaluation core moved into `src/lib/ai/evaluate.ts`** (prompt, Gemini call, coverage normalised to our outline, server-side score) without changing behaviour; `/api/evaluate` calls it, and so does the new runner, so the report measures what learners get.

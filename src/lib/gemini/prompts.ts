@@ -37,7 +37,8 @@ Hasilkan objek JSON dengan field berikut:
 2. "sources": 2–4 sumber belajar berkualitas dan relevan. Setiap sumber punya:
    - "title": judul sumber.
    - "type": salah satu dari "video", "article", "book", "paper", atau "other".
-   - "url": sertakan HANYA jika kamu yakin URL-nya benar dan masih aktif. Jika ragu, kosongkan (null) — JANGAN mengarang URL.
+   - "url": alamat lengkap (https) halaman sumber itu. Isi setiap kali kamu tahu alamatnya: artikel Wikipedia, dokumentasi resmi, halaman universitas atau lembaga, Khan Academy, video YouTube yang kamu kenal. Server memeriksa setiap tautan dan membuang yang mati, jadi lebih baik memberi alamat yang kamu yakini daripada mengosongkannya. Kosongkan (null) hanya jika kamu benar-benar tidak tahu alamatnya; jangan menyusun alamat dari tebakan pola.
+   - Utamakan sumber yang mudah dibuka langsung (artikel, video, halaman web) daripada buku cetak.
 
 3. "estimated_duration_sec": estimasi durasi rekaman penjelasan dalam detik, berdasarkan kompleksitas topik. Harus berupa bilangan bulat antara ${MIN_DURATION_SEC} dan ${MAX_DURATION_SEC}.
 

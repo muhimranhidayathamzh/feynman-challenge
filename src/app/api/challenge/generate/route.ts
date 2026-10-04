@@ -16,6 +16,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/api/rate-limit";
 import { logError } from "@/lib/monitoring/report";
+import { verifySourceLinks } from "@/lib/sources/verify";
 import { latencyBucket } from "@/lib/utils/error-scrub";
 
 export const runtime = "nodejs";
@@ -95,9 +96,13 @@ export async function POST(request: Request) {
 
     after(() => recordAiUsage(supabase, quota.usageId, usage));
 
+    // The AI may suggest links freely; dead ones are dropped here and the
+    // title opens a search instead (src/lib/sources/verify.ts).
+    const sources = await verifySourceLinks(result.sources);
+
     const payload: GenerateResponse = {
       outline: result.outline,
-      sources: result.sources,
+      sources,
       estimated_duration_sec: clamp(
         result.estimated_duration_sec,
         MIN_DURATION_SEC,
