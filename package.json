@@ -15,7 +15,8 @@
     "shots": "node scripts/shots.mjs",
     "design:check": "node scripts/check-design.mjs",
     "og": "node scripts/og-image.mjs",
-    "maintenance": "tsx scripts/maintenance.ts"
+    "maintenance": "tsx scripts/maintenance.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@google/genai": "^2.9.0",
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^24.13.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",

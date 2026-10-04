@@ -242,6 +242,22 @@ The same checks run in CI on every push (`.github/workflows/ci.yml`). The servic
 
 Other scripts: `npm run icons` regenerates the app icons after changing the mark, and `npm run og` re-photographs the link-preview card.
 
+### End-to-end tests
+
+`npm run test:e2e` drives the whole flow in Chrome against a production build: sign in, create a challenge, edit the outline, record 20 seconds through a fake microphone (`e2e/fixtures/explain.wav`), listen and send, see the result with its coverage, follow "Pelajari lagi" to the right point, open the attempt from its history, answer a follow-up question, and get the offline page without a network.
+
+- **Gemini is mocked** (`AI_MOCK=1`, `src/lib/ai/mock.ts`): fixed answers that pass the same Zod schemas as real ones, with no network call and no cost. It refuses to run when `VERCEL_ENV=production`.
+- **A separate Supabase project is required** (decision D12). The tests create a real user and delete it afterwards, with its recordings, so they never run against the project you use. Create a second free project, run migrations 001–010 and `verify.sql` in it, then put its keys in `.env.e2e` (git-ignored):
+
+  ```bash
+  E2E_SUPABASE_URL=https://<test-project>.supabase.co
+  E2E_SUPABASE_ANON_KEY=...
+  E2E_SUPABASE_SERVICE_ROLE_KEY=...
+  ```
+
+  The runner refuses to start without them, and refuses if the URL matches the project in `.env.local`.
+- **In CI** the `e2e` job runs only when those three are set as repository secrets; until then it is skipped, not failed.
+
 ### Screen gallery (design work)
 
 In development, `/dev/galeri` renders every screen and state (dashboard, notebook, recording, results, settings, dialogs) with fixed sample data, without Supabase. It returns 404 in production builds.

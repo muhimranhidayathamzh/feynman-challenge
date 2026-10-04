@@ -4,6 +4,14 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### End-to-end tests, ready for a test project (4.3)
+
+- **`AI_MOCK=1`** returns fixed Gemini answers that pass the real Zod schemas, from the one function every AI call goes through. It refuses to run in production (tested), since a mocked score must never reach a learner.
+- **Playwright** drives the main flow against a production build with a fake microphone: sign in, create, edit the outline, record 20 seconds, send, read the coverage, "Pelajari lagi" to the right point, the attempt history, a follow-up answer, and the offline page.
+- **Guarded against the wrong database**: it needs a separate Supabase project (D12) in `.env.e2e`, refuses to start without one, and refuses if it is the project in `.env.local`. Both refusals were checked. A CI job runs it once the three secrets exist and is skipped until then.
+- **Not run green yet**: no test project exists so far, so the scenario has been listed and type-checked but not executed end to end. That happens once the project is created.
+- Sentry was already done in U.2. Bundle impact of this prompt: none on the client; the mock is server code behind a runtime flag.
+
 ### Review reminders by email (5.4)
 
 - **The spaced-repetition schedule now calls people back.** A daily job emails each learner on the day a review falls due: what is due today, plus anything still waiting, with one button back to the app. At most once a day, only between 07:00 and 21:00 in their own timezone, never to demo accounts, and never again for a review they already ignored.

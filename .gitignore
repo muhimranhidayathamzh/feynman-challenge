@@ -43,3 +43,9 @@ next-env.d.ts
 
 # Claude Code local settings (jangan di-commit)
 .claude/settings.local.json
+
+# end-to-end tests (Prompt 4.3)
+/e2e/.auth/
+/test-results/
+/playwright-report/
+/blob-report/

@@ -2,6 +2,8 @@ import "server-only";
 
 import { z } from "zod";
 
+import { aiMockEnabled } from "@/lib/ai/mock";
+
 /**
  * Server-only environment variables, validated once at first import.
  * Never import this module from a Client Component (the `server-only` guard
@@ -87,4 +89,15 @@ export function remindersAvailable(): boolean {
   return Boolean(
     process.env.RESEND_API_KEY && process.env.REMINDER_FROM && process.env.CRON_SECRET,
   );
+}
+
+/**
+ * AI_MOCK=1 (Prompt 4.3): Gemini answers come from fixtures. Throws when set
+ * in production, so a mocked score can never reach a real learner.
+ */
+export function aiMock(): boolean {
+  return aiMockEnabled({
+    AI_MOCK: process.env.AI_MOCK,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+  });
 }

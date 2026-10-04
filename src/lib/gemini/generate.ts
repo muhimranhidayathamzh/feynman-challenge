@@ -3,7 +3,9 @@ import "server-only";
 import type { ContentListUnion, Schema } from "@google/genai";
 import type { ZodType } from "zod";
 
+import { mockAnswer } from "@/lib/ai/mock";
 import { parseUsageMetadata, type AiCallUsage } from "@/lib/ai/usage";
+import { aiMock } from "@/lib/env";
 import { GEMINI_MODEL, getGeminiClient } from "@/lib/gemini/client";
 import {
   GeminiError,
@@ -64,6 +66,8 @@ function sleep(ms: number): Promise<void> {
  * validation, and a latency log line. Throws GeminiError only.
  */
 export async function generateJson<T>(params: GenerateJsonParams<T>): Promise<T> {
+  if (aiMock()) return mockedJson(params);
+
   const { maxRetries = 2 } = params;
   const started = Date.now();
   const ai = getGeminiClient();
@@ -145,4 +149,24 @@ export async function generateJson<T>(params: GenerateJsonParams<T>): Promise<T>
       await sleep(delay);
     }
   }
+}
+
+/**
+ * AI_MOCK=1: the fixture for this call, validated by the same schema and
+ * accounted like a real call (zero tokens), so quotas behave as in use.
+ */
+function mockedJson<T>(params: GenerateJsonParams<T>): T {
+  const parsed = params.zodSchema.safeParse(mockAnswer(params.label));
+  if (!parsed.success) {
+    throw new GeminiError("invalid_response", `${params.label}: mock fixture mismatch`);
+  }
+  params.onUsage?.({
+    model: "mock",
+    promptTokens: 0,
+    outputTokens: 0,
+    thinkingTokens: 0,
+    latencyMs: 0,
+  });
+  console.info(`[gemini] ${params.label} mocked (AI_MOCK=1)`);
+  return parsed.data;
 }
