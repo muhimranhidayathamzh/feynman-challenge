@@ -4,6 +4,13 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Strangers welcome, abusers not (5.1)
+
+- **Per-IP rate limit on every API route that writes or calls the AI**: AI routes 20 a minute, saves 120 a minute, password checks and sign-in callbacks 20 per ten minutes, answered with `429` and `Retry-After`. A sliding window in memory per instance (`src/lib/utils/rate-limit.ts`, tested). The client address is trusted only from Vercel's edge; elsewhere a forged `x-forwarded-for` buys nothing.
+- **Cloudflare Turnstile**, off until `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is set. The plan named sign-up and the demo button, but Supabase asks for a token on every auth call once CAPTCHA is on, so the widget is also on sign-in (including "resend confirmation"), password reset, and the password check before account deletion; otherwise switching it on would have locked everyone out. On the demo button it appears only after the click and continues on its own. Tokens are single-use, so every failed attempt fetches a new one.
+- Checked both ways in the browser with Supabase intercepted: without a key every flow sends no token and works as before; with Cloudflare's test key every flow sends one.
+- The sign-up confirmation now mentions the spam folder, and the note under "Coba tanpa akun" no longer promises a prepared example that V.9 removed.
+
 ### Privacy and terms in plain language (5.2)
 
 - **`/privasi`** says what is stored and why, that recordings and topics go to Google Gemini, who else processes data (Supabase, Vercel, Google), how long each thing is kept, the rights under Indonesia's personal data law (UU 27/2022), and how to delete everything. **`/syarat`** is short: AI scoring can be wrong and is not for important decisions, your content stays yours, fair use, and Indonesian law.

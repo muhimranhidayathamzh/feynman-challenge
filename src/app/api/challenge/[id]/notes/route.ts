@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/api/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -12,6 +13,8 @@ const PutSchema = z.object({
 });
 
 export async function PUT(request: Request, context: RouteContext) {
+  const limited = rateLimit(request, "write");
+  if (limited) return limited;
   try {
     const { id } = await context.params;
     const supabase = await createClient();

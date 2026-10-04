@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { normalizeHttpUrl } from "@/lib/gemini/schemas";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/api/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -16,6 +17,8 @@ const AddSchema = z.object({
 });
 
 export async function POST(request: Request, context: RouteContext) {
+  const limited = rateLimit(request, "write");
+  if (limited) return limited;
   try {
     const { id } = await context.params;
     const supabase = await createClient();
@@ -67,6 +70,8 @@ export async function POST(request: Request, context: RouteContext) {
 }
 
 export async function DELETE(request: Request, context: RouteContext) {
+  const limited = rateLimit(request, "write");
+  if (limited) return limited;
   try {
     const { id } = await context.params;
     const supabase = await createClient();

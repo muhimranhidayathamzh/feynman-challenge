@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { authErrorMessage } from "@/lib/auth/errors";
 import { createClient } from "@/lib/supabase/client";
+
+import { useCaptcha } from "./captcha";
 
 interface Props {
   onError: (message: string) => void;
@@ -25,6 +27,9 @@ interface Props {
  * Supabase, see README) and goes straight to "Tantangan baru", so the visitor
  * tries the product on a topic of their own rather than reading a prepared
  * example (V.9). The account can later be kept from Pengaturan.
+ *
+ * With CAPTCHA on (5.1), the check appears only after the click, so the
+ * landing stays clean, and the sign-in continues as soon as it passes.
  */
 export function DemoButton({
   onError,
@@ -33,38 +38,63 @@ export function DemoButton({
 }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const captcha = useCaptcha();
+  const { token, reset } = captcha;
 
-  async function handleClick() {
-    setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInAnonymously({
-      options: {
-        data: {
-          display_name: "Tamu",
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  const signIn = useCallback(
+    async (captchaToken: string | null) => {
+      setLoading(true);
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInAnonymously({
+        options: {
+          data: {
+            display_name: "Tamu",
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          },
+          ...(captchaToken && { captchaToken }),
         },
-      },
-    });
-    if (error) {
-      onError(authErrorMessage(error));
-      setLoading(false);
+      });
+      if (error) {
+        onError(authErrorMessage(error));
+        setLoading(false);
+        setVerifying(false);
+        reset();
+        return;
+      }
+
+      router.replace("/challenge/new");
+      router.refresh();
+    },
+    [onError, reset, router],
+  );
+
+  // CAPTCHA on: wait for the check, then carry on without a second click.
+  useEffect(() => {
+    if (verifying && token && !loading) void signIn(token);
+  }, [verifying, token, loading, signIn]);
+
+  function handleClick() {
+    if (captcha.enabled && !token) {
+      setVerifying(true);
       return;
     }
-
-    router.replace("/challenge/new");
-    router.refresh();
+    void signIn(token);
   }
 
   return (
-    <Button
-      variant={variant}
-      size="lg"
-      block
-      icon={Sparkles}
-      loading={loading}
-      onClick={() => void handleClick()}
-    >
-      {label}
-    </Button>
+    <>
+      <Button
+        variant={variant}
+        size="lg"
+        block
+        icon={Sparkles}
+        loading={loading || (verifying && !token)}
+        onClick={handleClick}
+      >
+        {label}
+      </Button>
+      {verifying && captcha.widget}
+    </>
   );
 }

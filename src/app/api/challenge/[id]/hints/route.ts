@@ -5,6 +5,7 @@ import { regenerateMissingHints } from "@/lib/ai/hints";
 import type { HintsResponse } from "@/lib/api/contracts";
 import { GEMINI_ERROR_RESPONSE } from "@/lib/gemini/retry";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/api/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -15,7 +16,9 @@ type RouteContext = { params: Promise<{ id: string }> };
  * Fills in AI hints for outline points that have none. Called by the
  * recording screen before recording starts; a no-op when nothing is missing.
  */
-export async function POST(_request: Request, context: RouteContext) {
+export async function POST(request: Request, context: RouteContext) {
+  const limited = rateLimit(request, "ai");
+  if (limited) return limited;
   try {
     const { id } = await context.params;
     if (!z.uuid().safeParse(id).success) {

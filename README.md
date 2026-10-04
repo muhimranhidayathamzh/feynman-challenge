@@ -137,6 +137,7 @@ GEMINI_API_KEY=...                 # server-only
 CRON_SECRET=...                    # server-only, optional: guards /api/cron/*
 GEMINI_PAID_TIER=                  # "1" only once the Gemini key is billed (see below)
 CONTACT_EMAIL=...                  # shown on /privasi and /syarat for privacy requests
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=    # optional: Cloudflare Turnstile CAPTCHA (see Protection)
 
 NEXT_PUBLIC_SITE_URL=...           # canonical origin, for Open Graph and the sitemap
 NEXT_PUBLIC_ALLOW_INDEXING=        # leave empty; "1" only for the real launch
@@ -273,6 +274,30 @@ Every screen was photographed from the dev gallery before Fase V and again after
 | <img src="docs/design/shots/before/catatan-390.png" alt="Notebook before" width="230" /> | <img src="docs/design/shots/after/catatan-390-light.png" alt="Notebook after" width="230" /> |
 
 The findings that drove the change are listed in [`docs/design/audit.md`](docs/design/audit.md).
+
+---
+
+## 🛡️ Protection against abuse
+
+Four layers, each answering a different question. None of them depends on another.
+
+| Layer | Stops | Where |
+|---|---|---|
+| **App-wide brake** | The whole bill running away: a kill switch and a daily ceiling in weighted units, flipped from the SQL editor with no redeploy | `app_settings` (migrations 007, 008) |
+| **Per-user quota** | One account burning the budget: AI calls per day and per minute, tighter for demo accounts, checked atomically in SQL | `consume_ai_quota` (003) |
+| **Per-IP rate limit** | Floods from one address, signed in or not: AI routes 20 a minute, saves 120 a minute, password checks and sign-in callbacks 20 per ten minutes. Answers `429` with `Retry-After` | `src/lib/api/rate-limit.ts` |
+| **CAPTCHA** | Scripts creating accounts: Cloudflare Turnstile on sign-up, sign-in, password reset, the demo button and the password check before account deletion | `src/components/auth/captcha.tsx` |
+
+The rate limit is a sliding window in memory, per server instance. It only trusts the client address that Vercel's edge writes; anywhere else every request shares one key, so a forged header cannot buy a fresh allowance. Once traffic spreads across many instances, move it to a shared store (Upstash Redis).
+
+**Turning CAPTCHA on** takes both halves:
+1. Cloudflare dashboard > Turnstile > add a widget for your domain (mode *Managed*). Copy the site key and the secret key.
+2. Supabase > Authentication > Attack Protection > enable CAPTCHA, provider Turnstile, paste the **secret** key.
+3. Vercel: set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` to the **site** key and redeploy.
+
+Do step 3 together with step 2: once Supabase requires a token, sign-in without the widget fails. With the variable empty, no widget renders and every form works as before. Cloudflare's test key `1x00000000000000000000AA` always passes, for trying it locally.
+
+**Email confirmation** must be on before strangers sign up, or anyone can register with someone else's address: Supabase > Authentication > Sign In / Providers > Email > *Confirm email*. The sign-up form already says "Cek email kamu", and the link lands on `/api/auth/callback`.
 
 ---
 

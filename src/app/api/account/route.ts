@@ -7,19 +7,29 @@ import { deleteAccount } from "@/lib/maintenance/cleanup";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isDeleteConfirmed, usesPassword } from "@/lib/utils/account-cleanup";
+import { rateLimit } from "@/lib/api/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 /** Checks a password without touching the caller's own session cookies. */
-async function passwordMatches(email: string, password: string): Promise<boolean> {
+async function passwordMatches(
+  email: string,
+  password: string,
+  captchaToken: string | undefined,
+): Promise<boolean> {
   const env = publicEnv();
   const probe = createPlainClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
-  const { error } = await probe.auth.signInWithPassword({ email, password });
+  // With CAPTCHA on, Supabase asks for a token on this check too.
+  const { error } = await probe.auth.signInWithPassword({
+    email,
+    password,
+    ...(captchaToken && { options: { captchaToken } }),
+  });
   return !error;
 }
 
@@ -29,6 +39,8 @@ async function passwordMatches(email: string, password: string): Promise<boolean
  * plus the password for email accounts (D10).
  */
 export async function DELETE(request: Request) {
+  const limited = rateLimit(request, "auth");
+  if (limited) return limited;
   try {
     const supabase = await createClient();
     const {
@@ -57,8 +69,12 @@ export async function DELETE(request: Request) {
     }
 
     if (usesPassword(user)) {
-      const { password } = parsed.data;
-      if (!user.email || !password || !(await passwordMatches(user.email, password))) {
+      const { password, captchaToken } = parsed.data;
+      if (
+        !user.email ||
+        !password ||
+        !(await passwordMatches(user.email, password, captchaToken))
+      ) {
         return NextResponse.json({ error: "Kata sandi salah." }, { status: 403 });
       }
     }

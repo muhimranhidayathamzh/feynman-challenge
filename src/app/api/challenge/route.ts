@@ -10,6 +10,7 @@ import {
 import type { CreateChallengeResponse } from "@/lib/api/contracts";
 import { sanitizeKeywords } from "@/lib/utils/hints";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/api/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -26,6 +27,8 @@ const CreateChallengeSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const limited = rateLimit(request, "write");
+  if (limited) return limited;
   try {
     const supabase = await createClient();
     const {

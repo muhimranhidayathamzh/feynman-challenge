@@ -3,11 +3,14 @@ import { NextResponse } from "next/server";
 import { ProfilePatchRequestSchema, type ProfileResponse } from "@/lib/api/contracts";
 import { isValidTimeZone } from "@/lib/utils/date";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/api/rate-limit";
 
 export const runtime = "nodejs";
 
 /** Update the signed-in user's display name and/or timezone. */
 export async function PATCH(request: Request) {
+  const limited = rateLimit(request, "write");
+  if (limited) return limited;
   try {
     const supabase = await createClient();
     const {

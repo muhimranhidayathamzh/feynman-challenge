@@ -14,6 +14,7 @@ import {
   OutlineGenerationSchema,
 } from "@/lib/gemini/schemas";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/api/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -30,6 +31,8 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 export async function POST(request: Request) {
+  const limited = rateLimit(request, "ai");
+  if (limited) return limited;
   const started = Date.now();
   try {
     // --- Auth: only signed-in users may generate plans ---

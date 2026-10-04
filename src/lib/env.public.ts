@@ -43,3 +43,12 @@ export function publicEnv(): PublicEnv {
   cached = { NEXT_PUBLIC_SUPABASE_URL: url, NEXT_PUBLIC_SUPABASE_ANON_KEY: anonKey };
   return cached;
 }
+
+/**
+ * Cloudflare Turnstile site key (Prompt 5.1, D15), or null when CAPTCHA is
+ * off. Off means every form works without it, as in local development.
+ */
+export function turnstileSiteKey(): string | null {
+  const key = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim();
+  return key ? key : null;
+}

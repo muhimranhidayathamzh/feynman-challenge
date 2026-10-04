@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { regenerateMissingHints } from "@/lib/ai/hints";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/api/rate-limit";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types";
 
@@ -59,6 +60,8 @@ async function ownsChallenge(supabase: DB, id: string): Promise<boolean> {
 }
 
 export async function POST(request: Request, context: RouteContext) {
+  const limited = rateLimit(request, "write");
+  if (limited) return limited;
   try {
     const { id } = await context.params;
     const supabase = await createClient();
@@ -114,6 +117,8 @@ export async function POST(request: Request, context: RouteContext) {
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
+  const limited = rateLimit(request, "write");
+  if (limited) return limited;
   try {
     const { id } = await context.params;
     const supabase = await createClient();
@@ -187,6 +192,8 @@ export async function PATCH(request: Request, context: RouteContext) {
 }
 
 export async function DELETE(request: Request, context: RouteContext) {
+  const limited = rateLimit(request, "write");
+  if (limited) return limited;
   try {
     const { id } = await context.params;
     const supabase = await createClient();

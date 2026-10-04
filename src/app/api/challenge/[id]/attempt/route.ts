@@ -12,6 +12,7 @@ import {
 import { MIN_RECORDING_SEC } from "@/lib/utils/constants";
 import { MAX_SCORE_BY_HINT } from "@/lib/utils/labels";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/api/rate-limit";
 
 // The audio itself is uploaded by the browser straight to Storage
 // (see src/lib/audio/upload.ts). This route only registers the attempt.
@@ -24,6 +25,8 @@ const UNIQUE_VIOLATION = "23505";
 const MAX_INSERT_RETRIES = 3;
 
 export async function POST(request: Request, context: RouteContext) {
+  const limited = rateLimit(request, "write");
+  if (limited) return limited;
   const { id } = await context.params;
   const supabase = await createClient();
 

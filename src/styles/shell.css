@@ -210,3 +210,14 @@
   color: var(--accent-text);
   flex-shrink: 0;
 }
+
+/* --- CAPTCHA (Prompt 5.1): Turnstile's managed widget is 65px tall; hold
+   the space so the submit button does not jump when it appears. --- */
+.captcha {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.captcha-widget {
+  min-height: 65px;
+}

@@ -25,6 +25,7 @@ import { computeReviewAfterAttempt } from "@/lib/utils/review";
 import { computeOverallScore, normalizeSubScores } from "@/lib/utils/scoring";
 import { computeStreakOnActivity } from "@/lib/utils/streak";
 import { getUserClock } from "@/lib/utils/user-day";
+import { rateLimit } from "@/lib/api/rate-limit";
 import type { Json } from "@/types";
 
 export const runtime = "nodejs";
@@ -45,6 +46,8 @@ class StorageFailure extends Error {}
 const STORAGE_RESPONSE = { status: 500, message: "Gagal mengunduh audio dari storage." };
 
 export async function POST(request: Request) {
+  const limited = rateLimit(request, "ai");
+  if (limited) return limited;
   const started = Date.now();
   const supabase = await createClient();
 

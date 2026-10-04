@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 
+import { useCaptcha } from "@/components/auth/captcha";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Field, Input } from "@/components/ui/field";
@@ -25,8 +26,13 @@ export function DeleteAccount({ needsPassword, isDemo }: Props) {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The password is checked through Supabase sign-in, which asks for a
+  // CAPTCHA token once CAPTCHA is on.
+  const captcha = useCaptcha();
+  const captchaReady = !needsPassword || captcha.ready;
 
-  const ready = isDeleteConfirmed(confirm) && (!needsPassword || password.length > 0);
+  const ready =
+    isDeleteConfirmed(confirm) && (!needsPassword || password.length > 0) && captchaReady;
 
   function close() {
     setOpen(false);
@@ -41,11 +47,15 @@ export function DeleteAccount({ needsPassword, isDemo }: Props) {
     setError(null);
     const result = await fetchJson("/api/account", OkResponseSchema, {
       method: "DELETE",
-      json: { confirm, ...(needsPassword && { password }) },
+      json: {
+        confirm,
+        ...(needsPassword && { password, ...captcha.options }),
+      },
     });
     if (!result.ok) {
       setBusy(false);
       setError(result.error);
+      if (needsPassword) captcha.reset();
       return;
     }
     await clearAppCaches();
@@ -113,6 +123,7 @@ export function DeleteAccount({ needsPassword, isDemo }: Props) {
               />
             </Field>
           )}
+          {needsPassword && open && captcha.widget}
           {/* Enter in a field submits; the dialog's own button does the same. */}
           <button type="submit" hidden aria-hidden="true" tabIndex={-1} />
         </form>

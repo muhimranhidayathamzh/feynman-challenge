@@ -194,6 +194,8 @@ export const AccountDeleteRequestSchema = z.object({
   confirm: z.string().max(20),
   /** Required for accounts that sign in with email and password. */
   password: z.string().min(1).max(200).optional(),
+  /** Turnstile token for the password check, when CAPTCHA is on (5.1). */
+  captchaToken: z.string().min(1).max(4096).optional(),
 });
 export type AccountDeleteRequest = z.infer<typeof AccountDeleteRequestSchema>;
 

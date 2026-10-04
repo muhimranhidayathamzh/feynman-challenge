@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { KeyRound, MailCheck } from "lucide-react";
 
+import { useCaptcha } from "@/components/auth/captcha";
 import { Button } from "@/components/ui/button";
 import { Sheet } from "@/components/ui/sheet";
 import { Field, Input } from "@/components/ui/field";
@@ -16,6 +17,7 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const captcha = useCaptcha();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -24,10 +26,12 @@ export default function ForgotPasswordPage() {
     const supabase = createClient();
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent("/atur-ulang-password")}`,
+      ...captcha.options,
     });
     setLoading(false);
     if (resetError) {
       setError(authErrorMessage(resetError));
+      captcha.reset();
       return;
     }
     // Same message whether or not the email exists (no account enumeration).
@@ -77,7 +81,15 @@ export default function ForgotPasswordPage() {
             disabled={loading}
           />
         </Field>
-        <Button type="submit" size="lg" block icon={KeyRound} loading={loading}>
+        {captcha.widget}
+        <Button
+          type="submit"
+          size="lg"
+          block
+          icon={KeyRound}
+          loading={loading}
+          disabled={!captcha.ready}
+        >
           Kirim tautan
         </Button>
       </form>

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { FOLLOWUPS_FOLDER, RECORDINGS_BUCKET } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/api/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -96,6 +97,8 @@ export async function GET(_request: Request, context: RouteContext) {
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
+  const limited = rateLimit(request, "write");
+  if (limited) return limited;
   try {
     const { id } = await context.params;
     const supabase = await createClient();
@@ -134,7 +137,9 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 }
 
-export async function DELETE(_request: Request, context: RouteContext) {
+export async function DELETE(request: Request, context: RouteContext) {
+  const limited = rateLimit(request, "write");
+  if (limited) return limited;
   try {
     const { id } = await context.params;
     const supabase = await createClient();

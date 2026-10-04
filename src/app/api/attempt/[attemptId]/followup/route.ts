@@ -22,6 +22,7 @@ import {
 } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
 import { parseStoredFollowUps } from "@/lib/utils/followups";
+import { rateLimit } from "@/lib/api/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -36,6 +37,8 @@ type RouteContext = { params: Promise<{ attemptId: string }> };
  * Never touches scores, mastery, reviews, or the streak.
  */
 export async function POST(request: Request, context: RouteContext) {
+  const limited = rateLimit(request, "ai");
+  if (limited) return limited;
   const started = Date.now();
   const { attemptId } = await context.params;
   if (!z.uuid().safeParse(attemptId).success) {

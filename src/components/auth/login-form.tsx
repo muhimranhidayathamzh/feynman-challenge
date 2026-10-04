@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/client";
 
 import type { AuthFeatures } from "@/lib/auth/auth-features";
 
+import { useCaptcha } from "./captcha";
 import { DemoButton } from "./demo-button";
 import { GoogleButton } from "./google-button";
 
@@ -35,6 +36,7 @@ export function LoginForm({ next, initialError, initialNotice = null, features }
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
   const [loading, setLoading] = useState(false);
+  const captcha = useCaptcha();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -46,12 +48,14 @@ export function LoginForm({ next, initialError, initialNotice = null, features }
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
+      options: captcha.options,
     });
 
     if (signInError) {
       setError(authErrorMessage(signInError));
       setNeedsConfirmation(authErrorCode(signInError) === "email_not_confirmed");
       setLoading(false);
+      captcha.reset();
       return;
     }
 
@@ -65,8 +69,12 @@ export function LoginForm({ next, initialError, initialNotice = null, features }
     const { error: resendError } = await supabase.auth.resend({
       type: "signup",
       email,
-      options: { emailRedirectTo: `${window.location.origin}/api/auth/callback` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        ...captcha.options,
+      },
     });
+    captcha.reset();
     if (resendError) {
       setError(authErrorMessage(resendError));
       setResendState("idle");
@@ -97,6 +105,7 @@ export function LoginForm({ next, initialError, initialNotice = null, features }
               icon={Mail}
               className="self-start"
               loading={resendState === "sending"}
+              disabled={!captcha.ready}
               onClick={() => void handleResendConfirmation()}
             >
               Kirim ulang email konfirmasi
@@ -154,6 +163,8 @@ export function LoginForm({ next, initialError, initialNotice = null, features }
           />
         </Field>
 
+        {captcha.widget}
+
         <Button
           type="submit"
           size="lg"
@@ -161,6 +172,7 @@ export function LoginForm({ next, initialError, initialNotice = null, features }
           className="mt-2"
           icon={LogIn}
           loading={loading}
+          disabled={!captcha.ready}
         >
           Masuk
         </Button>
@@ -182,8 +194,8 @@ export function LoginForm({ next, initialError, initialNotice = null, features }
           <div className="stack gap-2">
             <DemoButton onError={setError} />
             <p className="text-muted text-xs text-center">
-              Mode demo berisi tantangan contoh lengkap dengan hasil evaluasinya. Kuota AI
-              dibatasi, dan progresmu bisa disimpan jadi akun kapan saja.
+              Tanpa email: langsung coba dengan topikmu sendiri. Kuota AI dibatasi, dan
+              progresmu bisa disimpan jadi akun kapan saja.
             </p>
           </div>
         </>

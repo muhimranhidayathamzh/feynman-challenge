@@ -9,6 +9,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Sheet } from "@/components/ui/sheet";
 import { Field, Input } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
+import { useCaptcha } from "@/components/auth/captcha";
 import { GoogleButton } from "@/components/auth/google-button";
 import { authErrorMessage } from "@/lib/auth/errors";
 import { MIN_PASSWORD_LENGTH, validateNewPassword } from "@/lib/auth/password";
@@ -28,6 +29,7 @@ export function SignupForm({ googleEnabled }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const captcha = useCaptcha();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -53,12 +55,14 @@ export function SignupForm({ googleEnabled }: Props) {
           typeof window !== "undefined"
             ? `${window.location.origin}/api/auth/callback`
             : undefined,
+        ...captcha.options,
       },
     });
 
     if (signUpError) {
       setError(authErrorMessage(signUpError));
       setLoading(false);
+      captcha.reset();
       return;
     }
 
@@ -80,8 +84,9 @@ export function SignupForm({ googleEnabled }: Props) {
         <Icon icon={Mail} size={36} className="state-icon" />
         <h2 className="text-xl">Cek email kamu</h2>
         <p className="text-secondary text-sm">
-          Kami mengirim tautan konfirmasi ke <strong>{email}</strong>. Klik tautan itu
-          untuk mengaktifkan akunmu.
+          Kami mengirim tautan konfirmasi ke <strong>{email}</strong>. Buka tautan itu
+          untuk mengaktifkan akunmu, lalu kamu langsung masuk. Tidak ada di kotak masuk?
+          Cek folder spam.
         </p>
         <ButtonLink href="/login" variant="secondary" block>
           Kembali ke halaman masuk
@@ -164,6 +169,8 @@ export function SignupForm({ googleEnabled }: Props) {
           />
         </Field>
 
+        {captcha.widget}
+
         <Button
           type="submit"
           size="lg"
@@ -171,6 +178,7 @@ export function SignupForm({ googleEnabled }: Props) {
           className="mt-2"
           icon={UserPlus}
           loading={loading}
+          disabled={!captcha.ready}
         >
           Daftar
         </Button>
