@@ -10,6 +10,7 @@ import {
   DEMO_OUTLINE,
   DEMO_SOURCES,
 } from "@/lib/demo/fixture";
+import { buildHistory, type AttemptSummaryRow } from "@/lib/utils/attempt-history";
 import type { CalendarDay } from "@/lib/utils/date";
 import {
   buildCoverageTrend,
@@ -26,6 +27,7 @@ export const TODAY: CalendarDay = "2026-09-19";
 export const USER_ID = "00000000-0000-4000-8000-000000000001";
 export const CHALLENGE_ID = "00000000-0000-4000-8000-0000000000c1";
 export const ATTEMPT_ID = "00000000-0000-4000-8000-0000000000a2";
+const attemptId = (n: number) => `00000000-0000-4000-8000-0000000000a${n.toString(16)}`;
 export const DISPLAY_NAME = "Rani";
 
 // ---------------------------------------------------------------------------
@@ -119,13 +121,83 @@ const FIRST_ATTEMPT_COVERAGE: Coverage[] = DEMO_ATTEMPT.coverage.map((entry) => 
 
 const SECOND_ATTEMPT_COVERAGE: Coverage[] = DEMO_ATTEMPT.coverage;
 
+const resultHref = (n: number) => `/challenge/${CHALLENGE_ID}/result/${attemptId(n)}`;
+
 export const notebookTrend = buildCoverageTrend(
   [
-    { attemptNumber: 1, coverage: FIRST_ATTEMPT_COVERAGE },
-    { attemptNumber: 2, coverage: SECOND_ATTEMPT_COVERAGE },
+    { attemptNumber: 1, coverage: FIRST_ATTEMPT_COVERAGE, href: resultHref(1) },
+    { attemptNumber: 2, coverage: SECOND_ATTEMPT_COVERAGE, href: resultHref(2) },
   ],
   OUTLINE,
 );
+
+const HISTORY_CONTEXT = {
+  challengeId: CHALLENGE_ID,
+  timeZone: "Asia/Jakarta",
+  today: TODAY,
+};
+
+const scoredRow = (
+  n: number,
+  createdAt: string,
+  score: number,
+  hint: AttemptSummaryRow["hint_level_used"] = "none",
+): AttemptSummaryRow => ({
+  id: attemptId(n),
+  attempt_number: n,
+  created_at: createdAt,
+  evaluation_status: "completed",
+  overall_score: score,
+  max_possible_score: hint === "none" ? 10 : hint === "keywords" ? 9 : 8,
+  hint_level_used: hint,
+  audio_issue: "none",
+});
+
+/** The notebook's history: every outcome once, matching the trend above. */
+export const notebookHistory = buildHistory(
+  [
+    scoredRow(1, "2026-09-14T12:00:00Z", 6, "keywords"),
+    scoredRow(2, "2026-09-17T12:00:00Z", 7),
+    {
+      ...scoredRow(3, "2026-09-18T12:00:00Z", 0),
+      overall_score: null,
+      audio_issue: "silent",
+    },
+    {
+      ...scoredRow(4, "2026-09-19T02:00:00Z", 0),
+      evaluation_status: "error",
+      overall_score: null,
+      audio_issue: null,
+    },
+  ],
+  HISTORY_CONTEXT,
+);
+
+/** A long history: more than the preview, so "Tampilkan semua" appears. */
+export const longHistory = buildHistory(
+  Array.from({ length: 14 }, (_, index) =>
+    scoredRow(
+      index + 1,
+      new Date(Date.UTC(2026, 7, 10 + index * 3, 12)).toISOString(),
+      Math.min(9, 3 + Math.floor(index / 2)),
+      index < 4 ? "guiding_questions" : index < 8 ? "keywords" : "none",
+    ),
+  ),
+  HISTORY_CONTEXT,
+);
+
+/** Neighbours of attempts #2, #3, and #4 in the notebook's history. */
+export const neighbours = {
+  scored: {
+    previous: { id: attemptId(1), number: 1 },
+    next: { id: attemptId(3), number: 3 },
+  },
+  rejected: {
+    previous: { id: attemptId(2), number: 2 },
+    next: { id: attemptId(4), number: 4 },
+  },
+  failed: { previous: { id: attemptId(3), number: 3 }, next: null },
+};
 
 export const notebook = {
   id: CHALLENGE_ID,
@@ -138,6 +210,7 @@ export const notebook = {
   reviewBox: 1,
   outline: OUTLINE,
   trend: notebookTrend,
+  history: notebookHistory,
   sources: [
     ...DEMO_SOURCES.map((source, index) => ({
       id: `00000000-0000-4000-8000-00000000020${index}`,
@@ -209,6 +282,7 @@ export const result = {
   improvements: DEMO_ATTEMPT.improvements,
   transcript: DEMO_ATTEMPT.transcript,
   audioUrl: null,
+  neighbours: neighbours.scored,
 };
 
 export const followUpQuestions = DEMO_ATTEMPT.followUpQuestions;

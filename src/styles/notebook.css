@@ -181,6 +181,28 @@
   display: inline-flex;
 }
 
+/* Linked dots (Prompt 4.1): each opens its attempt. 32px targets, under the
+   44px rule (DESIGN.md §13) because the history card below carries the same
+   links at full size; the negative margin keeps the row as tall as before. */
+.trend-dots.is-linked {
+  gap: 0;
+}
+
+.trend-dot-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-block: -9.5px;
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast);
+}
+
+.trend-dot-link:hover {
+  background: var(--sunken);
+}
+
 .trend-none {
   display: inline-block;
   width: 13px;
@@ -200,6 +222,93 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
+}
+
+/* --- Attempt history (Prompt 4.1): one ruled line per attempt --- */
+.history-list {
+  display: grid;
+}
+
+/* The rule sits on the item so the row's rounded hover leaves it straight. */
+.history-list li {
+  padding-block: 2px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.history-list li:last-child {
+  border-bottom: 0;
+}
+
+.history-row {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 3.25rem;
+  padding: var(--space-2) var(--space-2) var(--space-2) 0;
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  transition: background var(--transition-fast);
+}
+
+.history-row:hover {
+  background: var(--sunken);
+}
+
+.history-number {
+  font-family: var(--font-serif);
+  font-size: var(--text-lead);
+  color: var(--ink-3);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-body {
+  display: grid;
+  min-width: 0;
+}
+
+.history-day {
+  font-weight: var(--weight-semibold);
+}
+
+.history-hint {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}
+
+.history-score {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.history-score-max {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}
+
+.history-status {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  text-align: right;
+}
+
+.history-toggle {
+  align-self: center;
+  min-height: 2.75rem;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.history-toggle:hover {
+  color: var(--ink);
 }
 
 /* --- Sources: a short bibliography --- */

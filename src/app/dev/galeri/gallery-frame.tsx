@@ -5,6 +5,7 @@ import { useEffect, type ReactNode } from "react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { LoginForm } from "@/components/auth/login-form";
 import { SignupForm } from "@/components/auth/signup-form";
+import { AttemptHistory } from "@/components/challenge/attempt-history";
 import { NewChallengeView } from "@/components/challenge/new-challenge-view";
 import { NotebookView } from "@/components/challenge/notebook-view";
 import { DashboardView } from "@/components/dashboard/dashboard-view";
@@ -129,6 +130,12 @@ function content(id: string): ReactNode {
       return <NewChallengeView />;
     case "catatan":
       return <NotebookView {...fx.notebook} />;
+    case "catatan-riwayat":
+      return (
+        <section className="page">
+          <AttemptHistory entries={fx.longHistory} />
+        </section>
+      );
     case "rekam-siap":
       return stage({});
     case "rekam-merekam":
@@ -194,6 +201,7 @@ function content(id: string): ReactNode {
           audioIssue="silent"
           feedback={null}
           audioUrl={null}
+          neighbours={fx.neighbours.rejected}
         />
       );
     case "hasil-diproses":
@@ -204,6 +212,7 @@ function content(id: string): ReactNode {
           error={null}
           onRetry={noop}
           onReload={noop}
+          neighbours={fx.neighbours.failed}
         />
       );
     case "hasil-gagal":
@@ -214,6 +223,7 @@ function content(id: string): ReactNode {
           error="Layanan AI sedang sibuk. Rekamanmu aman, coba nilai ulang sebentar lagi."
           onRetry={noop}
           onReload={noop}
+          neighbours={fx.neighbours.failed}
         />
       );
     case "pengaturan":

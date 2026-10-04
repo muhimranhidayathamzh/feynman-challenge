@@ -4,6 +4,14 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Every attempt can be opened again (4.1)
+
+- **"Riwayat percobaan" in the notebook**: one line per attempt, newest first, with the day in the learner's own timezone ("Hari ini", "Kemarin", "21 Sep"), the hint used, and the score ("7 /10") or what happened instead ("Sedang dinilai", "Penilaian gagal", "Tidak bisa dinilai"). Each line opens that attempt's result. The last ten show; "Tampilkan semua" reveals the rest.
+- **Attempts that never finished are reachable.** An attempt still being judged, or whose judging failed, opens like any other, and its page resumes or retries the evaluation as before.
+- **Coverage trend dots are links** to the attempt they stand for, each named for screen readers ("Percobaan #2: tercakup").
+- **The result page steps to the previous and next attempt**, beside "Percobaan #N", and under the card on the judging, failed and unscorable screens.
+- Logic in `src/lib/utils/attempt-history.ts`, tested; checked at 360, 390 and 1280 px in both themes, by keyboard, and with a screen-reader tree dump.
+
 ### Every learning source opens something
 
 - **Source titles are always clickable.** The AI is told never to invent a URL, so most suggested sources arrived without one and their titles could not be opened, which looked like a bug. A title now opens the source's own page when it has a real http(s) URL, and otherwise a search for that title: YouTube for videos, Google Scholar for papers, Google for the rest. The small print says which ("Video · cari di YouTube"), so a search is never passed off as the page itself, and screen readers hear "membuka pencarian". Applied in the notebook and in the plan preview when creating a challenge (`src/lib/utils/source-link.ts`, tested).

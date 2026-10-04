@@ -2,10 +2,12 @@ import { Mic } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
 import { Sheet, SheetTitle } from "@/components/ui/sheet";
+import type { HistoryEntry } from "@/lib/utils/attempt-history";
 import type { TrendPoint } from "@/lib/utils/coverage-progress";
 import type { DeadlineInfo } from "@/lib/utils/deadline";
 import type { ChallengeStatus, MasteryState } from "@/types";
 
+import { AttemptHistory } from "./attempt-history";
 import { NotebookHeader } from "./notebook-header";
 import { NotesEditor } from "./notes-editor";
 import { OutlineEditor } from "./outline-editor";
@@ -24,6 +26,8 @@ interface Props {
   reviewBox: number;
   outline: OutlineItemData[];
   trend: Record<string, TrendPoint[]>;
+  /** Every attempt, newest first; the card hides itself when empty. */
+  history: HistoryEntry[];
   sources: SourceData[];
   notes: string;
 }
@@ -54,6 +58,8 @@ export function NotebookView(props: Props) {
           trend={props.trend}
         />
       </Sheet>
+
+      <AttemptHistory entries={props.history} />
 
       <Sheet as="section" className="stack gap-4" aria-labelledby="sources-title">
         <SheetTitle id="sources-title">Sumber belajar</SheetTitle>

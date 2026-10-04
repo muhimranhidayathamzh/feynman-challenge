@@ -10,17 +10,23 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { Sheet } from "@/components/ui/sheet";
 import { AUDIO_ISSUE_MESSAGES } from "@/lib/api/contracts";
+import type { AttemptLink } from "@/lib/utils/attempt-history";
 import type { CoverageComparison as Comparison } from "@/lib/utils/coverage-progress";
 import { nextFocus } from "@/lib/utils/result-digest";
 import { splitSummary } from "@/lib/utils/transcript";
 import type { AudioIssue } from "@/types";
 
+import { AttemptPager } from "./attempt-pager";
 import { CoverageComparison } from "./coverage-comparison";
 import { FeedbackNotes } from "./feedback-notes";
 import { ResultEvidence, type CoverageRow } from "./result-evidence";
 import { ScoreFigure } from "./score-figure";
 import { ScoreHistory } from "./score-history";
 import { SubScoreBars } from "./sub-score-bars";
+
+type Neighbours = { previous: AttemptLink | null; next: AttemptLink | null };
+
+const NO_NEIGHBOURS: Neighbours = { previous: null, next: null };
 
 function hrefs(challengeId: string) {
   return {
@@ -37,6 +43,7 @@ interface RejectedProps {
   audioIssue: Exclude<AudioIssue, "none">;
   feedback: string | null;
   audioUrl: string | null;
+  neighbours?: Neighbours;
   headingRef?: Ref<HTMLHeadingElement>;
 }
 
@@ -68,6 +75,11 @@ export function EvaluationRejectedView(props: RejectedProps) {
           <AudioPlayer src={props.audioUrl} label="Rekaman percobaan ini" />
         )}
       </EmptyState>
+      <AttemptPager
+        spelled
+        challengeId={props.challengeId}
+        {...(props.neighbours ?? NO_NEIGHBOURS)}
+      />
     </section>
   );
 }
@@ -83,10 +95,18 @@ interface StatusProps {
   error: string | null;
   onRetry: () => void;
   onReload: () => void;
+  neighbours?: Neighbours;
 }
 
 export function EvaluationStatusView(props: StatusProps) {
   const links = hrefs(props.challengeId);
+  const pager = (
+    <AttemptPager
+      spelled
+      challengeId={props.challengeId}
+      {...(props.neighbours ?? NO_NEIGHBOURS)}
+    />
+  );
   if (props.view === "error") {
     return (
       <section className="state-screen">
@@ -109,6 +129,7 @@ export function EvaluationStatusView(props: StatusProps) {
             Rekamanmu aman. Menilai ulang tidak perlu merekam lagi.
           </p>
         </EmptyState>
+        {pager}
       </section>
     );
   }
@@ -131,6 +152,7 @@ export function EvaluationStatusView(props: StatusProps) {
         >
           <p>Rekamanmu sudah diterima dan masih dinilai. Cek lagi sebentar.</p>
         </EmptyState>
+        {pager}
       </section>
     );
   }
@@ -142,6 +164,7 @@ export function EvaluationStatusView(props: StatusProps) {
           Biasanya 10 sampai 30 detik.
         </p>
       </EmptyState>
+      {pager}
     </section>
   );
 }
@@ -170,6 +193,7 @@ export interface CompletedProps {
   transcript: string | null;
   audioUrl: string | null;
   followUp: ReactNode;
+  neighbours?: Neighbours;
   headingRef?: Ref<HTMLHeadingElement>;
 }
 
@@ -185,7 +209,13 @@ export function EvaluationCompletedView(props: CompletedProps) {
           <Icon icon={ArrowLeft} size={14} />
           {props.challengeTitle}
         </Link>
-        <p className="result-eyebrow">Percobaan #{props.attemptNumber}</p>
+        <div className="result-eyebrow-row">
+          <p className="result-eyebrow">Percobaan #{props.attemptNumber}</p>
+          <AttemptPager
+            challengeId={props.challengeId}
+            {...(props.neighbours ?? NO_NEIGHBOURS)}
+          />
+        </div>
         <h1 ref={props.headingRef} tabIndex={-1} className="result-summary focus-target">
           {summary ?? `Hasil percobaan #${props.attemptNumber}`}
         </h1>

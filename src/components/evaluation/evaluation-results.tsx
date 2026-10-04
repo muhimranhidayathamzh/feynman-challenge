@@ -9,6 +9,7 @@ import {
   describeEvaluationError,
 } from "@/lib/api/contracts";
 import { fetchJson } from "@/lib/api/fetch-json";
+import type { AttemptLink } from "@/lib/utils/attempt-history";
 import type { CoverageComparison as Comparison } from "@/lib/utils/coverage-progress";
 import type { AudioIssue, EvaluationStatus } from "@/types";
 
@@ -30,6 +31,8 @@ interface Props {
   /** Cap from the hints used for this attempt. */
   maxScore: number;
   history: { attemptNumber: number; score: number | null }[];
+  /** Attempts on either side of this one, in any state (Prompt 4.1). */
+  neighbours: { previous: AttemptLink | null; next: AttemptLink | null };
   status: EvaluationStatus;
   evaluationError: string | null;
   overallScore: number | null;
@@ -159,6 +162,7 @@ export function EvaluationResults(props: Props) {
         audioIssue={props.audioIssue}
         feedback={props.feedback}
         audioUrl={props.audioUrl}
+        neighbours={props.neighbours}
         headingRef={headingRef}
       />
     );
@@ -173,6 +177,7 @@ export function EvaluationResults(props: Props) {
         error={error}
         onRetry={() => void runEvaluation()}
         onReload={startPolling}
+        neighbours={props.neighbours}
       />
     );
   }
@@ -197,6 +202,7 @@ export function EvaluationResults(props: Props) {
       transcript={props.transcript}
       audioUrl={props.audioUrl}
       followUp={props.followUp}
+      neighbours={props.neighbours}
       headingRef={headingRef}
     />
   );

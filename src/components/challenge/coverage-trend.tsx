@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { CoverageMark } from "@/components/evaluation/coverage-mark";
 import type { TrendPoint } from "@/lib/utils/coverage-progress";
 import { COVERAGE_STATUS_LABEL } from "@/lib/utils/labels";
@@ -20,34 +22,57 @@ function TrendDot({ status, title }: { status: CoverageStatus | null; title?: st
   );
 }
 
+function pointLabel(point: TrendPoint): string {
+  return `Percobaan #${point.attemptNumber}: ${statusText(point.status)}`;
+}
+
 /**
  * Coverage of one outline point across the last attempts, oldest first.
  * Shape differs per status (filled, half, ring), so it does not rely on color.
+ * When the points carry links (Prompt 4.1), each dot opens its attempt and is
+ * named on its own; otherwise the row is one image with a summary.
  */
 export function CoverageTrend({ points }: { points: TrendPoint[] }) {
   if (points.length === 0) return null;
-  const description = points
-    .map((point) => `#${point.attemptNumber} ${statusText(point.status)}`)
-    .join(", ");
+  const summary = `Cakupan ${points.length} percobaan terakhir`;
+  const linked = points.every((point) => point.href !== undefined);
 
   return (
     <span className="coverage-trend">
       <span className="text-muted text-xs" aria-hidden="true">
         Tren
       </span>
-      <span
-        className="trend-dots"
-        role="img"
-        aria-label={`Cakupan ${points.length} percobaan terakhir: ${description}`}
-      >
-        {points.map((point) => (
-          <TrendDot
-            key={point.attemptNumber}
-            status={point.status}
-            title={`Percobaan #${point.attemptNumber}: ${statusText(point.status)}`}
-          />
-        ))}
-      </span>
+      {linked ? (
+        <span className="trend-dots is-linked" role="group" aria-label={summary}>
+          {points.map((point) => (
+            <Link
+              key={point.attemptNumber}
+              href={point.href ?? ""}
+              className="trend-dot-link"
+              aria-label={pointLabel(point)}
+              title={pointLabel(point)}
+            >
+              <TrendDot status={point.status} />
+            </Link>
+          ))}
+        </span>
+      ) : (
+        <span
+          className="trend-dots"
+          role="img"
+          aria-label={`${summary}: ${points
+            .map((point) => `#${point.attemptNumber} ${statusText(point.status)}`)
+            .join(", ")}`}
+        >
+          {points.map((point) => (
+            <TrendDot
+              key={point.attemptNumber}
+              status={point.status}
+              title={pointLabel(point)}
+            />
+          ))}
+        </span>
+      )}
     </span>
   );
 }

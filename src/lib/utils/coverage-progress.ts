@@ -24,11 +24,14 @@ export interface TrendPoint {
   attemptNumber: number;
   /** null: the point was not assessed in that attempt (e.g. added later). */
   status: CoverageStatus | null;
+  /** Result page of that attempt, when the caller knows it. */
+  href?: string;
 }
 
 export interface AttemptCoverage {
   attemptNumber: number;
   coverage: readonly Coverage[];
+  href?: string;
 }
 
 export interface CoverageChange {
@@ -120,14 +123,16 @@ export function buildCoverageTrend(
     .slice(-TREND_LENGTH);
   const perAttempt = recent.map((attempt) => ({
     attemptNumber: attempt.attemptNumber,
+    href: attempt.href,
     statuses: statusByOutlineId(attempt.coverage, outline),
   }));
 
   const trend: Record<string, TrendPoint[]> = {};
   for (const item of outline) {
-    const points = perAttempt.map(({ attemptNumber, statuses }) => ({
+    const points = perAttempt.map(({ attemptNumber, href, statuses }) => ({
       attemptNumber,
       status: statuses.get(item.id) ?? null,
+      ...(href !== undefined && { href }),
     }));
     if (points.some((point) => point.status !== null)) trend[item.id] = points;
   }

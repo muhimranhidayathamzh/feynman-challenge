@@ -6,6 +6,7 @@ import { FollowUpSection } from "@/components/evaluation/follow-up-section";
 import { parseStoredFollowUps } from "@/lib/utils/followups";
 import { RECORDINGS_BUCKET } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
+import { attemptNeighbours } from "@/lib/utils/attempt-history";
 import { parseStoredCoverage } from "@/lib/utils/coverage";
 import { compareCoverage, matchCoverageToOutline } from "@/lib/utils/coverage-progress";
 import type { Json } from "@/types";
@@ -74,7 +75,7 @@ export default async function ResultPage({ params }: PageProps) {
     supabase.auth.getUser(),
     supabase
       .from("attempts")
-      .select("attempt_number, overall_score")
+      .select("id, attempt_number, overall_score")
       .eq("challenge_id", id)
       .order("attempt_number"),
     supabase
@@ -150,6 +151,7 @@ export default async function ResultPage({ params }: PageProps) {
       previous={previous}
       maxScore={attempt.max_possible_score ?? 10}
       history={history}
+      neighbours={attemptNeighbours(historyRows ?? [], attempt.attempt_number)}
       status={attempt.evaluation_status}
       evaluationError={attempt.evaluation_error}
       overallScore={attempt.overall_score}

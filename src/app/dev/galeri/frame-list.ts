@@ -63,6 +63,13 @@ export const FRAMES: readonly FrameMeta[] = [
     shell: "app",
     path: "/challenge/x",
   },
+  {
+    id: "catatan-riwayat",
+    group: "Tantangan",
+    title: "Riwayat percobaan panjang",
+    shell: "app",
+    path: "/challenge/x",
+  },
 
   { id: "rekam-siap", group: "Rekam", title: "Siap merekam", shell: "bare", path: "/r" },
   {

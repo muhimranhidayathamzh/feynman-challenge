@@ -124,6 +124,22 @@ describe("buildCoverageTrend", () => {
     expect(trend["a"]?.map((point) => point.attemptNumber)).toEqual([3, 4, 5, 6, 7]);
   });
 
+  it("carries each attempt's link onto its points", () => {
+    const trend = buildCoverageTrend(
+      [
+        {
+          attemptNumber: 1,
+          href: "/challenge/x/result/r1",
+          coverage: [cov("Apa itu QE", "partial", 1)],
+        },
+      ],
+      OUTLINE,
+    );
+    expect(trend["a"]).toEqual([
+      { attemptNumber: 1, status: "partial", href: "/challenge/x/result/r1" },
+    ]);
+  });
+
   it("is empty without attempts", () => {
     expect(buildCoverageTrend([], OUTLINE)).toEqual({});
   });
