@@ -801,7 +801,7 @@ Pengingat review naik dari backlog ke Prompt 5.4: itu bukan fitur tambahan, mela
 | 5.2 | Halaman legal & keterbukaan AI | ⬜ |
 | 5.4 | Pengingat review | ⬜ |
 | 5.3 | Peluncuran | ⬜ |
-| 4.1 | Riwayat percobaan | ⬜ |
+| 4.1 | Riwayat percobaan | ✅ |
 | 4.2 | Hapus akun & pembersihan storage | ⬜ |
 | 4.3 | Test E2E & monitoring error | ⬜ |
 | 4.4 | Konsistensi penilaian AI (eval-golden) | ⬜ |
