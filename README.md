@@ -33,6 +33,7 @@ You pick a topic. AI drafts a learning outline and sources. You study, then **re
 - **Trustworthy evaluation**: one Gemini call returns transcript, sub-scores, one coverage verdict per outline point with a quote as evidence, and unexplained jargon. The overall score is computed on the server. Unusable audio (silence, noise, wrong language) is rejected without a score.
 - **Close the gap**: every partial or missing point has **"Pelajari lagi"**, which opens the notebook at that point. The result page compares each point with your previous attempt: improved, declined, still weak.
 - **Socratic coach**: 1–2 follow-up questions aimed at your weakest point, answered by voice and graded (tepat / sebagian / keliru). Answers never change your score.
+- **Review reminders by email**: on the day a review falls due, one gentle email listing everything waiting, at most once a day, never to demo accounts. Switch it off in Pengaturan or from the link in any email, no sign-in needed.
 - **Spaced repetition**: Leitner boxes (1, 3, 7, 14, 30, 60 days) decide when each topic comes back. Mastery climbs `not_started → attempted → developing → proficient → mastered → solidified` and slips a level if a review is badly overdue.
 - **Gentle accountability**: deadlines are calendar days in your timezone, missed ones auto-extend once, and streaks count real completed evaluations.
 - **Demo mode**: anonymous sign-in straight into creating a challenge on your own topic, a stricter AI quota, and a one-step path to keep the account (link an email, then set a password).
@@ -139,6 +140,8 @@ GEMINI_PAID_TIER=                  # "1" only once the Gemini key is billed (see
 CONTACT_EMAIL=...                  # shown on /privasi and /syarat for privacy requests
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=    # optional: Cloudflare Turnstile CAPTCHA (see Protection)
 NEXT_PUBLIC_SENTRY_DSN=            # optional: error monitoring (see Error monitoring)
+RESEND_API_KEY=                    # optional: review reminder emails (see Review reminders)
+REMINDER_FROM=                     # e.g. "Feynman Challenge <pengingat@yourdomain>"
 
 NEXT_PUBLIC_SITE_URL=...           # canonical origin, for Open Graph and the sitemap
 NEXT_PUBLIC_ALLOW_INDEXING=        # leave empty; "1" only for the real launch
@@ -162,6 +165,7 @@ In the Supabase SQL Editor, run every migration **in order**. Each one is idempo
 | `007_public_safety.sql` | `app_settings`: app-wide AI kill switch and daily ceiling, checked inside `consume_ai_quota` |
 | `008_ai_cost.sql` | Weighted ceiling (cost units instead of calls) and per-call token and latency accounting |
 | `009_maintenance_access.sql` | Read-only (`SELECT`) access for `service_role` on the four tables the maintenance job reads |
+| `010_review_reminders.sql` | `review_reminders` and `last_reminded_on` on profiles; `service_role` may update only those two columns |
 
 Then run [`supabase/verify.sql`](supabase/verify.sql) in the same editor. It is read-only and prints one row per table, RLS policy, function, column, bucket setting and grant, each marked OK or missing, so a half-applied migration cannot go unnoticed.
 
@@ -299,6 +303,19 @@ The rate limit is a sliding window in memory, per server instance. It only trust
 Do step 3 together with step 2: once Supabase requires a token, sign-in without the widget fails. With the variable empty, no widget renders and every form works as before. Cloudflare's test key `1x00000000000000000000AA` always passes, for trying it locally.
 
 **Email confirmation** must be on before strangers sign up, or anyone can register with someone else's address: Supabase > Authentication > Sign In / Providers > Email > *Confirm email*. The sign-up form already says "Cek email kamu", and the link lands on `/api/auth/callback`.
+
+---
+
+## 🔔 Review reminders
+
+Spaced repetition schedules a topic for 1, 3, 7, 14 days later; without something calling the learner back, that schedule means little. `/api/cron/reminders` runs daily and sends one email to each learner with a review falling due that day.
+
+- **Who**: accounts with an email that have not switched reminders off. Never demo accounts. The rules are pure functions in `src/lib/utils/reminders.ts`, tested across Jakarta, Makassar, Jayapura and UTC.
+- **When**: only between 07:00 and 21:00 in the learner's own timezone, at most once a day (`last_reminded_on`). Only on the day a review *newly* falls due; ignoring an email does not bring another tomorrow.
+- **Opting out**: Pengaturan, or the link in every email. The link opens a confirmation page (`/berhenti`, no sign-in) so mail scanners that open links cannot unsubscribe anyone; mail apps' own unsubscribe button works through the `List-Unsubscribe` one-click header. Links are signed with an HMAC derived from `CRON_SECRET`.
+- **Turning it on**: create a [Resend](https://resend.com) account, verify your sending domain, then set `RESEND_API_KEY`, `REMINDER_FROM` and `CRON_SECRET` in Vercel and run migration 010. Without all three, the Pengaturan switch is hidden and nothing is sent; `/privasi` names Resend only once it is configured.
+- **Schedule**: `vercel.json` runs it at 00:00 UTC, which is 07:00 in Jakarta, 08:00 in Makassar and 09:00 in Jayapura. Vercel's Hobby plan allows one run a day, so learners whose 00:00 UTC falls outside 07:00–21:00 (most of Europe and Africa) get no reminder until the schedule becomes hourly on a paid plan (`0 * * * *`); the code already handles that.
+- **Try it safely**: `curl -H "Authorization: Bearer $CRON_SECRET" "https://<domain>/api/cron/reminders?dry=1"` counts who would get an email without sending anything.
 
 ---
 

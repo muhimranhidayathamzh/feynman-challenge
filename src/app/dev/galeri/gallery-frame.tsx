@@ -237,6 +237,7 @@ function content(id: string): ReactNode {
           pendingEmail={null}
           hasPassword
           justConverted={false}
+          reminders={{ on: true }}
           theme="system"
         />
       );

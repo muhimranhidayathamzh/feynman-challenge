@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const GEMINI_TERMS = "https://ai.google.dev/gemini-api/terms";
 
 export default function PrivacyPage() {
-  const { geminiPaidTier, contactEmail, errorMonitoring } = legalEnv();
+  const { geminiPaidTier, contactEmail, errorMonitoring, reminderEmails } = legalEnv();
 
   return (
     <LegalPage
@@ -60,7 +60,10 @@ export default function PrivacyPage() {
       <p>
         Hanya untuk menjalankan aplikasi: menyusun rencana belajar, menilai penjelasanmu,
         menjadwalkan review, dan menjaga kuota AI supaya biayanya terkendali dan layanan
-        tidak disalahgunakan. Datamu tidak dipakai untuk iklan dan tidak dijual.
+        tidak disalahgunakan.
+        {reminderEmails &&
+          " Emailmu juga dipakai untuk pengingat saat review jatuh tempo, yang bisa kamu matikan di Pengaturan atau lewat tautan di setiap email."}{" "}
+        Datamu tidak dipakai untuk iklan dan tidak dijual.
       </p>
 
       <h2>Rekamanmu dan Google Gemini</h2>
@@ -108,6 +111,12 @@ export default function PrivacyPage() {
           <strong>Google</strong>: Gemini untuk penilaian, dan Google Sign-In kalau kamu
           memakainya.
         </li>
+        {reminderEmails && (
+          <li>
+            <strong>Resend</strong>: mengirim email pengingat review. Yang diterimanya
+            hanya alamat email dan judul topik yang jatuh tempo.
+          </li>
+        )}
         {errorMonitoring && (
           <li>
             <strong>Sentry</strong>: laporan error teknis, seperti bagian aplikasi yang

@@ -1,7 +1,7 @@
 -- ---------------------------------------------------------------------------
--- verify.sql — periksa apakah migrasi 001 sampai 009 sudah lengkap.
+-- verify.sql — periksa apakah migrasi 001 sampai 010 sudah lengkap.
 --
--- Jalankan di Supabase SQL Editor SETELAH menjalankan semua migrasi (001-009).
+-- Jalankan di Supabase SQL Editor SETELAH menjalankan semua migrasi (001-010).
 -- Hanya membaca, tidak mengubah apa pun. Aman diulang.
 --
 -- Semua baris harus "OK". Kalau ada "KURANG", jalankan ulang migrasi
@@ -47,14 +47,17 @@ expected_columns (tbl, col, from_migration) as (
     ('ai_usage', 'prompt_tokens', '008'),
     ('ai_usage', 'output_tokens', '008'),
     ('ai_usage', 'thinking_tokens', '008'),
-    ('ai_usage', 'latency_ms', '008')
+    ('ai_usage', 'latency_ms', '008'),
+    ('profiles', 'review_reminders', '010'),
+    ('profiles', 'last_reminded_on', '010')
 ),
 expected_grants (tbl, from_migration) as (
   values
     ('attempts', '009'),
     ('attempt_followups', '009'),
     ('challenges', '009'),
-    ('ai_usage', '009')
+    ('ai_usage', '009'),
+    ('profiles', '010')
 )
 
 -- 1. Tabel ada?
@@ -140,5 +143,23 @@ select
   end,
   e.from_migration
 from expected_grants e
+
+union all
+
+-- 7. Pengingat boleh mengubah DUA kolom profil saja, bukan seluruh baris
+select
+  '7. hak service_role',
+  'update profiles.' || c.col,
+  case
+    when not exists (
+      select 1 from information_schema.columns
+      where table_schema = 'public' and table_name = 'profiles' and column_name = c.col
+    ) then 'KURANG (kolom tidak ada)'
+    when not has_column_privilege('service_role', 'public.profiles', c.col, 'UPDATE')
+      then 'KURANG'
+    else 'OK'
+  end,
+  '010'
+from (values ('review_reminders'), ('last_reminded_on')) as c (col)
 
 order by bagian, item;

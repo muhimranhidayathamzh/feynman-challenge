@@ -16,6 +16,9 @@ const PUBLIC_PATHS = [
   "/offline",
   "/privasi",
   "/syarat",
+  // Opt-out from reminder emails works without signing in (5.4).
+  "/berhenti",
+  "/api/reminders/unsubscribe",
   "/api/auth/callback",
   // Scheduled jobs carry no session; each route checks CRON_SECRET itself.
   "/api/cron",

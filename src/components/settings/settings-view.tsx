@@ -7,6 +7,7 @@ import { ConvertAccount } from "./convert-account";
 import { DeleteAccount } from "./delete-account";
 import { PasswordSection } from "./password-section";
 import { ProfileForm } from "./profile-form";
+import { ReminderToggle } from "./reminder-toggle";
 import { ThemeForm } from "./theme-form";
 
 interface Props {
@@ -20,6 +21,8 @@ interface Props {
   hasPassword: boolean;
   justConverted: boolean;
   theme: ThemePreference;
+  /** Review reminder emails; null when this account or deployment cannot get them. */
+  reminders?: { on: boolean } | null;
 }
 
 /** Settings markup. Data is loaded by the page (or the dev gallery). */
@@ -48,6 +51,13 @@ export function SettingsView(props: Props) {
         <SheetTitle>Tampilan</SheetTitle>
         <ThemeForm initial={props.theme} />
       </Sheet>
+
+      {props.reminders && (
+        <Sheet className="stack gap-4" id="pengingat">
+          <SheetTitle>Pengingat review</SheetTitle>
+          <ReminderToggle initial={props.reminders.on} />
+        </Sheet>
+      )}
 
       {props.isDemo ? (
         <Sheet className="stack gap-4" id="simpan-akun">

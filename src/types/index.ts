@@ -56,6 +56,10 @@ export type Database = {
           best_streak: number;
           last_active_date: string | null;
           timezone: string;
+          /** Email reminder when a review falls due (migration 010). */
+          review_reminders: boolean;
+          /** Calendar day of the last reminder email, user timezone. */
+          last_reminded_on: string | null;
           created_at: string;
         };
         Insert: {
@@ -65,6 +69,8 @@ export type Database = {
           best_streak?: number;
           last_active_date?: string | null;
           timezone?: string;
+          review_reminders?: boolean;
+          last_reminded_on?: string | null;
           created_at?: string;
         };
         Update: {
@@ -74,6 +80,8 @@ export type Database = {
           best_streak?: number;
           last_active_date?: string | null;
           timezone?: string;
+          review_reminders?: boolean;
+          last_reminded_on?: string | null;
           created_at?: string;
         };
         Relationships: [];

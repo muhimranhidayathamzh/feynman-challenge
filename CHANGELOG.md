@@ -4,6 +4,14 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Review reminders by email (5.4)
+
+- **The spaced-repetition schedule now calls people back.** A daily job emails each learner on the day a review falls due: what is due today, plus anything still waiting, with one button back to the app. At most once a day, only between 07:00 and 21:00 in their own timezone, never to demo accounts, and never again for a review they already ignored.
+- **Opting out takes one click, without signing in**: a confirmation page (`/berhenti`) behind a signed link, so mail scanners that open links cannot unsubscribe anyone, plus the `List-Unsubscribe` one-click header for mail apps. Also a switch in Pengaturan.
+- **Off until configured**: needs `RESEND_API_KEY`, `REMINDER_FROM` and `CRON_SECRET`. Until then the switch is hidden and `/privasi` does not mention Resend.
+- **Migration 010** adds `review_reminders` and `last_reminded_on` to profiles, and lets `service_role` update only those two columns.
+- Recipient selection, the sending window and the email itself are pure functions (`src/lib/utils/reminders.ts`, `unsubscribe-token.ts`), tested across four timezones, including a local date ahead of UTC. Titles are escaped in the HTML, since learners write them.
+
 ### Errors you do not see still get recorded (U.2)
 
 - **Sentry, off until `NEXT_PUBLIC_SENTRY_DSN` is set.** Server errors (every API route's failure path now goes through `logError`, and Next.js's own `onRequestError`) and browser errors (unhandled errors and the error boundaries) are reported.

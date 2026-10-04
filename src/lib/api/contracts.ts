@@ -177,6 +177,8 @@ export const ProfilePatchRequestSchema = z
   .object({
     display_name: z.string().trim().min(1).max(60).nullable().optional(),
     timezone: z.string().min(1).max(64).optional(),
+    /** Review reminder emails (Prompt 5.4). */
+    review_reminders: z.boolean().optional(),
   })
   .refine((value) => Object.keys(value).length > 0, { message: "Tidak ada perubahan." });
 export type ProfilePatchRequest = z.infer<typeof ProfilePatchRequestSchema>;

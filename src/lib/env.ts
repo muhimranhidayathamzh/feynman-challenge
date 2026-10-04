@@ -14,6 +14,10 @@ const ServerEnvSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   // Guards the scheduled routes under /api/cron. Without it they refuse.
   CRON_SECRET: z.string().min(16).optional(),
+  // Review reminder emails (Prompt 5.4) through Resend. Both or neither:
+  // without them /api/cron/reminders sends nothing.
+  RESEND_API_KEY: z.string().min(1).optional(),
+  REMINDER_FROM: z.string().min(3).optional(),
 });
 
 function loadServerEnv(): z.infer<typeof ServerEnvSchema> {
@@ -21,6 +25,8 @@ function loadServerEnv(): z.infer<typeof ServerEnvSchema> {
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || undefined,
     CRON_SECRET: process.env.CRON_SECRET || undefined,
+    RESEND_API_KEY: process.env.RESEND_API_KEY || undefined,
+    REMINDER_FROM: process.env.REMINDER_FROM || undefined,
   });
   if (!parsed.success) {
     const missing = parsed.error.issues.map((issue) => issue.path.join(".")).join(", ");
@@ -55,6 +61,7 @@ export function legalEnv(): {
   geminiPaidTier: boolean;
   contactEmail: string | null;
   errorMonitoring: boolean;
+  reminderEmails: boolean;
 } {
   const parsed = LegalEnvSchema.safeParse({
     GEMINI_PAID_TIER: process.env.GEMINI_PAID_TIER || undefined,
@@ -65,5 +72,19 @@ export function legalEnv(): {
     contactEmail: (parsed.success && parsed.data.CONTACT_EMAIL) || null,
     // Sentry (U.2) receives error reports only when its DSN is set.
     errorMonitoring: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN),
+    // Resend (5.4) receives an address only when reminders can be sent.
+    reminderEmails: remindersAvailable(),
   };
+}
+
+/**
+ * True when this deployment can send reminder emails (Prompt 5.4): the
+ * Resend key, a sender, and the cron secret that signs unsubscribe links.
+ * Pengaturan hides the switch otherwise, so it never promises email that
+ * cannot arrive.
+ */
+export function remindersAvailable(): boolean {
+  return Boolean(
+    process.env.RESEND_API_KEY && process.env.REMINDER_FROM && process.env.CRON_SECRET,
+  );
 }

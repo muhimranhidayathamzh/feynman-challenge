@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { SettingsView } from "@/components/settings/settings-view";
+import { remindersAvailable } from "@/lib/env";
 import { THEME_COOKIE, parseTheme } from "@/lib/theme";
 import { DEFAULT_TIMEZONE } from "@/lib/utils/date";
 import { createClient } from "@/lib/supabase/server";
@@ -32,7 +33,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, timezone")
+    .select("display_name, timezone, review_reminders")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -52,6 +53,12 @@ export default async function SettingsPage({ searchParams }: PageProps) {
       pendingEmail={user.new_email ?? null}
       hasPassword={hasPassword}
       justConverted={justConverted}
+      reminders={
+        // Only accounts with an email can be reminded, and only where sending works.
+        !isDemo && user.email && remindersAvailable()
+          ? { on: profile?.review_reminders ?? true }
+          : null
+      }
       theme={parseTheme((await cookies()).get(THEME_COOKIE)?.value)}
     />
   );
