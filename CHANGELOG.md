@@ -4,6 +4,14 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Delete your account, and storage that stays clean (4.2)
+
+- **"Zona berbahaya" in Pengaturan deletes the account.** Type HAPUS, plus the password for email accounts (Google and demo accounts have none to give). Every recording is removed first and the account second, so if the files cannot be removed the account stays and the learner can try again. Afterwards the app clears its caches and lands on the sign-in page with a confirmation.
+- **`npm run maintenance`** finds recordings nothing points at (older than 24 hours) and anonymous demo accounts idle for seven days. It is a dry run unless given `--apply`, and prints counts and sizes only. Files of unknown age are never deleted.
+- **Migration 009** gives `service_role` read-only access to the four tables maintenance reads. The first dry run against the real project showed this role had no table privileges at all, so the job could not tell which recordings were still in use. Account deletion was never affected: it only needs Auth and Storage.
+- **Optional daily run on Vercel**: `/api/cron/maintenance`, scheduled in `vercel.json`, refuses every request until `CRON_SECRET` is set.
+- The decisions (confirmation, orphans, idle accounts, who must give a password) are pure functions in `src/lib/utils/account-cleanup.ts`, tested; the storage work is shared by the route, the cron and the script in `src/lib/maintenance/cleanup.ts`.
+
 ### Every attempt can be opened again (4.1)
 
 - **"Riwayat percobaan" in the notebook**: one line per attempt, newest first, with the day in the learner's own timezone ("Hari ini", "Kemarin", "21 Sep"), the hint used, and the score ("7 /10") or what happened instead ("Sedang dinilai", "Penilaian gagal", "Tidak bisa dinilai"). Each line opens that attempt's result. The last ten show; "Tampilkan semua" reveals the rest.

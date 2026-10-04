@@ -6,6 +6,7 @@ import { SettingsView } from "@/components/settings/settings-view";
 import { THEME_COOKIE, parseTheme } from "@/lib/theme";
 import { DEFAULT_TIMEZONE } from "@/lib/utils/date";
 import { createClient } from "@/lib/supabase/server";
+import { usesPassword } from "@/lib/utils/account-cleanup";
 
 export const metadata: Metadata = { title: "Pengaturan" };
 
@@ -38,9 +39,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
   // Users who signed in with Google have no password to change here, and a
   // demo account can only set one after linking an email.
   const isDemo = user.is_anonymous ?? false;
-  const hasPassword =
-    !isDemo &&
-    (user.app_metadata.providers as string[] | undefined)?.includes("email") !== false;
+  const hasPassword = usesPassword(user);
   const justConverted = !isDemo && akun === "tersimpan";
 
   return (

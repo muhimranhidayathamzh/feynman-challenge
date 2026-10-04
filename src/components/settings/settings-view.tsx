@@ -2,6 +2,7 @@ import { Sheet, SheetTitle } from "@/components/ui/sheet";
 import type { ThemePreference } from "@/lib/theme";
 
 import { ConvertAccount } from "./convert-account";
+import { DeleteAccount } from "./delete-account";
 import { PasswordSection } from "./password-section";
 import { ProfileForm } from "./profile-form";
 import { ThemeForm } from "./theme-form";
@@ -70,6 +71,11 @@ export function SettingsView(props: Props) {
           <PasswordSection firstTime={props.justConverted} />
         </Sheet>
       )}
+
+      <Sheet as="section" className="stack gap-3" aria-labelledby="danger-title">
+        <SheetTitle id="danger-title">Zona berbahaya</SheetTitle>
+        <DeleteAccount needsPassword={props.hasPassword} isDemo={props.isDemo} />
+      </Sheet>
     </section>
   );
 }

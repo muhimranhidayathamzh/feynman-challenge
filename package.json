@@ -14,7 +14,8 @@
     "icons": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-icons.mjs",
     "shots": "node scripts/shots.mjs",
     "design:check": "node scripts/check-design.mjs",
-    "og": "node scripts/og-image.mjs"
+    "og": "node scripts/og-image.mjs",
+    "maintenance": "tsx scripts/maintenance.ts"
   },
   "dependencies": {
     "@google/genai": "^2.9.0",
@@ -39,6 +40,7 @@
     "playwright-core": "^1.63.0",
     "prettier": "^3.9.8",
     "sharp": "^0.34.5",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.0.1"
   }

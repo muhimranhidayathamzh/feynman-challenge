@@ -15,6 +15,8 @@ const PUBLIC_PATHS = [
   "/lupa-password",
   "/offline",
   "/api/auth/callback",
+  // Scheduled jobs carry no session; each route checks CRON_SECRET itself.
+  "/api/cron",
 ];
 
 // The screen gallery (/dev/galeri) renders fixtures only and exists only in

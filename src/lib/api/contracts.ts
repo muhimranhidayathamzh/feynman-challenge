@@ -187,6 +187,17 @@ export const ProfileResponseSchema = z.object({
 export type ProfileResponse = z.infer<typeof ProfileResponseSchema>;
 
 // ---------------------------------------------------------------------------
+// DELETE /api/account (Prompt 4.2)
+// ---------------------------------------------------------------------------
+export const AccountDeleteRequestSchema = z.object({
+  /** Must be "HAPUS" (utils/account-cleanup.ts). */
+  confirm: z.string().max(20),
+  /** Required for accounts that sign in with email and password. */
+  password: z.string().min(1).max(200).optional(),
+});
+export type AccountDeleteRequest = z.infer<typeof AccountDeleteRequestSchema>;
+
+// ---------------------------------------------------------------------------
 // POST /api/challenge/[id]/hints
 // ---------------------------------------------------------------------------
 export const HintsResponseSchema = z.object({ updated: z.number().int().nonnegative() });

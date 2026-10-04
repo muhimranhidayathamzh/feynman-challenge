@@ -23,15 +23,23 @@ const CALLBACK_ERRORS: Record<string, string> = {
  * Server wrapper: reads ?next= (validated here, so the client never sees an
  * unsafe target) and ?error= forwarded by the auth callback.
  */
+/** Notices other pages may send here, by code for the same reason. */
+const NOTICES: Record<string, string> = {
+  akun_dihapus: "Akunmu dan semua rekamannya sudah dihapus. Terima kasih sudah mencoba.",
+};
+
 export default async function LoginPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const code = Array.isArray(params.error) ? params.error[0] : params.error;
   const initialError = (code && CALLBACK_ERRORS[code]) || null;
+  const noticeCode = Array.isArray(params.pesan) ? params.pesan[0] : params.pesan;
+  const initialNotice = (noticeCode && NOTICES[noticeCode]) || null;
   const features = await getAuthFeatures();
   return (
     <LoginForm
       next={safeNext(params.next)}
       initialError={initialError}
+      initialNotice={initialNotice}
       features={features}
     />
   );

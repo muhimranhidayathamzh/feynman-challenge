@@ -1,7 +1,7 @@
 -- ---------------------------------------------------------------------------
--- verify.sql — periksa apakah migrasi 001 sampai 008 sudah lengkap.
+-- verify.sql — periksa apakah migrasi 001 sampai 009 sudah lengkap.
 --
--- Jalankan di Supabase SQL Editor SETELAH menjalankan semua migrasi (001-008).
+-- Jalankan di Supabase SQL Editor SETELAH menjalankan semua migrasi (001-009).
 -- Hanya membaca, tidak mengubah apa pun. Aman diulang.
 --
 -- Semua baris harus "OK". Kalau ada "KURANG", jalankan ulang migrasi
@@ -48,6 +48,13 @@ expected_columns (tbl, col, from_migration) as (
     ('ai_usage', 'output_tokens', '008'),
     ('ai_usage', 'thinking_tokens', '008'),
     ('ai_usage', 'latency_ms', '008')
+),
+expected_grants (tbl, from_migration) as (
+  values
+    ('attempts', '009'),
+    ('attempt_followups', '009'),
+    ('challenges', '009'),
+    ('ai_usage', '009')
 )
 
 -- 1. Tabel ada?
@@ -119,5 +126,19 @@ select
   '002 + 003'
 from (select 1) dummy
 left join storage.buckets b on b.id = 'recordings'
+
+union all
+
+-- 6. Maintenance boleh MEMBACA tabel yang dibutuhkannya (dan hanya membaca)
+select
+  '6. hak service_role',
+  'select ' || e.tbl,
+  case
+    when to_regclass('public.' || e.tbl) is null then 'KURANG (tabel tidak ada)'
+    when not has_table_privilege('service_role', 'public.' || e.tbl, 'SELECT') then 'KURANG'
+    else 'OK'
+  end,
+  e.from_migration
+from expected_grants e
 
 order by bagian, item;

@@ -21,11 +21,13 @@ interface Props {
   next: string;
   /** Error forwarded by the auth callback (?error=), if any. */
   initialError: string | null;
+  /** A success notice by code from another page (e.g. account deleted). */
+  initialNotice?: string | null;
   /** Provider switches from Supabase; disabled options are hidden. */
   features: AuthFeatures;
 }
 
-export function LoginForm({ next, initialError, features }: Props) {
+export function LoginForm({ next, initialError, initialNotice = null, features }: Props) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -80,6 +82,11 @@ export function LoginForm({ next, initialError, features }: Props) {
         <p className="text-secondary text-sm">Lanjutkan tantangan belajarmu.</p>
       </div>
 
+      {initialNotice && !error && (
+        <div className="alert alert-success" role="status">
+          {initialNotice}
+        </div>
+      )}
       {error && (
         <div className="alert alert-error stack gap-2" role="alert">
           <span>{error}</span>

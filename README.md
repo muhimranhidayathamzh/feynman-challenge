@@ -28,7 +28,7 @@ You pick a topic. AI drafts a learning outline and sources. You study, then **re
 ### Features
 
 - **AI learning plans**: outline, suggested sources, and a recording length sized to the topic.
-- **Notebook**: editable outline (drag or arrows), sources, and markdown notes with autosave and preview. Each outline point shows a **coverage trend** of your last 5 attempts.
+- **Notebook**: editable outline (drag or arrows), sources, and markdown notes with autosave and preview. Each outline point shows a **coverage trend** of your last 5 attempts, and every attempt, finished or not, stays one tap away in the **attempt history**.
 - **Immersive recording**: countdown, live waveform, pause/resume, listen-before-send, and **tiered hints** generated per outline point that cap the maximum score (none 10, keywords 9, guiding questions 8, outline 7).
 - **Trustworthy evaluation**: one Gemini call returns transcript, sub-scores, one coverage verdict per outline point with a quote as evidence, and unexplained jargon. The overall score is computed on the server. Unusable audio (silence, noise, wrong language) is rejected without a score.
 - **Close the gap**: every partial or missing point has **"Pelajari lagi"**, which opens the notebook at that point. The result page compares each point with your previous attempt: improved, declined, still weak.
@@ -37,6 +37,7 @@ You pick a topic. AI drafts a learning outline and sources. You study, then **re
 - **Gentle accountability**: deadlines are calendar days in your timezone, missed ones auto-extend once, and streaks count real completed evaluations.
 - **Demo mode**: anonymous sign-in straight into creating a challenge on your own topic, a stricter AI quota, and a one-step path to keep the account (link an email, then set a password).
 - **Four layers of cost control**: a per-user AI quota enforced atomically in SQL, tighter limits for demo accounts, an app-wide daily ceiling, and a kill switch — the last two flipped from the SQL editor with no redeploy.
+- **Your data, deletable**: deleting the account removes every recording first and then the account, whose rows follow by cascade. A maintenance job clears recordings nothing points at and demo accounts idle for a week.
 - **Installable PWA**: maskable icons, shortcuts, an offline page, and a service worker that never caches private pages.
 - **"Kertas & Kapur" interface**: a warm paper light theme for studying and a chalkboard dark theme for the recording stage, in Newsreader and Plus Jakarta Sans. One action per screen, evidence before numbers, and never red for a learning gap. The rules live in [`docs/design/DESIGN.md`](docs/design/DESIGN.md) and are enforced by `npm run design:check`.
 
@@ -130,8 +131,9 @@ Copy `.env.local.example` to `.env.local` and fill in:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...      # server-only
+SUPABASE_SERVICE_ROLE_KEY=...      # server-only: account deletion and maintenance
 GEMINI_API_KEY=...                 # server-only
+CRON_SECRET=...                    # server-only, optional: guards /api/cron/*
 
 NEXT_PUBLIC_SITE_URL=...           # canonical origin, for Open Graph and the sitemap
 NEXT_PUBLIC_ALLOW_INDEXING=        # leave empty; "1" only for the real launch
@@ -152,8 +154,9 @@ In the Supabase SQL Editor, run every migration **in order**. Each one is idempo
 | `006_learning_loop.sql` | Spaced repetition (`review_box`, `next_review_at`), follow-up questions and answers |
 | `007_public_safety.sql` | `app_settings`: app-wide AI kill switch and daily ceiling, checked inside `consume_ai_quota` |
 | `008_ai_cost.sql` | Weighted ceiling (cost units instead of calls) and per-call token and latency accounting |
+| `009_maintenance_access.sql` | Read-only (`SELECT`) access for `service_role` on the four tables the maintenance job reads |
 
-Then run [`supabase/verify.sql`](supabase/verify.sql) in the same editor. It is read-only and prints one row per table, RLS policy, function, column and bucket setting, each marked OK or missing, so a half-applied migration cannot go unnoticed.
+Then run [`supabase/verify.sql`](supabase/verify.sql) in the same editor. It is read-only and prints one row per table, RLS policy, function, column, bucket setting and grant, each marked OK or missing, so a half-applied migration cannot go unnoticed.
 
 To stop all AI spend at any time, with no deployment:
 
@@ -199,6 +202,17 @@ The sign-in and sign-up pages read these switches from Supabase and hide the Goo
 ```bash
 npm run dev      # http://localhost:3000
 ```
+
+### 7. Maintenance
+```bash
+npm run maintenance              # dry run: counts and sizes only
+npm run maintenance -- --apply   # delete them
+```
+Removes recordings that no attempt or follow-up answer points at (older than 24 hours, so uploads in flight are safe) and anonymous demo accounts idle for seven days, together with their files. Files whose age Storage does not report are always kept.
+
+> **Warning:** the script uses `SUPABASE_SERVICE_ROLE_KEY`, which bypasses every RLS policy. Run the dry run first and read the numbers before `--apply`. It prints counts and sizes only, never keys or content.
+
+On Vercel the same job runs daily at 02:30 WIB through Vercel Cron (`vercel.json`), but only once `CRON_SECRET` is set: without it `/api/cron/maintenance` refuses every request.
 
 ---
 
@@ -262,7 +276,7 @@ The findings that drove the change are listed in [`docs/design/audit.md`](docs/d
 The app runs on Vercel with no extra configuration; everything below is set once.
 
 1. **Import the repository** in Vercel. Next.js is detected automatically.
-2. **Environment variables**: the four from [Environment](#3-environment), plus `NEXT_PUBLIC_SITE_URL` once the domain is known. Only the two `NEXT_PUBLIC_` Supabase values reach the browser; the service-role and Gemini keys are read exclusively through `src/lib/env.ts`, which is guarded by `server-only`.
+2. **Environment variables**: the ones from [Environment](#3-environment), including `CRON_SECRET` for the daily maintenance, plus `NEXT_PUBLIC_SITE_URL` once the domain is known. Only the two `NEXT_PUBLIC_` Supabase values reach the browser; the service-role and Gemini keys are read exclusively through `src/lib/env.ts`, which is guarded by `server-only`.
 3. **Supabase → URL Configuration**: add `https://<your-domain>/api/auth/callback` to the redirect URLs, alongside the localhost one.
 4. **Set the AI ceiling** for the audience you expect (`app_settings.ai_global_per_day`).
 5. **Leave `NEXT_PUBLIC_ALLOW_INDEXING` empty** until the launch is real.

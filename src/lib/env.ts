@@ -9,14 +9,18 @@ import { z } from "zod";
  */
 const ServerEnvSchema = z.object({
   GEMINI_API_KEY: z.string().min(1, "GEMINI_API_KEY is not set"),
-  // Not used yet; reserved for maintenance scripts and account deletion.
+  // Account deletion and storage maintenance (Prompt 4.2). Without it those
+  // features answer "not available" instead of failing.
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
+  // Guards the scheduled routes under /api/cron. Without it they refuse.
+  CRON_SECRET: z.string().min(16).optional(),
 });
 
 function loadServerEnv(): z.infer<typeof ServerEnvSchema> {
   const parsed = ServerEnvSchema.safeParse({
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || undefined,
+    CRON_SECRET: process.env.CRON_SECRET || undefined,
   });
   if (!parsed.success) {
     const missing = parsed.error.issues.map((issue) => issue.path.join(".")).join(", ");
