@@ -368,21 +368,57 @@ To check it end to end, set the DSN on a preview deployment, open the browser co
 
 ## ☁️ Deploying
 
-The app runs on Vercel with no extra configuration; everything below is set once.
+Two stages: a **private deployment** for the owner's own week of use, then the **public launch**. Each step says what breaks if it is skipped.
 
-1. **Import the repository** in Vercel. Next.js is detected automatically.
-2. **Environment variables**: the ones from [Environment](#3-environment), including `CRON_SECRET` for the daily maintenance, plus `NEXT_PUBLIC_SITE_URL` once the domain is known. Only the two `NEXT_PUBLIC_` Supabase values reach the browser; the service-role and Gemini keys are read exclusively through `src/lib/env.ts`, which is guarded by `server-only`.
-3. **Supabase → URL Configuration**: add `https://<your-domain>/api/auth/callback` to the redirect URLs, alongside the localhost one.
-4. **Set the AI ceiling** for the audience you expect (`app_settings.ai_global_per_day`).
-5. **Leave `NEXT_PUBLIC_ALLOW_INDEXING` empty** until the launch is real.
+### Private deployment
 
-Supabase's free tier pauses a project after seven days without activity and keeps no backups, so a deployment meant to be used needs the paid tier. Its built-in email service is rate limited for testing only — password resets need custom SMTP before real users arrive.
+1. **Gemini billing.** The free tier allows 20 requests a day for `gemini-2.5-flash` and one learning session uses about four, so the free tier serves about five sessions a day for the whole app. Enable billing on the key's Google Cloud project and set a budget alert. Then set `GEMINI_PAID_TIER=1`, so `/privasi` describes the paid-tier terms (Google does not use the data to improve its products).
+2. **Database.** In the Supabase SQL editor, run any migration not applied yet (through `010_review_reminders.sql`), then `verify.sql`: every row must say OK.
+3. **Vercel → Environment Variables** (Production and Preview):
+
+   | Variable | Required | Without it |
+   |---|---|---|
+   | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | nothing works |
+   | `GEMINI_API_KEY` | yes | no plans, hints or scores |
+   | `SUPABASE_SERVICE_ROLE_KEY` | yes | account deletion answers "not available" |
+   | `CRON_SECRET` (`openssl rand -hex 32`) | yes | no daily clean-up, no reminder emails |
+   | `NEXT_PUBLIC_SITE_URL` (`https://<project>.vercel.app`) | yes | links in emails and previews point elsewhere |
+   | `GEMINI_PAID_TIER` | after step 1 | `/privasi` keeps the free-tier wording |
+   | `CONTACT_EMAIL` | recommended | privacy requests go to the GitHub page |
+   | `NEXT_PUBLIC_ALLOW_INDEXING` | **leave empty** | (empty is correct until launch) |
+   | `NEXT_PUBLIC_SENTRY_DSN` | optional | errors are only in Vercel's logs |
+   | `RESEND_API_KEY`, `REMINDER_FROM` | optional | no reminder emails; the switch stays hidden |
+   | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | optional | no CAPTCHA (fine while private) |
+
+   Only the `NEXT_PUBLIC_` values reach the browser. The service-role and Gemini keys are read through `src/lib/env.ts`, which is guarded by `server-only`.
+4. **Redeploy** after changing variables: `NEXT_PUBLIC_` values are baked in at build time.
+5. **Supabase → Authentication → URL Configuration**: Site URL `https://<project>.vercel.app`, and add `https://<project>.vercel.app/api/auth/callback` to the redirect URLs. Without it, email confirmation, password reset and Google sign-in fail.
+6. **AI ceiling for one person** (`app_settings`, in units: evaluate 5, follow-up 3, plan 2, hints 1). 150 units a day covers about 18 recorded attempts with a follow-up each (8 units), or 13 new challenges taken all the way through (11 units). Plenty for one person, and a hard stop if a key leaks.
+
+   ```sql
+   update public.app_settings set ai_global_per_day = 150 where id = 1;
+   ```
+
+7. **Smoke test on the real domain**, and write down what happened: sign up, confirm the email, sign in, create a challenge, record, get scored, answer a follow-up, open the attempt history, switch theme, install as an app, go offline (the offline page appears), delete a test account.
+8. **Check that it stays hidden**: `https://<project>.vercel.app/robots.txt` must say `Disallow: /`, and every page must carry `<meta name="robots" content="noindex">`.
+
+### Public launch
+
+Before sharing the link with strangers:
+
+- **Supabase Pro**: the free tier pauses after seven days without activity and keeps no backups.
+- **Custom SMTP** (Resend or Postmark) in Supabase → Authentication → SMTP. The built-in sender allows only a few emails an hour.
+- **Email confirmation on** and **Turnstile on** (both described in Protection against abuse above).
+- **Sentry on**, and a deliberate test error seen in it without personal data.
+- **A budget limit on the Gemini key**, and `ai_global_per_day` raised deliberately from the real cost per evaluation ([What a call actually costs](#what-a-call-actually-costs)).
+- **A real domain**: `NEXT_PUBLIC_SITE_URL`, Supabase URLs, then `NEXT_PUBLIC_ALLOW_INDEXING=1` and a redeploy.
+- **Lighthouse again** on the production domain (median of three runs).
 
 ---
 
 ## 🗺️ Roadmap
 
-The plan of record is [`prompts/improvement-plan.md`](prompts/improvement-plan.md): every phase, the decisions behind it, and a status table. Phases 1–3 shipped as v1.0.0, phase V was the visual redesign, and **phase 5** collects the gates before a public launch — per-IP rate limiting and CAPTCHA, account deletion, privacy and terms, error monitoring. Phase 4 (attempt history, end-to-end tests, AI scoring consistency) follows the launch. Offline recording, push reminders, analytics and export remain in the backlog.
+The plan of record is [`prompts/improvement-plan.md`](prompts/improvement-plan.md): every phase, the decisions behind it, and a status table. Phases 1–3 shipped as v1.0.0 and phase V was the visual redesign. Since then: attempt history, account deletion and storage clean-up, privacy and terms, rate limiting and CAPTCHA, error monitoring, review reminders, end-to-end tests, and a consistency check for the AI grader. Two things wait on outside resources: a separate Supabase project to run the end-to-end tests against, and enough Gemini quota to finish the grader report. Then the private deployment, and the public launch after it (see Deploying above). Offline recording, push notifications, analytics and export remain in the backlog.
 
 [`docs/README.md`](docs/README.md) maps the rest of the documentation. See [`CHANGELOG.md`](CHANGELOG.md) for what changed.
 
