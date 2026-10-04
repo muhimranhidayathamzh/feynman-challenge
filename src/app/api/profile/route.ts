@@ -4,6 +4,7 @@ import { ProfilePatchRequestSchema, type ProfileResponse } from "@/lib/api/contr
 import { isValidTimeZone } from "@/lib/utils/date";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { logError } from "@/lib/monitoring/report";
 
 export const runtime = "nodejs";
 
@@ -39,14 +40,14 @@ export async function PATCH(request: Request) {
       .single();
 
     if (error || !profile) {
-      console.error("[profile PATCH] failed:", error);
+      logError("[profile PATCH] failed:", error);
       return NextResponse.json({ error: "Gagal menyimpan profil." }, { status: 500 });
     }
 
     const payload: ProfileResponse = { profile };
     return NextResponse.json(payload);
   } catch (error) {
-    console.error("[profile PATCH] failed:", error);
+    logError("[profile PATCH] failed:", error);
     return NextResponse.json({ error: "Gagal menyimpan profil." }, { status: 500 });
   }
 }

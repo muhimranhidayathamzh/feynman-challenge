@@ -4,6 +4,14 @@ All notable changes to Feynman Challenge. The format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Errors you do not see still get recorded (U.2)
+
+- **Sentry, off until `NEXT_PUBLIC_SENTRY_DSN` is set.** Server errors (every API route's failure path now goes through `logError`, and Next.js's own `onRequestError`) and browser errors (unhandled errors and the error boundaries) are reported.
+- **No personal data, proven rather than promised.** Sentry 11 collects request bodies, cookies, headers, local variables in stack frames, database query data and AI inputs and outputs by default; each is switched off, the AI and local-variable integrations are removed, and `scrubEvent` filters what remains (tested). Real reports sent from the server and from a browser to a local stand-in for Sentry carried no email, transcript, user or request body.
+- **Tags**: `ai_kind`, `gemini_code`, and a coarse `latency` bucket.
+- **Bundle cost, measured**: a first attempt grew the Edge middleware from 91.3 kB to 164 kB with monitoring *off*, because `instrumentation.ts` was bundled for Edge; rewriting the checks as build-time constants brought it back to 91.5 kB. With monitoring on, the first attempt lazily loaded 337 kB gzip of SDK; named imports and the plain browser SDK cut that to about 30 kB, after the page, with the first load unchanged.
+- `/privasi` names Sentry as a processor only when it is configured.
+
 ### Strangers welcome, abusers not (5.1)
 
 - **Per-IP rate limit on every API route that writes or calls the AI**: AI routes 20 a minute, saves 120 a minute, password checks and sign-in callbacks 20 per ten minutes, answered with `429` and `Retry-After`. A sliding window in memory per instance (`src/lib/utils/rate-limit.ts`, tested). The client address is trusted only from Vercel's edge; elsewhere a forged `x-forwarded-for` buys nothing.

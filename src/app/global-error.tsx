@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { logError } from "@/lib/monitoring/report";
 
 // Replaces the root layout when it (or the root template) throws, so this must
 // render its own <html>/<body> and cannot rely on globals.css — styles inline.
@@ -12,7 +13,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    logError("[client] render failed:", error);
   }, [error]);
 
   return (

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { FOLLOWUPS_FOLDER, RECORDINGS_BUCKET } from "@/lib/storage/recording-path";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { logError } from "@/lib/monitoring/report";
 
 export const runtime = "nodejs";
 
@@ -36,7 +37,8 @@ async function removeRecordingsFolder(
       if (paths.length < STORAGE_PAGE) return;
     }
   } catch (error) {
-    console.error(`[challenge DELETE] storage cleanup failed for ${folder}:`, error);
+    // No folder in the message: it holds the user id.
+    logError("[challenge DELETE] storage cleanup failed:", error);
   }
 }
 
@@ -91,7 +93,7 @@ export async function GET(_request: Request, context: RouteContext) {
       note: note ?? null,
     });
   } catch (error) {
-    console.error("[challenge/:id GET] failed:", error);
+    logError("[challenge/:id GET] failed:", error);
     return NextResponse.json({ error: "Gagal memuat tantangan." }, { status: 500 });
   }
 }
@@ -123,7 +125,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       .maybeSingle();
 
     if (error) {
-      console.error("[challenge/:id PATCH] update failed:", error);
+      logError("[challenge/:id PATCH] update failed:", error);
       return NextResponse.json({ error: "Gagal menyimpan perubahan." }, { status: 500 });
     }
     if (!updated) {
@@ -132,7 +134,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     return NextResponse.json({ challenge: updated });
   } catch (error) {
-    console.error("[challenge/:id PATCH] failed:", error);
+    logError("[challenge/:id PATCH] failed:", error);
     return NextResponse.json({ error: "Gagal menyimpan perubahan." }, { status: 500 });
   }
 }
@@ -153,7 +155,7 @@ export async function DELETE(request: Request, context: RouteContext) {
     // Database first: it is the source of truth and cascades to attempts.
     const { error } = await supabase.from("challenges").delete().eq("id", id);
     if (error) {
-      console.error("[challenge/:id DELETE] failed:", error);
+      logError("[challenge/:id DELETE] failed:", error);
       return NextResponse.json({ error: "Gagal menghapus tantangan." }, { status: 500 });
     }
 
@@ -165,7 +167,7 @@ export async function DELETE(request: Request, context: RouteContext) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("[challenge/:id DELETE] failed:", error);
+    logError("[challenge/:id DELETE] failed:", error);
     return NextResponse.json({ error: "Gagal menghapus tantangan." }, { status: 500 });
   }
 }

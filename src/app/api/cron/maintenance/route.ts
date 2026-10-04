@@ -4,6 +4,7 @@ import { serverEnv } from "@/lib/env";
 import { runMaintenance } from "@/lib/maintenance/cleanup";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isCronAuthorized } from "@/lib/utils/cron-auth";
+import { logError } from "@/lib/monitoring/report";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
     console.info("[cron maintenance]", JSON.stringify(report));
     return NextResponse.json(report);
   } catch (error) {
-    console.error("[cron maintenance] failed:", error);
+    logError("[cron maintenance] failed:", error);
     return NextResponse.json({ error: "Pembersihan gagal." }, { status: 500 });
   }
 }

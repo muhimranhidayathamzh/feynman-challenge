@@ -6,6 +6,7 @@ import type { HintsResponse } from "@/lib/api/contracts";
 import { GEMINI_ERROR_RESPONSE } from "@/lib/gemini/retry";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { logError } from "@/lib/monitoring/report";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -71,7 +72,7 @@ export async function POST(request: Request, context: RouteContext) {
       }
     }
   } catch (error) {
-    console.error("[hints POST] failed:", error);
+    logError("[hints POST] failed:", error);
     return NextResponse.json({ error: "Gagal menyiapkan hint." }, { status: 500 });
   }
 }

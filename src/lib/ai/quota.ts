@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types";
 
 import { costUnitsFor, type AiCallUsage } from "./usage";
+import { logError } from "@/lib/monitoring/report";
 
 /** Kinds of AI calls that count against a user's quota. */
 export type AiUsageKind = "generate" | "evaluate" | "hints" | "followup";
@@ -113,7 +114,7 @@ export async function consumeAiQuota(
 
   const row = data?.[0];
   if (error || !row) {
-    console.error("[quota] consume_ai_quota failed:", error);
+    logError("[quota] consume_ai_quota failed:", error);
     return {
       allowed: false,
       reason: "disabled",

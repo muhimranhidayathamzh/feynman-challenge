@@ -26,6 +26,8 @@ import { computeOverallScore, normalizeSubScores } from "@/lib/utils/scoring";
 import { computeStreakOnActivity } from "@/lib/utils/streak";
 import { getUserClock } from "@/lib/utils/user-day";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { logError } from "@/lib/monitoring/report";
+import { latencyBucket } from "@/lib/utils/error-scrub";
 import type { Json } from "@/types";
 
 export const runtime = "nodejs";
@@ -93,7 +95,7 @@ export async function POST(request: Request) {
     { p_attempt_id: attemptId },
   );
   if (claimError) {
-    console.error("[evaluate] claim failed:", claimError);
+    logError("[evaluate] claim failed:", claimError);
     return NextResponse.json({ error: "Gagal memulai evaluasi." }, { status: 500 });
   }
   const attempt = claimedRows?.[0];
@@ -221,7 +223,7 @@ export async function POST(request: Request) {
         p_feedback: result.feedback,
       });
       if (rejectError) {
-        console.error("[evaluate] finalize_rejected failed:", rejectError);
+        logError("[evaluate] finalize_rejected failed:", rejectError);
         throw new Error("finalize rejected failed");
       }
       const rejected: EvaluateResponse = {
@@ -321,7 +323,7 @@ export async function POST(request: Request) {
       p_last_active_date: streak.changed ? streak.lastActiveDate : null,
     });
     if (finalizeError) {
-      console.error("[evaluate] finalize failed:", finalizeError);
+      logError("[evaluate] finalize failed:", finalizeError);
       throw new Error("finalize failed");
     }
 
@@ -332,11 +334,14 @@ export async function POST(request: Request) {
     };
     return NextResponse.json(done);
   } catch (error) {
-    console.error("[evaluate] failed:", error);
-
     let code: EvaluationErrorCode = "unknown";
     if (error instanceof GeminiError) code = error.code;
     else if (error instanceof StorageFailure) code = "storage";
+    logError("[evaluate] failed:", error, {
+      ai_kind: "evaluate",
+      gemini_code: code,
+      latency: latencyBucket(Date.now() - started),
+    });
     await markError(code);
 
     const response = code === "storage" ? STORAGE_RESPONSE : GEMINI_ERROR_RESPONSE[code];

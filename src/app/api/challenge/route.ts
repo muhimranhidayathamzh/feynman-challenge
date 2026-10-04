@@ -11,6 +11,7 @@ import type { CreateChallengeResponse } from "@/lib/api/contracts";
 import { sanitizeKeywords } from "@/lib/utils/hints";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { logError } from "@/lib/monitoring/report";
 
 export const runtime = "nodejs";
 
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
       .single();
 
     if (challengeError || !challenge) {
-      console.error("[challenge] create failed:", challengeError);
+      logError("[challenge] create failed:", challengeError);
       return NextResponse.json({ error: "Gagal menyimpan tantangan." }, { status: 500 });
     }
 
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
       // No transactions over the REST API — undo the challenge so we don't
       // leave an orphan (cascade removes any partial children).
       await supabase.from("challenges").delete().eq("id", challenge.id);
-      console.error("[challenge] outline insert failed:", outlineError);
+      logError("[challenge] outline insert failed:", outlineError);
       return NextResponse.json({ error: "Gagal menyimpan outline." }, { status: 500 });
     }
 
@@ -102,7 +103,7 @@ export async function POST(request: Request) {
 
       if (sourceError) {
         await supabase.from("challenges").delete().eq("id", challenge.id);
-        console.error("[challenge] source insert failed:", sourceError);
+        logError("[challenge] source insert failed:", sourceError);
         return NextResponse.json(
           { error: "Gagal menyimpan sumber belajar." },
           { status: 500 },
@@ -113,7 +114,7 @@ export async function POST(request: Request) {
     const payload: CreateChallengeResponse = { id: challenge.id };
     return NextResponse.json(payload, { status: 201 });
   } catch (error) {
-    console.error("[challenge] POST failed:", error);
+    logError("[challenge] POST failed:", error);
     return NextResponse.json(
       { error: "Gagal membuat tantangan. Coba lagi." },
       { status: 500 },

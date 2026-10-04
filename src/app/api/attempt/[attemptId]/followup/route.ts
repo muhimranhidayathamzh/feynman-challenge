@@ -23,6 +23,8 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { parseStoredFollowUps } from "@/lib/utils/followups";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { logError } from "@/lib/monitoring/report";
+import { latencyBucket } from "@/lib/utils/error-scrub";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -185,7 +187,7 @@ export async function POST(request: Request, context: RouteContext) {
       .select("question_index, transcript, verdict, feedback, hint")
       .single();
     if (saveError || !saved) {
-      console.error("[followup] save failed:", saveError);
+      logError("[followup] save failed:", saveError);
       return NextResponse.json({ error: "Gagal menyimpan jawaban." }, { status: 500 });
     }
 
@@ -197,7 +199,11 @@ export async function POST(request: Request, context: RouteContext) {
     const payload: FollowupResponse = { answer };
     return NextResponse.json(payload);
   } catch (error) {
-    console.error("[followup] failed:", error);
+    logError("[followup] failed:", error, {
+      ai_kind: "followup",
+      gemini_code: error instanceof GeminiError ? error.code : "unknown",
+      latency: latencyBucket(Date.now() - started),
+    });
     await discardAudio();
     if (error instanceof GeminiError) {
       const response = GEMINI_ERROR_RESPONSE[error.code];

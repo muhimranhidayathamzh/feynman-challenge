@@ -13,6 +13,7 @@ import { MIN_RECORDING_SEC } from "@/lib/utils/constants";
 import { MAX_SCORE_BY_HINT } from "@/lib/utils/labels";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { logError } from "@/lib/monitoring/report";
 
 // The audio itself is uploaded by the browser straight to Storage
 // (see src/lib/audio/upload.ts). This route only registers the attempt.
@@ -121,7 +122,7 @@ export async function POST(request: Request, context: RouteContext) {
     if (!attemptId) {
       // Don't orphan the upload.
       await storage.remove([path]);
-      console.error("[attempt POST] insert failed:", lastError);
+      logError("[attempt POST] insert failed:", lastError);
       return NextResponse.json({ error: "Gagal menyimpan percobaan." }, { status: 500 });
     }
 
@@ -139,7 +140,7 @@ export async function POST(request: Request, context: RouteContext) {
     const payload: AttemptCreateResponse = { attemptId };
     return NextResponse.json(payload, { status: 201 });
   } catch (error) {
-    console.error("[attempt POST] failed:", error);
+    logError("[attempt POST] failed:", error);
     return NextResponse.json(
       { error: "Gagal mengirim rekaman. Coba lagi." },
       { status: 500 },

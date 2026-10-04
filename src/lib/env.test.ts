@@ -10,7 +10,12 @@ describe("legalEnv", () => {
   it("defaults to the free-tier wording and no contact address", () => {
     vi.stubEnv("GEMINI_PAID_TIER", "");
     vi.stubEnv("CONTACT_EMAIL", "");
-    expect(legalEnv()).toEqual({ geminiPaidTier: false, contactEmail: null });
+    vi.stubEnv("NEXT_PUBLIC_SENTRY_DSN", "");
+    expect(legalEnv()).toEqual({
+      geminiPaidTier: false,
+      contactEmail: null,
+      errorMonitoring: false,
+    });
   });
 
   it("claims the paid tier only for exactly 1", () => {
@@ -25,5 +30,10 @@ describe("legalEnv", () => {
     expect(legalEnv().contactEmail).toBe("halo@contoh.id");
     vi.stubEnv("CONTACT_EMAIL", "bukan email");
     expect(legalEnv().contactEmail).toBeNull();
+  });
+
+  it("names error monitoring only when Sentry is configured", () => {
+    vi.stubEnv("NEXT_PUBLIC_SENTRY_DSN", "https://key@o0.ingest.sentry.io/0");
+    expect(legalEnv().errorMonitoring).toBe(true);
   });
 });

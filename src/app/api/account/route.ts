@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isDeleteConfirmed, usesPassword } from "@/lib/utils/account-cleanup";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { logError } from "@/lib/monitoring/report";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -84,7 +85,7 @@ export async function DELETE(request: Request) {
     } catch (error) {
       // Recordings first, account second: a failure here leaves the account
       // in place, so the learner can retry and no file outlives its owner.
-      console.error("[account DELETE] deletion failed:", error);
+      logError("[account DELETE] deletion failed:", error);
       return NextResponse.json(
         { error: "Akun belum terhapus. Coba lagi sebentar lagi." },
         { status: 500 },
@@ -97,7 +98,7 @@ export async function DELETE(request: Request) {
     const payload: OkResponse = { ok: true };
     return NextResponse.json(payload);
   } catch (error) {
-    console.error("[account DELETE] failed:", error);
+    logError("[account DELETE] failed:", error);
     return NextResponse.json({ error: "Gagal menghapus akun." }, { status: 500 });
   }
 }

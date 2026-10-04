@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const GEMINI_TERMS = "https://ai.google.dev/gemini-api/terms";
 
 export default function PrivacyPage() {
-  const { geminiPaidTier, contactEmail } = legalEnv();
+  const { geminiPaidTier, contactEmail, errorMonitoring } = legalEnv();
 
   return (
     <LegalPage
@@ -108,6 +108,13 @@ export default function PrivacyPage() {
           <strong>Google</strong>: Gemini untuk penilaian, dan Google Sign-In kalau kamu
           memakainya.
         </li>
+        {errorMonitoring && (
+          <li>
+            <strong>Sentry</strong>: laporan error teknis, seperti bagian aplikasi yang
+            gagal dan berapa lama prosesnya. Tanpa rekaman, transkrip, catatan, email,
+            atau identitasmu.
+          </li>
+        )}
       </ul>
       <p>Server mereka bisa berada di luar Indonesia.</p>
 

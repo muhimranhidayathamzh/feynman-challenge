@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 // Identifies this build. The service worker is registered as /sw.js?v=<this>,
 // so every deploy installs a fresh worker with its own versioned caches.
@@ -27,4 +28,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Source maps go to Sentry only when monitoring is on AND an upload token is
+// set (Prompt U.2); every other build is exactly the plain Next.js build.
+const uploadSourceMaps =
+  Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN) && Boolean(process.env.SENTRY_AUTH_TOKEN);
+
+export default uploadSourceMaps
+  ? withSentryConfig(nextConfig, {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      silent: true,
+      widenClientFileUpload: true,
+      sourcemaps: { deleteSourcemapsAfterUpload: true },
+    })
+  : nextConfig;

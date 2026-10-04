@@ -138,6 +138,7 @@ CRON_SECRET=...                    # server-only, optional: guards /api/cron/*
 GEMINI_PAID_TIER=                  # "1" only once the Gemini key is billed (see below)
 CONTACT_EMAIL=...                  # shown on /privasi and /syarat for privacy requests
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=    # optional: Cloudflare Turnstile CAPTCHA (see Protection)
+NEXT_PUBLIC_SENTRY_DSN=            # optional: error monitoring (see Error monitoring)
 
 NEXT_PUBLIC_SITE_URL=...           # canonical origin, for Open Graph and the sitemap
 NEXT_PUBLIC_ALLOW_INDEXING=        # leave empty; "1" only for the real launch
@@ -298,6 +299,19 @@ The rate limit is a sliding window in memory, per server instance. It only trust
 Do step 3 together with step 2: once Supabase requires a token, sign-in without the widget fails. With the variable empty, no widget renders and every form works as before. Cloudflare's test key `1x00000000000000000000AA` always passes, for trying it locally.
 
 **Email confirmation** must be on before strangers sign up, or anyone can register with someone else's address: Supabase > Authentication > Sign In / Providers > Email > *Confirm email*. The sign-up form already says "Cek email kamu", and the link lands on `/api/auth/callback`.
+
+---
+
+## 🩺 Error monitoring
+
+Sentry reports what broke, never who or what they said. It is off until `NEXT_PUBLIC_SENTRY_DSN` is set, and off means off: a build without a DSN contains no Sentry code at all (the imports sit behind `process.env` checks that Next.js replaces at build time).
+
+- **Nothing personal leaves the app.** Sentry's own collection is switched off item by item: request bodies, cookies, headers, query strings, user info, local variable values in stack frames, database query data, and AI inputs and outputs. Then `scrubEvent` (`src/lib/utils/error-scrub.ts`, tested) removes anything left: the user, the request beyond method and path, console breadcrumbs, any field named like transcript, audio, notes, email or password, and email addresses inside messages. Verified by sending real reports, from the server and from a browser, to a stand-in ingest endpoint and reading the envelopes.
+- **Tags answer "what broke"**: `ai_kind` (generate, hints, evaluate, followup), `gemini_code` (timeout, quota, unavailable, invalid_response, storage) and a coarse `latency` bucket.
+- **Cost to the page**: with no DSN, the middleware and every page are the same size as before (the shared bundle gains about 0.15 kB, Next.js's own client-instrumentation hook). With a DSN, the first load is still unchanged; about 30 kB gzip of SDK loads afterwards. The browser uses `@sentry/browser` rather than the Next.js client entry, which carries a tracing integration several times that size.
+- **Readable stack traces** need source maps: set `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` in Vercel and they are uploaded at build time, then deleted from the deployment.
+
+To check it end to end, set the DSN on a preview deployment, open the browser console on any page and run `setTimeout(() => { throw new Error("uji sentry") })`; the error appears in Sentry within a minute, with no user attached.
 
 ---
 

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { logError } from "@/lib/monitoring/report";
 
 export const runtime = "nodejs";
 
@@ -51,13 +52,13 @@ export async function PUT(request: Request, context: RouteContext) {
       .single();
 
     if (error || !note) {
-      console.error("[notes PUT] failed:", error);
+      logError("[notes PUT] failed:", error);
       return NextResponse.json({ error: "Gagal menyimpan catatan." }, { status: 500 });
     }
 
     return NextResponse.json({ note });
   } catch (error) {
-    console.error("[notes PUT] failed:", error);
+    logError("[notes PUT] failed:", error);
     return NextResponse.json({ error: "Gagal menyimpan catatan." }, { status: 500 });
   }
 }

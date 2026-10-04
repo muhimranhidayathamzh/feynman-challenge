@@ -15,6 +15,8 @@ import {
 } from "@/lib/gemini/schemas";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { logError } from "@/lib/monitoring/report";
+import { latencyBucket } from "@/lib/utils/error-scrub";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -104,7 +106,11 @@ export async function POST(request: Request) {
     };
     return NextResponse.json(payload);
   } catch (error) {
-    console.error("[challenge/generate] failed:", error);
+    logError("[challenge/generate] failed:", error, {
+      ai_kind: "generate",
+      gemini_code: error instanceof GeminiError ? error.code : "unknown",
+      latency: latencyBucket(Date.now() - started),
+    });
     if (error instanceof GeminiError) {
       const response = GEMINI_ERROR_RESPONSE[error.code];
       return NextResponse.json(

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import type { AttemptStatusResponse } from "@/lib/api/contracts";
 import { createClient } from "@/lib/supabase/server";
+import { logError } from "@/lib/monitoring/report";
 
 export const runtime = "nodejs";
 
@@ -39,7 +40,7 @@ export async function GET(_request: Request, context: RouteContext) {
     };
     return NextResponse.json(payload, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
-    console.error("[attempt GET] failed:", error);
+    logError("[attempt GET] failed:", error);
     return NextResponse.json({ error: "Gagal memuat status." }, { status: 500 });
   }
 }

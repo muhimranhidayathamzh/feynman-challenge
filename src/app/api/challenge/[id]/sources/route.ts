@@ -4,6 +4,7 @@ import { z } from "zod";
 import { normalizeHttpUrl } from "@/lib/gemini/schemas";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { logError } from "@/lib/monitoring/report";
 
 export const runtime = "nodejs";
 
@@ -58,13 +59,13 @@ export async function POST(request: Request, context: RouteContext) {
       .single();
 
     if (error || !created) {
-      console.error("[sources POST] failed:", error);
+      logError("[sources POST] failed:", error);
       return NextResponse.json({ error: "Gagal menambah sumber." }, { status: 500 });
     }
 
     return NextResponse.json({ source: created }, { status: 201 });
   } catch (error) {
-    console.error("[sources POST] failed:", error);
+    logError("[sources POST] failed:", error);
     return NextResponse.json({ error: "Gagal menambah sumber." }, { status: 500 });
   }
 }
@@ -95,13 +96,13 @@ export async function DELETE(request: Request, context: RouteContext) {
       .eq("challenge_id", id);
 
     if (error) {
-      console.error("[sources DELETE] failed:", error);
+      logError("[sources DELETE] failed:", error);
       return NextResponse.json({ error: "Gagal menghapus sumber." }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("[sources DELETE] failed:", error);
+    logError("[sources DELETE] failed:", error);
     return NextResponse.json({ error: "Gagal menghapus sumber." }, { status: 500 });
   }
 }

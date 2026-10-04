@@ -51,7 +51,11 @@ const LegalEnvSchema = z.object({
  * of serverEnv(), so the pages build even where GEMINI_API_KEY is absent;
  * an invalid value counts as unset.
  */
-export function legalEnv(): { geminiPaidTier: boolean; contactEmail: string | null } {
+export function legalEnv(): {
+  geminiPaidTier: boolean;
+  contactEmail: string | null;
+  errorMonitoring: boolean;
+} {
   const parsed = LegalEnvSchema.safeParse({
     GEMINI_PAID_TIER: process.env.GEMINI_PAID_TIER || undefined,
     CONTACT_EMAIL: process.env.CONTACT_EMAIL || undefined,
@@ -59,5 +63,7 @@ export function legalEnv(): { geminiPaidTier: boolean; contactEmail: string | nu
   return {
     geminiPaidTier: parsed.success && parsed.data.GEMINI_PAID_TIER === "1",
     contactEmail: (parsed.success && parsed.data.CONTACT_EMAIL) || null,
+    // Sentry (U.2) receives error reports only when its DSN is set.
+    errorMonitoring: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN),
   };
 }

@@ -5,6 +5,7 @@ import { House, RotateCcw } from "lucide-react";
 
 import { Button, ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { logError } from "@/lib/monitoring/report";
 
 export default function Error({
   error,
@@ -14,7 +15,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    logError("[client] render failed:", error);
   }, [error]);
 
   return (

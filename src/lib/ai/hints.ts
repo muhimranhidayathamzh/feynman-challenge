@@ -10,6 +10,7 @@ import { generateJson } from "@/lib/gemini/generate";
 import { HINTS_SYSTEM_INSTRUCTION, buildHintsPrompt } from "@/lib/gemini/prompts";
 import { GeminiError, type GeminiErrorCode } from "@/lib/gemini/retry";
 import { HINTS_RESPONSE_SCHEMA, HintsGenerationSchema } from "@/lib/gemini/schemas";
+import { logError } from "@/lib/monitoring/report";
 import { isHintMissing, sanitizeKeywords } from "@/lib/utils/hints";
 import type { Database } from "@/types";
 
@@ -87,7 +88,10 @@ export async function regenerateMissingHints(
       budgetMs: options.budgetMs ?? 25_000,
     });
   } catch (error) {
-    console.error("[hints] generation failed:", error);
+    logError("[hints] generation failed:", error, {
+      ai_kind: "hints",
+      gemini_code: error instanceof GeminiError ? error.code : "unknown",
+    });
     return {
       status: "error",
       code: error instanceof GeminiError ? error.code : "unknown",
@@ -111,7 +115,7 @@ export async function regenerateMissingHints(
       .eq("title", item.title)
       .select("id");
     if (error) {
-      console.error("[hints] update failed:", error);
+      logError("[hints] update failed:", error);
       continue;
     }
     updated += data?.length ?? 0;

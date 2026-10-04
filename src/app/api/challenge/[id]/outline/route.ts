@@ -4,6 +4,7 @@ import { z } from "zod";
 import { regenerateMissingHints } from "@/lib/ai/hints";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/api/rate-limit";
+import { logError } from "@/lib/monitoring/report";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types";
 
@@ -44,7 +45,7 @@ function scheduleHintRegeneration(
         console.warn(`[outline] hint regeneration skipped: ${result.status}`);
       }
     } catch (error) {
-      console.error("[outline] hint regeneration failed:", error);
+      logError("[outline] hint regeneration failed:", error);
     }
   });
 }
@@ -103,7 +104,7 @@ export async function POST(request: Request, context: RouteContext) {
       .single();
 
     if (error || !created) {
-      console.error("[outline POST] failed:", error);
+      logError("[outline POST] failed:", error);
       return NextResponse.json({ error: "Gagal menambah poin." }, { status: 500 });
     }
 
@@ -111,7 +112,7 @@ export async function POST(request: Request, context: RouteContext) {
     scheduleHintRegeneration(supabase, id, user.is_anonymous ?? false);
     return NextResponse.json({ item: created }, { status: 201 });
   } catch (error) {
-    console.error("[outline POST] failed:", error);
+    logError("[outline POST] failed:", error);
     return NextResponse.json({ error: "Gagal menambah poin." }, { status: 500 });
   }
 }
@@ -147,7 +148,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       const results = await Promise.all(updates);
       const failed = results.find((r) => r.error);
       if (failed?.error) {
-        console.error("[outline PATCH reorder] failed:", failed.error);
+        logError("[outline PATCH reorder] failed:", failed.error);
         return NextResponse.json({ error: "Gagal mengurutkan." }, { status: 500 });
       }
       return NextResponse.json({ ok: true });
@@ -174,7 +175,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       .maybeSingle();
 
     if (error) {
-      console.error("[outline PATCH update] failed:", error);
+      logError("[outline PATCH update] failed:", error);
       return NextResponse.json({ error: "Gagal menyimpan." }, { status: 500 });
     }
     if (!updated) {
@@ -186,7 +187,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
     return NextResponse.json({ item: updated });
   } catch (error) {
-    console.error("[outline PATCH] failed:", error);
+    logError("[outline PATCH] failed:", error);
     return NextResponse.json({ error: "Gagal menyimpan." }, { status: 500 });
   }
 }
@@ -217,13 +218,13 @@ export async function DELETE(request: Request, context: RouteContext) {
       .eq("challenge_id", id);
 
     if (error) {
-      console.error("[outline DELETE] failed:", error);
+      logError("[outline DELETE] failed:", error);
       return NextResponse.json({ error: "Gagal menghapus poin." }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("[outline DELETE] failed:", error);
+    logError("[outline DELETE] failed:", error);
     return NextResponse.json({ error: "Gagal menghapus poin." }, { status: 500 });
   }
 }
